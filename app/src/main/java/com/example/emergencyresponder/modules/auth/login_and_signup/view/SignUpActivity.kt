@@ -1,11 +1,9 @@
-package com.example.emergencyresponder.modules.view.login_and_signup
+package com.example.emergencyresponder.modules.auth.login_and_signup.view
 
 import android.os.Bundle
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.emergencyresponder.R
 
 class SignUpActivity : AppCompatActivity() {

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/driveSmarterFragment">
+
+    <fragment
+        android:id="@+id/driveSmarterFragment"
+        android:name="com.example.emergencyresponder.modules.onboarding.view.DriveSmarterFragment"
+        android:label="fragment_drive_smarter"
+        tools:layout="@layout/fragment_drive_smarter" >
+        <action
+            android:id="@+id/action_driveSmarterFragment_to_automaticCrashFragment"
+            app:destination="@id/automaticCrashFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/automaticCrashFragment"
+        android:name="com.example.emergencyresponder.modules.onboarding.view.AutomaticCrashFragment"
+        android:label="fragment_automatic_crash"
+        tools:layout="@layout/fragment_automatic_crash" >
+        <action
+            android:id="@+id/action_automaticCrashFragment_to_notifyYourBelovedFragment"
+            app:destination="@id/notifyYourBelovedFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/notifyYourBelovedFragment"
+        android:name="com.example.emergencyresponder.modules.onboarding.view.NotifyYourBelovedFragment"
+        android:label="fragment_notify_your_beloved"
+        tools:layout="@layout/fragment_notify_your_beloved" >
+        <action
+            android:id="@+id/action_notifyYourBelovedFragment_to_enableLocationFragment"
+            app:destination="@id/enableLocationFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/enableLocationFragment"
+        android:name="com.example.emergencyresponder.modules.onboarding.view.EnableLocationFragment"
+        android:label="fragment_enable_location"
+        tools:layout="@layout/fragment_enable_location" />
+</navigation>

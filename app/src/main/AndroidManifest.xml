@@ -12,13 +12,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EmergencyResponder">
         <activity
-            android:name=".modules.view.login_and_signup.ForgotPasswordActivity"
+            android:name=".modules.onboarding.view.OnboardingActivity"
             android:exported="false" />
         <activity
-            android:name=".modules.view.login_and_signup.SignUpActivity"
+            android:name=".modules.auth.login_and_signup.view.ForgotPasswordActivity"
             android:exported="false" />
         <activity
-            android:name=".modules.view.login_and_signup.LoginActivity"
+            android:name=".modules.auth.login_and_signup.view.SignUpActivity"
+            android:exported="false" />
+        <activity
+            android:name=".modules.auth.login_and_signup.view.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
