@@ -48,5 +48,7 @@ dependencies {
     implementation("com.github.JessYanCoding:AndroidAutoSize:v1.2.1")
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.0")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.0")
+    implementation("com.tbuonomo:dotsindicator:5.1.0")
+
 
 }

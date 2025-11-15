@@ -1,9 +1,22 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.EmergencyResponder" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+    <!-- Base App Theme (AppCompat compatible) -->
+    <style name="Base.Theme.EmergencyResponder" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Your custom theme values here -->
     </style>
 
+    <!-- Application Theme -->
     <style name="Theme.EmergencyResponder" parent="Base.Theme.EmergencyResponder" />
+
+
+    <style name="AppButton" parent="Widget.Material3.Button">
+        <item name="android:backgroundTint">@color/primaryColor</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">16sp</item>
+        <item name="fontFamily">@font/inter_regular</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+
+
 </resources>

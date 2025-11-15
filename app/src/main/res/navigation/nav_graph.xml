@@ -3,38 +3,40 @@
              xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/driveSmarterFragment">
+    app:startDestination="@id/onboardingDriveSmarterFragment">
+
 
     <fragment
-        android:id="@+id/driveSmarterFragment"
-        android:name="com.example.emergencyresponder.modules.onboarding.view.DriveSmarterFragment"
-        android:label="fragment_drive_smarter"
-        tools:layout="@layout/fragment_drive_smarter" >
+        android:id="@+id/onboardingCrashDetectionFragment"
+        android:name="com.example.emergencyresponder.modules.onboarding.ui.OnboardingCrashDetectionFragment"
+        android:label="fragment_onboarding_crash_detection"
+        tools:layout="@layout/fragment_onboarding_crash_detection" >
         <action
-            android:id="@+id/action_driveSmarterFragment_to_automaticCrashFragment"
-            app:destination="@id/automaticCrashFragment" />
+            android:id="@+id/action_onboardingCrashDetectionFragment_to_onboardingNotifyFragment"
+            app:destination="@id/onboardingNotifyFragment" />
     </fragment>
     <fragment
-        android:id="@+id/automaticCrashFragment"
-        android:name="com.example.emergencyresponder.modules.onboarding.view.AutomaticCrashFragment"
-        android:label="fragment_automatic_crash"
-        tools:layout="@layout/fragment_automatic_crash" >
+        android:id="@+id/onboardingNotifyFragment"
+        android:name="com.example.emergencyresponder.modules.onboarding.ui.OnboardingNotifyFragment"
+        android:label="fragment_onboarding_notify"
+        tools:layout="@layout/fragment_onboarding_notify" >
         <action
-            android:id="@+id/action_automaticCrashFragment_to_notifyYourBelovedFragment"
-            app:destination="@id/notifyYourBelovedFragment" />
+            android:id="@+id/action_onboardingNotifyFragment_to_onboardingLocationFragment"
+            app:destination="@id/onboardingLocationFragment" />
     </fragment>
     <fragment
-        android:id="@+id/notifyYourBelovedFragment"
-        android:name="com.example.emergencyresponder.modules.onboarding.view.NotifyYourBelovedFragment"
-        android:label="fragment_notify_your_beloved"
-        tools:layout="@layout/fragment_notify_your_beloved" >
+        android:id="@+id/onboardingDriveSmarterFragment"
+        android:name="com.example.emergencyresponder.modules.onboarding.ui.OnboardingDriveSmarterFragment"
+        android:label="fragment_onboarding_drive_smarter"
+        tools:layout="@layout/fragment_onboarding_drive_smarter" >
         <action
-            android:id="@+id/action_notifyYourBelovedFragment_to_enableLocationFragment"
-            app:destination="@id/enableLocationFragment" />
+            android:id="@+id/action_onboardingDriveSmarterFragment_to_onboardingCrashDetectionFragment"
+            app:destination="@id/onboardingCrashDetectionFragment" />
     </fragment>
     <fragment
-        android:id="@+id/enableLocationFragment"
-        android:name="com.example.emergencyresponder.modules.onboarding.view.EnableLocationFragment"
-        android:label="fragment_enable_location"
-        tools:layout="@layout/fragment_enable_location" />
+        android:id="@+id/onboardingLocationFragment"
+        android:name="com.example.emergencyresponder.modules.onboarding.ui.OnboardingLocationFragment"
+        android:label="fragment_onboarding_location"
+        tools:layout="@layout/fragment_onboarding_location" />
+
 </navigation>

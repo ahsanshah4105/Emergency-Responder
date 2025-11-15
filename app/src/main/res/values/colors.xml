@@ -5,7 +5,8 @@
     <color name="subheading">#6A6A6A</color>
     <color name="background_shadow">#F3F3F3</color>
     <color name="hint_color">#A4A4A4</color>
-    <color name="alert">#D32F2F</color>
+    <color name="primaryColor">#FF3B30</color>
+    <color name="primaryGrey">#EAE7E7</color>
 
 
 </resources>

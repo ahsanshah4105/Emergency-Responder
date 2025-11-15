@@ -12,23 +12,27 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EmergencyResponder">
         <activity
-            android:name=".modules.onboarding.view.OnboardingActivity"
-            android:exported="false" />
-        <activity
-            android:name=".modules.auth.login_and_signup.view.ForgotPasswordActivity"
-            android:exported="false" />
-        <activity
-            android:name=".modules.auth.login_and_signup.view.SignUpActivity"
-            android:exported="false" />
-        <activity
-            android:name=".modules.auth.login_and_signup.view.LoginActivity"
-            android:exported="true">
+            android:name=".modules.splash.ui.SplashActivity"
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".modules.onboarding.ui.OnboardingActivity"
+            android:exported="false">
+
+        </activity>
+        <activity
+            android:name=".modules.auth.ui.ForgotPasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".modules.auth.ui.SignUpActivity"
+            android:exported="false" />
+        <activity
+            android:name=".modules.auth.ui.LoginActivity"
+            android:exported="false"></activity>
     </application>
 
 </manifest>

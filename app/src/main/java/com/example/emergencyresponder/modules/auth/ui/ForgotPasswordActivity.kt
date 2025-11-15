@@ -1,4 +1,4 @@
-package com.example.emergencyresponder.modules.auth.login_and_signup.view
+package com.example.emergencyresponder.modules.auth.ui
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge

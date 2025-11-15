@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">Emergency Responder</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="continue_button_text">Continue</string>
+
+    <string name="crash_detection_title">Crash Detection</string>
+
 </resources>
