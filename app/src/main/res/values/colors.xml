@@ -7,6 +7,8 @@
     <color name="hint_color">#A4A4A4</color>
     <color name="primaryColor">#FF3B30</color>
     <color name="primaryGrey">#EAE7E7</color>
+    <color name="subTextColor">#595959</color>
+
 
 
 </resources>

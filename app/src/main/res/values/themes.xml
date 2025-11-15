@@ -17,6 +17,21 @@
         <item name="android:textAllCaps">false</item>
     </style>
 
+    <!-- Custom text style -->
+    <style name="CustomText" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">@color/black</item>
+        <item name="lineSpacing">5dp</item>
+        <item name="android:textSize">24sp</item>
+        <item name="fontFamily">@font/poppins_semibold</item>
+    </style>
+
+    <style name="CustomSubText" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">@color/subTextColor</item>
+        <item name="android:textSize">14sp</item>
+        <item name="fontFamily">@font/inter_regular</item>
+    </style>
+
+
 
 
 </resources>

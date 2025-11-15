@@ -1,9 +1,7 @@
 package com.example.emergencyresponder.modules.onboarding.ui
 
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.example.emergencyresponder.R
 import com.example.emergencyresponder.modules.onboarding.adapter.ViewPagerAdapter
