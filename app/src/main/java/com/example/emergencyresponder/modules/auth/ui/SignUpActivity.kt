@@ -5,27 +5,15 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.example.emergencyresponder.R
+import com.example.emergencyresponder.databinding.ActivitySignUpBinding
 
 class SignUpActivity : AppCompatActivity() {
 
-    private lateinit var loginButton: TextView
+    private lateinit var binding: ActivitySignUpBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_sign_up)
-        initializeViews()
-        handleIntent()
-    }
-
-    private fun initializeViews() {
-        //loginButton = findViewById(R.id.login_button)
-
-    }
-
-    private fun handleIntent() {
-        loginButton.setOnClickListener {
-            finish()
-        }
+        binding = ActivitySignUpBinding.inflate(layoutInflater)
+        setContentView(binding.root)
     }
 }
