@@ -8,22 +8,18 @@ import com.example.emergencyresponder.modules.onboarding.ui.OnboardingDriveSmart
 import com.example.emergencyresponder.modules.onboarding.ui.OnboardingLocationFragment
 import com.example.emergencyresponder.modules.onboarding.ui.OnboardingNotifyFragment
 
-class ViewPagerAdapter (
-    activity: OnboardingActivity
-) : FragmentStateAdapter(activity){
-    private  val fragments  = listOf(
-        //SplashFragment(),
+
+class OnboardingViewPagerAdapter(activity: OnboardingActivity) :
+    FragmentStateAdapter(activity) {
+
+    private val fragments = listOf(
         OnboardingDriveSmarterFragment(),
         OnboardingCrashDetectionFragment(),
         OnboardingNotifyFragment(),
-        OnboardingLocationFragment(),
-
+        OnboardingLocationFragment()
     )
 
-    override fun getItemCount(): Int = 4
+    override fun getItemCount(): Int = fragments.size
 
-
-    override fun createFragment(position: Int): Fragment {
-        return fragments[position]
-    }
+    override fun createFragment(position: Int): Fragment = fragments[position]
 }

@@ -9,6 +9,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.emergencyresponder.R
+import com.example.emergencyresponder.core.objects.SPreferenceManager
+import com.example.emergencyresponder.modules.auth.ui.LoginActivity
+import com.example.emergencyresponder.modules.onboarding.navigation.OnboardingNavigator
 import com.example.emergencyresponder.modules.onboarding.ui.OnboardingActivity
 
 class SplashActivity : AppCompatActivity() {
@@ -16,9 +19,16 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, OnboardingActivity::class.java))
+            if (SPreferenceManager.isOnboardingCompleted()) {
+                OnboardingNavigator.goToLogin(this)
+            } else {
+                startActivity(Intent(this, OnboardingActivity::class.java))
+            }
+
             finish()
         }, 3000)
+
+
     }
 
 }
