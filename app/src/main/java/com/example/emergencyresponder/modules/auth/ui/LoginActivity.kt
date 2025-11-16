@@ -32,7 +32,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun setupCheckbox() {
-        val uncheckedColor = ContextCompat.getColor(this, R.color.hint_color)
+        val uncheckedColor = ContextCompat.getColor(this, R.color.unchecked_color)
         val checkedColor = ContextCompat.getColor(this, R.color.primaryColor)
 
         checkBox.buttonTintList = ColorStateList.valueOf(uncheckedColor)

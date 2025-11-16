@@ -1,16 +1,13 @@
 package com.example.emergencyresponder.modules.onboarding.ui
 
-import android.content.Intent
 import android.os.Bundle
-import android.preference.PreferenceManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.emergencyresponder.core.objects.SPreferenceManager
 import com.example.emergencyresponder.databinding.ActivityOnboardingBinding
-import com.example.emergencyresponder.modules.auth.ui.LoginActivity
 import com.example.emergencyresponder.modules.onboarding.adapter.OnboardingViewPagerAdapter
-import com.example.emergencyresponder.modules.onboarding.navigation.OnboardingNavigator
-import com.example.emergencyresponder.modules.onboardingViewModel.OnboardingViewModel
+import com.example.emergencyresponder.navigation.OnboardingNavigator
+import com.example.emergencyresponder.modules.onboarding.onboardingViewModel.OnboardingViewModel
 
 class OnboardingActivity : AppCompatActivity() {
 

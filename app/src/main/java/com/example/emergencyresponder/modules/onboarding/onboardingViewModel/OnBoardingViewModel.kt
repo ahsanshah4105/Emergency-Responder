@@ -1,4 +1,4 @@
-package com.example.emergencyresponder.modules.onboardingViewModel
+package com.example.emergencyresponder.modules.onboarding.onboardingViewModel
 
 
 import androidx.lifecycle.ViewModel

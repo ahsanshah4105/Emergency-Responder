@@ -13,6 +13,30 @@
     <string name="incase_of_accident">In case of an incident, your pre-selected emergency contacts will be automatically notified with your location.</string>
     <string name="enable_location">Enable Location to Detect Accidents</string>
     <string name="precise_always_on_location">In case of an incident, your pre-selected emergency contacts will be automatically notified with your location.</string>
+    <string name="Login">Login to your existing account</string>
+    <string name="enter_your_email_and_password">Enter your email and password to login</string>
+    <string name="enter_email">Enter Email</string>
+    <string name="enter_password">Enter Password</string>
+    <string name="remember_me"> Remember me</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="enter_new_password">Enter New Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="login_button">Login</string>
+    <string name="or_login_with">Or Login With</string>
+    <string name="register"> Register</string>
+    <string name="don_t_have_an_account">Don’t have an account?  </string>
+    <string name="register_to_your_account">Register to your account</string>
+    <string name="join_to_enable_instant_safety">Join to enable instant safety</string>
+    <string name="emergency_contacts">Emergency Contacts</string>
+    <string name="enter_name">Enter Name</string>
+    <string name="enter_mobile_number">Enter Mobile Number</string>
+    <string name="add_more_contacts">Add More Contacts</string>
+    <string name="already_have_an_account">Already have an account?  </string>
+    <string name="login">Login</string>
+    <string name="enter_your_email_and_we_will_send_you_a_link_to_reset_it_securely">Enter your email, and we\'ll send you a link to reset it securely</string>
+
+
 
 
 

@@ -19,7 +19,7 @@ class SignUpActivity : AppCompatActivity() {
     }
 
     private fun initializeViews() {
-        loginButton = findViewById(R.id.login_button)
+        //loginButton = findViewById(R.id.login_button)
 
     }
 

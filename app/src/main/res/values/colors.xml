@@ -8,6 +8,11 @@
     <color name="primaryColor">#FF3B30</color>
     <color name="primaryGrey">#EAE7E7</color>
     <color name="subTextColor">#595959</color>
+    <color name="primaryBlue">#007AFF</color>
+    <color name="blackText">#333333</color>
+    <color name="unchecked_color">#FEFEFE</color>
+    <color name="stroke_color">#F3F3F3</color>
+
 
 
 
