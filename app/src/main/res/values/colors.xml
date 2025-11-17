@@ -12,6 +12,8 @@
     <color name="blackText">#333333</color>
     <color name="unchecked_color">#FEFEFE</color>
     <color name="stroke_color">#F3F3F3</color>
+    <color name="light_pink">#FAD9FF</color>
+    <color name="app_background">#F8FAFC</color>
 
 
 

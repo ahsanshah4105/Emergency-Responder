@@ -1,14 +1,13 @@
 <resources>
     <string name="app_name">Emergency Responder</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-
     <string name="continue_button_text">Continue</string>
-
     <string name="crash_detection_title">Crash Detection</string>
     <string name="drive_safer_stay_safer">Drive Smarter, Stay Safer</string>
     <string name="welocome_to_co_pilot">Welcome to your new co-pilot for peace of mind in the road. Let’s get you set up for a safer journey</string>
     <string name="automatic_crash">Automatic Crash Detection</string>
-    <string name="using_sensor_automatic_crash_detection">Using your phone’s sensors, we can detect a potential crash and automatically send for help when you need it most.</string>"
+    <string name="using_sensor_automatic_crash_detection">Using your phone’s sensors, we can detect a potential crash and automatically send for help when you need it most.</string>
+    "
     <string name="notify_your_loved_ones">Notify Your Loved Ones</string>
     <string name="incase_of_accident">In case of an incident, your pre-selected emergency contacts will be automatically notified with your location.</string>
     <string name="enable_location">Enable Location to Detect Accidents</string>
@@ -35,14 +34,26 @@
     <string name="already_have_an_account">Already have an account?  </string>
     <string name="login">Login</string>
     <string name="enter_your_email_and_we_will_send_you_a_link_to_reset_it_securely">Enter your email, and we\'ll send you a link to reset it securely</string>
-
-
-
-
-
-    <string name="location_title">Location</string>
-
-    <string name="notify_title">Notify</string>
-
+    <string name="safety_dashboard">Safety Dashboard</string>
+    <string name="voice">voice</string>
+    <string name="speed">Speed</string>
+    <string name="stability">Phone Stability</string>
+    <string name="g_force">G-Force</string>
+    <string name="trip_time">Trip Time</string>
+    <string name="stable">Stable</string>
+    <string name="high">High</string>
+    <string name="detail_member">Members Detail</string>
+    <string name="see_all">See all</string>
+    <string name="nearby_services">Nearby Services</string>
+    <string name="ambulance">Ambulance</string>
+    <string name="police_station">Police Station</string>
+    <string name="sos">SOS</string>
+    <string name="start_travelling">Start Traveling</string>
+    <string name="stop_travelling">Stop Traveling</string>
+    <string name="contacts">Contants</string>
+    <string name="are_you_okay">Are you OK?</string>
+    <string name="if_you_do_not_respond_we_will_automatically_notify_your_emergency_contacts">If you don’t respond, we wil automatically notify your emergency contacts.</string>
+    <string name="am_okay">I’m OK / Cancel Alert</string>
+    <string name="send_alert">Send Alert Now</string>
 
 </resources>

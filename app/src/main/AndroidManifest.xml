@@ -13,18 +13,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EmergencyResponder">
         <activity
+            android:name=".modules.dashboard.ui.SafetyDashboardActivity"
+            android:exported="false" />
+        <activity
             android:name=".modules.splash.ui.SplashActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".modules.onboarding.ui.OnboardingActivity"
-            android:exported="false">
-
-        </activity>
+            android:exported="false"></activity>
         <activity
             android:name=".modules.auth.ui.ForgotPasswordActivity"
             android:exported="false" />
@@ -33,7 +35,7 @@
             android:exported="false" />
         <activity
             android:name=".modules.auth.ui.LoginActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
     </application>
 
 </manifest>
