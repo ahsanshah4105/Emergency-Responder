@@ -6,8 +6,7 @@
     <string name="drive_safer_stay_safer">Drive Smarter, Stay Safer</string>
     <string name="welocome_to_co_pilot">Welcome to your new co-pilot for peace of mind in the road. Let’s get you set up for a safer journey</string>
     <string name="automatic_crash">Automatic Crash Detection</string>
-    <string name="using_sensor_automatic_crash_detection">Using your phone’s sensors, we can detect a potential crash and automatically send for help when you need it most.</string>
-    "
+    <string name="using_sensor_automatic_crash_detection">Using your phone’s sensors, we can detect a potential crash and automatically send for help when you need it most.</string>"
     <string name="notify_your_loved_ones">Notify Your Loved Ones</string>
     <string name="incase_of_accident">In case of an incident, your pre-selected emergency contacts will be automatically notified with your location.</string>
     <string name="enable_location">Enable Location to Detect Accidents</string>
@@ -36,9 +35,9 @@
     <string name="enter_your_email_and_we_will_send_you_a_link_to_reset_it_securely">Enter your email, and we\'ll send you a link to reset it securely</string>
     <string name="safety_dashboard">Safety Dashboard</string>
     <string name="voice">voice</string>
-    <string name="speed">Speed</string>
+    <string name="acceleration">Acceleration</string>
     <string name="stability">Phone Stability</string>
-    <string name="g_force">G-Force</string>
+    <string name="phone_stability">Phone Stability</string>
     <string name="trip_time">Trip Time</string>
     <string name="stable">Stable</string>
     <string name="high">High</string>

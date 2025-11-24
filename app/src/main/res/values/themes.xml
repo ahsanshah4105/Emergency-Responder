@@ -5,7 +5,7 @@
         <!-- Your custom theme values here -->
     </style>
 
-    <!-- Application Theme -->
+
     <style name="Theme.EmergencyResponder" parent="Base.Theme.EmergencyResponder" />
 
 
@@ -39,6 +39,13 @@
     <style name="Theme.App.BlueBorder" parent="Theme.App">
         <item name="customStrokeColor">@color/primaryBlue</item>
         <item name="android:radius">200dp</item>
+    </style>
+
+
+    <style name="DashboardText" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">@color/subTextColor</item>
+        <item name="android:textSize">14sp</item>
+        <item name="fontFamily">@font/inter_medium</item>
     </style>
 
 

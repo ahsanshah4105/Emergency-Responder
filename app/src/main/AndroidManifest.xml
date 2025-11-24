@@ -13,6 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EmergencyResponder">
         <activity
+            android:name=".modules.timestamp.ui.TimeStampActivity"
+            android:exported="false" />
+        <activity
             android:name=".modules.dashboard.ui.SafetyDashboardActivity"
             android:exported="false" />
         <activity
@@ -26,7 +29,7 @@
         </activity>
         <activity
             android:name=".modules.onboarding.ui.OnboardingActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".modules.auth.ui.ForgotPasswordActivity"
             android:exported="false" />
