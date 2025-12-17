@@ -1,68 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:cardCornerRadius="20dp"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp">
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
-        android:layout_height="wrap_content">
+        android:padding="12dp"
+        android:gravity="center_vertical">
 
+        <!-- Profile / Service Icon -->
         <ImageView
             android:id="@+id/person_img"
-            android:layout_width="40dp"
-            android:layout_gravity="center"
-            android:layout_height="40dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:background="@drawable/circle"
-            android:scaleType="centerCrop"/>
+            android:scaleType="centerCrop" />
 
+        <!-- Name & Phone -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginStart="12dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_marginStart="12dp">
 
             <TextView
+                android:id="@+id/personName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/nearby_services"
-                android:fontFamily="@font/poppins_medium"
+                android:text="Service Name"
+                android:textColor="@color/black"
                 android:textSize="16sp"
-                android:textColor="@color/black"/>
+                android:fontFamily="@font/poppins_medium" />
 
             <TextView
+                android:id="@+id/personPhone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="03199596412"
-                style="@style/DashboardText"/>
+                android:text="0311-1234567"
+                android:textSize="14sp"
+               style="@style/DashboardText"/>
 
         </LinearLayout>
 
-        <Space
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"/>
-
+        <!-- SOS Button -->
         <Button
+            android:id="@+id/sosButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            style="@style/AppButton"
-            android:paddingStart="37dp"
-            android:paddingEnd="37dp"
-            android:layout_gravity="end"
-            android:fontFamily="@font/inter_regular"
+            android:text="@string/sos"
             android:textSize="14sp"
-            android:text="@string/sos"/>
-
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            style="@style/AppButton"
+            android:textColor="@android:color/white"
+            android:fontFamily="@font/inter_regular" />
 
     </LinearLayout>
-
-
 
 </androidx.cardview.widget.CardView>

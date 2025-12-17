@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import com.example.emergencyresponder.R
 import com.example.emergencyresponder.databinding.ActivityLoginBinding
 import com.example.emergencyresponder.databinding.ActivityOnboardingBinding
+import com.example.emergencyresponder.modules.dashboard.ui.SafetyDashboardActivity
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
@@ -44,6 +45,10 @@ class LoginActivity : AppCompatActivity() {
         binding.checkbox.setOnCheckedChangeListener { _, isChecked ->
             val color = if (isChecked) checkedColor else uncheckedColor
             checkBox.buttonTintList = ColorStateList.valueOf(color)
+        }
+        binding.loginButton.setOnClickListener {
+            val intent = Intent(this, SafetyDashboardActivity::class.java)
+            startActivity(intent)
         }
     }
 

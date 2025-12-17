@@ -11,7 +11,7 @@
     <string name="incase_of_accident">In case of an incident, your pre-selected emergency contacts will be automatically notified with your location.</string>
     <string name="enable_location">Enable Location to Detect Accidents</string>
     <string name="precise_always_on_location">In case of an incident, your pre-selected emergency contacts will be automatically notified with your location.</string>
-    <string name="Login">Login to your existing account</string>
+    <string name="Login">Login </string>
     <string name="enter_your_email_and_password">Enter your email and password to login</string>
     <string name="enter_email">Enter Email</string>
     <string name="enter_password">Enter Password</string>
@@ -27,6 +27,7 @@
     <string name="register_to_your_account">Register to your account</string>
     <string name="join_to_enable_instant_safety">Join to enable instant safety</string>
     <string name="emergency_contacts">Emergency Contacts</string>
+    <string name="emergency_responder">Emergency Responder</string>
     <string name="enter_name">Enter Name</string>
     <string name="enter_mobile_number">Enter Mobile Number</string>
     <string name="add_more_contacts">Add More Contacts</string>
@@ -35,11 +36,12 @@
     <string name="enter_your_email_and_we_will_send_you_a_link_to_reset_it_securely">Enter your email, and we\'ll send you a link to reset it securely</string>
     <string name="safety_dashboard">Safety Dashboard</string>
     <string name="voice">voice</string>
-    <string name="acceleration">Acceleration</string>
+    <string name="acceleration">Acceleration      </string>
     <string name="stability">Phone Stability</string>
-    <string name="phone_stability">Phone Stability</string>
+    <string name="phone_stability">Stability</string>
     <string name="trip_time">Trip Time</string>
     <string name="stable">Stable</string>
+    <string name="speed">Speed</string>
     <string name="high">High</string>
     <string name="detail_member">Members Detail</string>
     <string name="see_all">See all</string>
