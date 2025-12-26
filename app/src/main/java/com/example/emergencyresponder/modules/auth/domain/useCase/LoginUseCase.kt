@@ -6,6 +6,9 @@ class LoginUseCase(
     private val repository: LoginRepository
 ) {
     suspend operator fun invoke(email: String, password: String) {
-        repository.login(email, password)
+        val user = repository.login(email, password)
+        if (!user.isEmailVerified) {
+            throw Exception("Email not verified. Please check your email.")
+        }
     }
 }

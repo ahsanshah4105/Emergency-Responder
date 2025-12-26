@@ -12,7 +12,9 @@ class SignUpRepositoryImpl(
 ) : SignUpRepository {
 
     override suspend fun signUp(email: String, password: String, user: User) {
-        val uid = authDataSource.createUser(email, password)
-        userDataSource.saveUser(uid, user)
+        val result = authDataSource.createUser(email, password)
+        val firebaseUser = result.user ?: throw Exception("User not created")
+        authDataSource.sendEmailVerification(firebaseUser)
+        userDataSource.saveUser(firebaseUser.uid, user)
     }
 }

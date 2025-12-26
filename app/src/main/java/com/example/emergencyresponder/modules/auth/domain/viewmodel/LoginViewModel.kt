@@ -5,15 +5,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.emergencyresponder.core.navigation.AppRoute
-import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
-import com.example.emergencyresponder.modules.auth.data.repository.LoginRepositoryImpl
 import com.example.emergencyresponder.modules.auth.domain.useCase.LoginUseCase
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
-    private val loginUseCase: LoginUseCase = LoginUseCase(LoginRepositoryImpl(
-        authDataSource = AuthRemoteDataSource()
-    ))
+    private val loginUseCase: LoginUseCase
 ) : ViewModel() {
 
     private val _state = MutableLiveData<AuthState>()
@@ -33,4 +29,9 @@ class LoginViewModel(
             }
         }
     }
+}
+
+sealed class AuthState {
+    object Success : AuthState()
+    data class Error(val message: String) : AuthState()
 }

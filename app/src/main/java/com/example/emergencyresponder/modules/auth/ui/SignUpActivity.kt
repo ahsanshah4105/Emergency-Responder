@@ -32,85 +32,30 @@ class SignUpActivity : AppCompatActivity() {
     }
 
     private fun setupValidationListeners() {
+        viewModel.emailError.observe(this) { binding.emailEditText.error = it }
+        viewModel.passwordError.observe(this) { binding.confirmPassword.error = it }
+        viewModel.nameError.observe(this) { binding.contactName.error = it }
+        viewModel.phoneError.observe(this) { binding.emergencyContactPhone.error = it }
+
         binding.emailEditText.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                val email = binding.emailEditText.text.toString()
-                if (!ValidationUtils.isEmailValid(email)) {
-                    binding.emailEditText.error = "Invalid email"
-                }
-            } else {
-                binding.emailEditText.error = null
-            }
+            if (!hasFocus) viewModel.validateEmail(binding.emailEditText.text.toString())
         }
 
-        binding.confirmPassword.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                val password = binding.newPassword.text.toString()
-                val confirmPassword = binding.confirmPassword.text.toString()
-                if (!ValidationUtils.isPasswordMatch(password, confirmPassword)) {
-                    binding.confirmPassword.error = "Passwords do not match"
-                }
-            } else {
-                binding.confirmPassword.error = null
-            }
-        }
 
-        binding.newPassword.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                val password = binding.newPassword.text.toString()
-                val confirmPassword = binding.confirmPassword.text.toString()
-                if (!ValidationUtils.isPasswordMatch(password, confirmPassword)) {
-                    binding.confirmPassword.error = "Passwords do not match"
-                }
-            } else {
-                binding.newPassword.error = null
-            }
-        }
-
-        binding.contactName.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                val name = binding.contactName.text.toString()
-                if (!ValidationUtils.isNotEmpty(name)) {
-                    binding.contactName.error = "Name cannot be empty"
-                }
-            }
-        }
-
-        binding.emergencyContactPhone.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                val phone = binding.emergencyContactPhone.text.toString()
-                if (!ValidationUtils.isPhoneValid(phone)) {
-                    binding.emergencyContactPhone.error = "Invalid phone number"
-                }
-            }
-        }
     }
-
     private fun setupListeners() {
         binding.signUptButton.setOnClickListener {
             val email = binding.emailEditText.text.toString()
-            val newPassword = binding.newPassword.text.toString()
+            val password = binding.newPassword.text.toString()
             val confirmPassword = binding.confirmPassword.text.toString()
-            val emergencyContactName = binding.contactName.text.toString()
-            val emergencyContactPhone = binding.emergencyContactPhone.text.toString()
+            val name = binding.contactName.text.toString()
+            val phone = binding.emergencyContactPhone.text.toString()
 
-            if (!ValidationUtils.isNotEmpty(emergencyContactName)) {
-                binding.contactName.error = "Name cannot be empty"
-                return@setOnClickListener
-            }
-            if (!ValidationUtils.isPhoneValid(emergencyContactPhone)) {
-                binding.emergencyContactPhone.error = "Invalid phone number"
+            if (!viewModel.validateInput(email, password, confirmPassword, name, phone)) {
                 return@setOnClickListener
             }
 
-            viewModel.signUp(
-                email = email,
-                password = newPassword,
-                confirmPassword = confirmPassword,
-                phone = emergencyContactPhone,
-                emergencyName = emergencyContactName,
-            )
-
+            viewModel.signUp(email, password, confirmPassword, phone, name)
         }
     }
 }
