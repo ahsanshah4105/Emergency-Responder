@@ -73,6 +73,7 @@
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
+                    android:id="@+id/loginEmailEditText"
                     android:layout_height="match_parent"
                     android:background="@color/background_shadow"
                     android:minHeight="0dp"
@@ -112,6 +113,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:id="@+id/loginPasswordEditText"
                     android:background="@color/background_shadow"
                     android:inputType="textPassword"
                     android:minHeight="0dp"

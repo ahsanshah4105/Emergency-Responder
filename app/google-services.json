@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "646296022035",
+    "project_id": "wave-app-2466f",
+    "storage_bucket": "wave-app-2466f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:646296022035:android:526e9bbe689cf8df53e3e6",
+        "android_client_info": {
+          "package_name": "com.ahsanshah.waveapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC36Jxir_mP7geOske7u4u-brL7nGmZr0Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:646296022035:android:ef25514a31c6aca153e3e6",
+        "android_client_info": {
+          "package_name": "com.example.emergencyresponder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC36Jxir_mP7geOske7u4u-brL7nGmZr0Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
