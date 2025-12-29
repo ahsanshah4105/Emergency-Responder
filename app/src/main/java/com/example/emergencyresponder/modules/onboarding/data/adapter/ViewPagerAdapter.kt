@@ -1,4 +1,4 @@
-package com.example.emergencyresponder.modules.onboarding.adapter
+package com.example.emergencyresponder.modules.onboarding.data.adapter
 
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -14,8 +14,8 @@ class OnboardingViewPagerAdapter(activity: OnboardingActivity) :
 
     private val fragments = listOf(
         OnboardingDriveSmarterFragment(),
-        OnboardingCrashDetectionFragment(),
         OnboardingNotifyFragment(),
+        OnboardingCrashDetectionFragment(),
         OnboardingLocationFragment()
     )
 

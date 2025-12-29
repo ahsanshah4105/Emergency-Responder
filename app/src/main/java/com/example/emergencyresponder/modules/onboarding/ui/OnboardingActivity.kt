@@ -5,9 +5,9 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.emergencyresponder.core.objects.SPreferenceManager
 import com.example.emergencyresponder.databinding.ActivityOnboardingBinding
-import com.example.emergencyresponder.modules.onboarding.adapter.OnboardingViewPagerAdapter
+import com.example.emergencyresponder.modules.onboarding.data.adapter.OnboardingViewPagerAdapter
 import com.example.emergencyresponder.navigation.OnboardingNavigator
-import com.example.emergencyresponder.modules.onboarding.onboardingViewModel.OnboardingViewModel
+import com.example.emergencyresponder.modules.onboarding.domain.viewmodel.OnboardingViewModel
 
 class OnboardingActivity : AppCompatActivity() {
 

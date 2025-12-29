@@ -15,21 +15,26 @@ import com.example.emergencyresponder.modules.auth.domain.useCase.SignUpValidato
 import kotlinx.coroutines.launch
 
 class SignUpViewModel(
-    private val validator: SignUpValidator = SignUpValidator(),
     private val signUpUseCase: SignUpUseCase
 ): ViewModel() {
+    private val validator: SignUpValidator = SignUpValidator()
 
     private val _state = MutableLiveData<AuthState>()
     val state: LiveData<AuthState> = _state
 
     private val _route = MutableLiveData<AppRoute>()
     val route: LiveData<AppRoute> = _route
-    // ViewModel
+    val userNameError = MutableLiveData<String?>()
+
     val emailError = MutableLiveData<String?>()
     val passwordError = MutableLiveData<String?>()
     val nameError = MutableLiveData<String?>()
     val phoneError = MutableLiveData<String?>()
 
+
+    fun validateUserName(email: String) {
+        emailError.value = if (ValidationUtils.isEmailValid(email)) null else "Name cannot be empty"
+    }
     fun validateEmail(email: String) {
         emailError.value = if (ValidationUtils.isEmailValid(email)) null else "Invalid email"
     }
@@ -46,14 +51,18 @@ class SignUpViewModel(
         phoneError.value = if (ValidationUtils.isPhoneValid(phone)) null else "Invalid phone number"
     }
 
-    // Validate input fields
     fun validateInput(
+        userName: String,
         email: String,
         password: String,
         confirmPassword: String,
         name: String,
         phone: String
     ): Boolean {
+        validator.validateName(userName).takeIf { !it.isValid }?.let {
+            _state.value = AuthState.Error(it.errorMessage ?: "")
+            return false
+        }
         validator.validateEmail(email).takeIf { !it.isValid }?.let {
             _state.value = AuthState.Error(it.errorMessage ?: "")
             return false
@@ -74,6 +83,7 @@ class SignUpViewModel(
     }
 
     fun signUp(
+        name: String,
         email: String,
         password: String,
         confirmPassword: String,
@@ -81,8 +91,9 @@ class SignUpViewModel(
         emergencyName: String
     ) {
         viewModelScope.launch {
+            _state.value = AuthState.Loading
             try {
-                val user = User(email, password, confirmPassword, phone, emergencyName)
+                val user = User(name ,email, password, confirmPassword, phone, emergencyName)
                 signUpUseCase(email, password, user)
                 _state.value = AuthState.Success
                 _route.value = AppRoute.Login

@@ -20,6 +20,7 @@ class LoginViewModel(
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
+            _state.value = AuthState.Loading
             try {
                 loginUseCase(email, password)
                 _state.value = AuthState.Success
@@ -32,6 +33,7 @@ class LoginViewModel(
 }
 
 sealed class AuthState {
+    object Loading : AuthState()
     object Success : AuthState()
     data class Error(val message: String) : AuthState()
 }
