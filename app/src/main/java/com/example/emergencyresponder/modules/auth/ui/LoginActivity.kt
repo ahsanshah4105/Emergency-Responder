@@ -103,5 +103,9 @@ class LoginActivity : AppCompatActivity() {
         binding.registerButton.setOnClickListener {
             startActivity(Intent(this, SignUpActivity::class.java))
         }
+
+        binding.forgotPassword.setOnClickListener {
+            startActivity(Intent(this, ForgotPasswordActivity::class.java))
+        }
     }
 }

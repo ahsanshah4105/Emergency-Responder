@@ -14,8 +14,13 @@ class AuthRemoteDataSource(
     suspend fun createUser(email: String, password: String) =
         auth.createUserWithEmailAndPassword(email, password).await()
 
-    suspend fun sendEmailVerification(user: FirebaseUser) =
-        user.sendEmailVerification().await()
+    suspend fun sendEmailVerification() {
+        val user = auth.currentUser
+        user?.sendEmailVerification()?.await() ?: throw Exception("No user logged in to verify")
+    }
+
+    suspend fun sendPasswordResetEmail(email: String) =
+        auth.sendPasswordResetEmail(email).await()
 
     fun logout() {
         auth.signOut()

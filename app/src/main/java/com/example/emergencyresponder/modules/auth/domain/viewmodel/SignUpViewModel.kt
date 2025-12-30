@@ -11,13 +11,13 @@ import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDat
 import com.example.emergencyresponder.modules.auth.data.model.User
 import com.example.emergencyresponder.modules.auth.data.repository.SignUpRepositoryImpl
 import com.example.emergencyresponder.modules.auth.domain.useCase.SignUpUseCase
-import com.example.emergencyresponder.modules.auth.domain.useCase.SignUpValidator
+import com.example.emergencyresponder.modules.auth.domain.useCase.Validator
 import kotlinx.coroutines.launch
 
 class SignUpViewModel(
     private val signUpUseCase: SignUpUseCase
 ): ViewModel() {
-    private val validator: SignUpValidator = SignUpValidator()
+    private val validator: Validator = Validator()
 
     private val _state = MutableLiveData<AuthState>()
     val state: LiveData<AuthState> = _state
@@ -29,18 +29,17 @@ class SignUpViewModel(
     val emailError = MutableLiveData<String?>()
     val passwordError = MutableLiveData<String?>()
     val nameError = MutableLiveData<String?>()
-    val phoneError = MutableLiveData<String?>()
+
+    private  val _phoneError = MutableLiveData<String?>()
+    val phoneError: LiveData<String?> = _phoneError
 
 
-    fun validateUserName(email: String) {
-        emailError.value = if (ValidationUtils.isEmailValid(email)) null else "Name cannot be empty"
+
+    fun validateUserName(name: String) {
+        emailError.value = if (ValidationUtils.isNotEmpty(name)) null else "Name cannot be empty"
     }
     fun validateEmail(email: String) {
         emailError.value = if (ValidationUtils.isEmailValid(email)) null else "Invalid email"
-    }
-
-    fun validatePassword(password: String, confirmPassword: String) {
-        passwordError.value = if (ValidationUtils.isPasswordMatch(password, confirmPassword)) null else "Passwords do not match"
     }
 
     fun validateName(name: String) {
@@ -48,7 +47,15 @@ class SignUpViewModel(
     }
 
     fun validatePhone(phone: String) {
-        phoneError.value = if (ValidationUtils.isPhoneValid(phone)) null else "Invalid phone number"
+        val isValid = ValidationUtils.isPhoneValid(phone, "PK") // Default to Pakistan or US
+
+        if (phone.isEmpty()) {
+            _phoneError.value = "Phone number is required"
+        } else if (!isValid) {
+            _phoneError.value = "Invalid phone format"
+        } else {
+            _phoneError.value = null // No error
+        }
     }
 
     fun validateInput(

@@ -1,7 +1,18 @@
 package com.example.emergencyresponder.core.utils
 
+import com.google.i18n.phonenumbers.PhoneNumberUtil
+
 
 object ValidationUtils {
+    fun isPhoneValid(phone: String, defaultCountry: String = "PK"): Boolean {
+        val phoneUtil = PhoneNumberUtil.getInstance()
+        return try {
+            val numberProto = phoneUtil.parse(phone, defaultCountry)
+            phoneUtil.isValidNumber(numberProto)
+        } catch (e: Exception) {
+            false
+        }
+    }
     fun isEmailValid(email: String): Boolean {
         return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
@@ -14,8 +25,5 @@ object ValidationUtils {
         return value.trim().isNotEmpty()
     }
 
-    fun isPhoneValid(phone: String): Boolean {
-        // Simple validation: must be 10-15 digits
-        return phone.matches(Regex("^[0-9]{10,15}\$"))
-    }
 }
+

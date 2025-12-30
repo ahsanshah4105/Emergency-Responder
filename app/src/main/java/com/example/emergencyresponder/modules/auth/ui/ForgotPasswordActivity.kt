@@ -1,21 +1,53 @@
 package com.example.emergencyresponder.modules.auth.ui
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.example.emergencyresponder.R
+import android.view.View
+import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
+import com.example.emergencyresponder.core.utils.BaseActivity
+import com.example.emergencyresponder.databinding.ActivityForgotPasswordBinding
+import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
+import com.example.emergencyresponder.modules.auth.data.repository.ResetPasswordRepositoryImpl
+import com.example.emergencyresponder.modules.auth.domain.useCase.ResetPasswordUseCase
+import com.example.emergencyresponder.modules.auth.domain.viewModelFactory.ForgotPasswordViewModelFactory
+import com.example.emergencyresponder.modules.auth.domain.viewmodel.AuthState
+import com.example.emergencyresponder.modules.auth.domain.viewmodel.ForgotPasswordViewModel
 
-class ForgotPasswordActivity : AppCompatActivity() {
+class ForgotPasswordActivity : BaseActivity() {
+    private lateinit var binding: ActivityForgotPasswordBinding
+    private lateinit var viewModel: ForgotPasswordViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_forgot_password)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+        binding = ActivityForgotPasswordBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        val repository = ResetPasswordRepositoryImpl(AuthRemoteDataSource())
+        val useCase = ResetPasswordUseCase(repository)
+        viewModel = ViewModelProvider(this, ForgotPasswordViewModelFactory(useCase))[ForgotPasswordViewModel::class.java]
+
+        setupObservers()
+
+        binding.resetPasswordButton.setOnClickListener {
+            val email = binding.resetPasswordEmail.text.toString().trim()
+            viewModel.resetPassword(email)
+        }
+    }
+
+    private fun setupObservers() {
+        viewModel.state.observe(this) { state ->
+            when (state) {
+                is AuthState.Loading -> binding.btnProgressBar.visibility = View.VISIBLE
+                is AuthState.Success -> {
+                    binding.btnProgressBar.visibility = View.GONE
+                    Toast.makeText(this, "Reset link sent to your email!", Toast.LENGTH_LONG).show()
+                    finish()
+                }
+                is AuthState.Error -> {
+                    binding.btnProgressBar.visibility = View.GONE
+                    Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 }

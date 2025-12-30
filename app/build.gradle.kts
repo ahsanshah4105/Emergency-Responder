@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
     implementation(libs.firebase.firestore)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -60,6 +61,7 @@ dependencies {
     implementation("androidx.navigation:navigation-ui-ktx:2.7.0")
     implementation("com.tbuonomo:dotsindicator:5.1.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
-
+// Use a specific version, like 8.13.26
+    implementation("com.googlecode.libphonenumber:libphonenumber:8.13.26")
 
 }

@@ -5,7 +5,7 @@ import com.example.emergencyresponder.core.utils.ValidationUtils
 
 data class ValidationResult(val isValid: Boolean, val errorMessage: String? = null)
 
-class SignUpValidator {
+class Validator {
 
     fun validateEmail(email: String): ValidationResult {
         return if (ValidationUtils.isEmailValid(email)) ValidationResult(true)

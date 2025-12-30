@@ -3,23 +3,20 @@ package com.example.emergencyresponder.modules.auth.ui
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import com.example.emergencyresponder.core.navigation.AppRoute
+import com.example.emergencyresponder.core.utils.BaseActivity
 import com.example.emergencyresponder.databinding.ActivitySignUpBinding
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
-import com.example.emergencyresponder.modules.auth.data.repository.LoginRepositoryImpl
 import com.example.emergencyresponder.modules.auth.data.repository.SignUpRepositoryImpl
-import com.example.emergencyresponder.modules.auth.domain.useCase.LoginUseCase
 import com.example.emergencyresponder.modules.auth.domain.useCase.SignUpUseCase
-import com.example.emergencyresponder.modules.auth.domain.viewModelFactory.LoginViewModelFactory
 import com.example.emergencyresponder.modules.auth.domain.viewModelFactory.SignUpViewModelFactory
-import com.example.emergencyresponder.modules.auth.domain.viewmodel.LoginViewModel
+import com.example.emergencyresponder.modules.auth.domain.viewmodel.AuthState
 import com.example.emergencyresponder.modules.auth.domain.viewmodel.SignUpViewModel
 
-class SignUpActivity : AppCompatActivity() {
+class SignUpActivity : BaseActivity() {
 
     private lateinit var binding: ActivitySignUpBinding
     private lateinit var viewModel: SignUpViewModel
@@ -38,9 +35,14 @@ class SignUpActivity : AppCompatActivity() {
         val useCase = SignUpUseCase(repository)
         val factory = SignUpViewModelFactory(useCase)
         viewModel = ViewModelProvider(this, factory).get(SignUpViewModel::class.java)
+
         setupListeners()
         setupValidationListeners()
+        navigator()
+        stateObserver()
+    }
 
+    private fun navigator() {
         viewModel.route.observe(this) {
             if (it == AppRoute.Login) {
                 startActivity(Intent(this, LoginActivity::class.java))
@@ -48,6 +50,29 @@ class SignUpActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun stateObserver() {
+        viewModel.state.observe(this) { state ->
+            when (state) {
+                is AuthState.Loading -> {
+                    binding.btnProgressBar.visibility = View.VISIBLE
+                    binding.signUptButton.isEnabled = false
+                }
+
+                is AuthState.Success -> {
+                    binding.btnProgressBar.visibility = View.GONE
+                    binding.signUptButton.isEnabled = true
+                }
+
+                is AuthState.Error -> {
+                    binding.btnProgressBar.visibility = View.GONE
+                    binding.signUptButton.isEnabled = true
+                    Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
 
     private fun setupValidationListeners() {
         viewModel.userNameError.observe(this) {binding.contactName.error = it}
@@ -64,19 +89,12 @@ class SignUpActivity : AppCompatActivity() {
             if (!hasFocus) viewModel.validateEmail(binding.emailEditText.text.toString())
         }
 
-        binding.confirmPassword.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) viewModel.validatePassword(
-                binding.newPassword.text.toString(),
-                binding.confirmPassword.text.toString()
-            )
-        }
-
         binding.contactName.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) viewModel.validateName(binding.contactName.text.toString())
         }
 
         binding.emergencyContactPhone.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) viewModel.validatePhone(binding.emergencyContactPhone.text.toString())
+            if (!hasFocus) viewModel.validatePhone(binding.emergencyContactPhone.text.toString().trim())
         }
     }
     private fun setupListeners() {
@@ -95,5 +113,6 @@ class SignUpActivity : AppCompatActivity() {
             viewModel.signUp(name, email, password, confirmPassword, phone, name)
         }
     }
+
 }
 
