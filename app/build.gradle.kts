@@ -53,6 +53,7 @@ dependencies {
     implementation(libs.googleid)
     implementation(libs.firebase.firestore)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.camera.core)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
