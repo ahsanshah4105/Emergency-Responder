@@ -1,4 +1,4 @@
-package com.example.emergencyresponder.modules.auth.domain.service
+package com.example.emergencyresponder.modules.auth.domain.repository
 
 import com.google.firebase.auth.FirebaseUser
 

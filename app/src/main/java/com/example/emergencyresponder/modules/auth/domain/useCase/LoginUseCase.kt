@@ -1,6 +1,6 @@
 package com.example.emergencyresponder.modules.auth.domain.useCase
 
-import com.example.emergencyresponder.modules.auth.domain.service.LoginRepository
+import com.example.emergencyresponder.modules.auth.domain.repository.LoginRepository
 
 class LoginUseCase(
     private val repository: LoginRepository

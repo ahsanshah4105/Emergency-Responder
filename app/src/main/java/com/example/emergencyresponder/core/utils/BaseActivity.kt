@@ -1,11 +1,17 @@
 package com.example.emergencyresponder.core.utils
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.example.emergencyresponder.core.constants.AppConstant
+
 
 abstract class BaseActivity : AppCompatActivity() {
 
@@ -24,4 +30,6 @@ abstract class BaseActivity : AppCompatActivity() {
         }
         return super.dispatchTouchEvent(ev)
     }
+
+
 }

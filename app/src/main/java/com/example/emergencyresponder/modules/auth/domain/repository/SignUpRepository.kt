@@ -1,4 +1,4 @@
-package com.example.emergencyresponder.modules.auth.domain.service
+package com.example.emergencyresponder.modules.auth.domain.repository
 
 import com.example.emergencyresponder.modules.auth.data.model.User
 

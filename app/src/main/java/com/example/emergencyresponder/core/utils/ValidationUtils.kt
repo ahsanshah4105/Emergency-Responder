@@ -24,6 +24,5 @@ object ValidationUtils {
     fun isNotEmpty(value: String): Boolean {
         return value.trim().isNotEmpty()
     }
-
 }
 

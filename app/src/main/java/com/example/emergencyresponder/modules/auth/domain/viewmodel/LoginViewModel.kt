@@ -30,6 +30,7 @@ class LoginViewModel(
             }
         }
     }
+
 }
 
 sealed class AuthState {

@@ -1,7 +1,7 @@
 package com.example.emergencyresponder.modules.auth.data.repository
 
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
-import com.example.emergencyresponder.modules.auth.domain.service.ResetPasswordRepository
+import com.example.emergencyresponder.modules.auth.domain.repository.ResetPasswordRepository
 
 class ResetPasswordRepositoryImpl (
     private val authDataSource: AuthRemoteDataSource

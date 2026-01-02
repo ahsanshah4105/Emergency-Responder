@@ -4,8 +4,9 @@ import android.content.SharedPreferences
 
 object SPreferenceManager {
 
-    private const val PREF_NAME = "app_preferences"
-    private const val KEY_ONBOARDING_DONE = "onboarding_done"
+    private const val PREF_NAME = "emergency_prefs"
+    private const val KEY_ONBOARDING = "onboarding_completed"
+    private const val KEY_LOGIN = "is_logged_in"
 
     private lateinit var prefs: SharedPreferences
 
@@ -14,10 +15,18 @@ object SPreferenceManager {
     }
 
     fun setOnboardingCompleted() {
-        prefs.edit().putBoolean(KEY_ONBOARDING_DONE, true).apply()
+        prefs.edit().putBoolean(KEY_ONBOARDING, true).apply()
     }
 
     fun isOnboardingCompleted(): Boolean {
-        return prefs.getBoolean(KEY_ONBOARDING_DONE, false)
+        return prefs.getBoolean(KEY_ONBOARDING, false)
+    }
+
+    fun setUserLoggedIn(value: Boolean) {
+        prefs.edit().putBoolean(KEY_LOGIN, value).apply()
+    }
+
+    fun isUserLoggedIn(): Boolean {
+        return prefs.getBoolean(KEY_LOGIN, false)
     }
 }

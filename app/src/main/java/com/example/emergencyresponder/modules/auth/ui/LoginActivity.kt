@@ -4,20 +4,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.example.emergencyresponder.core.navigation.AppNavigator
 import com.example.emergencyresponder.core.navigation.AppRoute
+import com.example.emergencyresponder.core.objects.SPreferenceManager
 import com.example.emergencyresponder.core.utils.ValidationUtils
 import com.example.emergencyresponder.databinding.ActivityLoginBinding
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.repository.LoginRepositoryImpl
-import com.example.emergencyresponder.modules.auth.domain.service.LoginRepository
 import com.example.emergencyresponder.modules.auth.domain.useCase.LoginUseCase
 import com.example.emergencyresponder.modules.auth.domain.viewModelFactory.LoginViewModelFactory
 import com.example.emergencyresponder.modules.auth.domain.viewmodel.AuthState
 import com.example.emergencyresponder.modules.auth.domain.viewmodel.LoginViewModel
-import com.example.emergencyresponder.modules.dashboard.ui.SafetyDashboardActivity
 
 class LoginActivity : AppCompatActivity() {
 
@@ -54,10 +53,16 @@ class LoginActivity : AppCompatActivity() {
 
         viewModel.route.observe(this) {
             if (it == AppRoute.Dashboard) {
-                startActivity(Intent(this, SafetyDashboardActivity::class.java))
-                finish()
+                SPreferenceManager.setUserLoggedIn(true)
+
+                AppNavigator.navigate(
+                    activity = this,
+                    route = AppRoute.Dashboard,
+                    finishCurrent = true
+                )
             }
         }
+
     }
 
     private fun setupValidationListeners() {

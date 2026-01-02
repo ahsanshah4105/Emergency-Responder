@@ -1,7 +1,7 @@
 package com.example.emergencyresponder.modules.auth.data.repository
 
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
-import com.example.emergencyresponder.modules.auth.domain.service.LoginRepository
+import com.example.emergencyresponder.modules.auth.domain.repository.LoginRepository
 import com.google.firebase.auth.FirebaseUser
 
 class LoginRepositoryImpl(

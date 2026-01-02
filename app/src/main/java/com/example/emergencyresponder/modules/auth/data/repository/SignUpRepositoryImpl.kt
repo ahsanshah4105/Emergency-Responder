@@ -3,7 +3,7 @@ package com.example.emergencyresponder.modules.auth.data.repository
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.model.User
-import com.example.emergencyresponder.modules.auth.domain.service.SignUpRepository
+import com.example.emergencyresponder.modules.auth.domain.repository.SignUpRepository
 
 
 class SignUpRepositoryImpl(

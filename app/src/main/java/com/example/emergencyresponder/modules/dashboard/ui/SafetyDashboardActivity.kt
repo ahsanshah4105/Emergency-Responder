@@ -12,7 +12,7 @@ import com.example.emergencyresponder.modules.dashboard.adapters.EmergencyContac
 import com.example.emergencyresponder.modules.dashboard.adapters.NearbyServicesAdapter
 import com.example.emergencyresponder.modules.dashboard.data.EmergencyContacts
 import com.example.emergencyresponder.modules.dashboard.data.NearbyService
-import com.example.emergencyresponder.modules.detection.ui.service.CrashDetectionService
+import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
 
 class SafetyDashboardActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySafetyDashboardBinding
