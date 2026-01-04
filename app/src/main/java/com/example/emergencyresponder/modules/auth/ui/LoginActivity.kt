@@ -56,7 +56,7 @@ class LoginActivity : AppCompatActivity() {
                 SPreferenceManager.setUserLoggedIn(true)
 
                 AppNavigator.navigate(
-                    activity = this,
+                    context = this,
                     route = AppRoute.Dashboard,
                     finishCurrent = true
                 )

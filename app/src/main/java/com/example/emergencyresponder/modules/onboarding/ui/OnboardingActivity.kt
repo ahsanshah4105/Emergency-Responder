@@ -43,40 +43,32 @@ class OnboardingActivity : AppCompatActivity() {
 
         binding.continueBtn.setOnClickListener {
             val currentPage = binding.onboardingViewPager.currentItem
+            val adapter = binding.onboardingViewPager.adapter!!
+
             if (viewModel.isLastPage(currentPage, adapter.itemCount)) {
                 if (AppPermissions.hasLocationPermission(this)) {
                     proceedAfterPermission()
                 } else {
-                    AppPermissions.requestLocationPermission(this, AppConstant.LOCATION_PERMISSION_CODE)
+                    AppPermissions.requestLocationPermission(
+                        this,
+                        AppConstant.LOCATION_PERMISSION_CODE
+                    )
                 }
-            }else if (viewModel.startCrashDetection(currentPage, adapter.itemCount)){
-                startCrashDetection()
-                binding.onboardingViewPager.currentItem = currentPage + 1
-            }else {
+            } else {
                 binding.onboardingViewPager.currentItem = currentPage + 1
             }
         }
 
-    }
-
-    private fun startCrashDetection() {
-            val intent = Intent(this, CrashDetectionService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(intent)
-            } else {
-                startService(intent)
-            }
-            viewModel.setCrashDetectionActive(true)
-            Toast.makeText(this, "Emergency detection started", Toast.LENGTH_SHORT).show()
 
     }
+
+
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<out String>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == AppConstant.LOCATION_PERMISSION_CODE) {
             if (AppPermissions.hasLocationPermission(this)) {
-                startCrashDetection()
                 navigateToLogin()
             } else {
                 Toast.makeText(this, "Location permission required", Toast.LENGTH_SHORT).show()
@@ -85,7 +77,7 @@ class OnboardingActivity : AppCompatActivity() {
     }
     private fun navigateToLogin() {
         AppNavigator.navigate(
-            activity = this,
+            context = this,
             route = AppRoute.Login,
             finishCurrent = true
         )
@@ -93,7 +85,7 @@ class OnboardingActivity : AppCompatActivity() {
     private fun proceedAfterPermission() {
         SPreferenceManager.setOnboardingCompleted()
         AppNavigator.navigate(
-            activity = this,
+            context = this,
             route = AppRoute.Login,
             finishCurrent = true
         )

@@ -1,27 +1,15 @@
-package com.example.emergencyresponder.core.constants
-
 enum class Sensitivity(
     val crashAccel: Double,
     val snatchAccel: Double,
     val gyro: Double,
     val minScore: Int
 ) {
-    LOW(
-        crashAccel = 25.0,
-        snatchAccel = 15.0,
-        gyro = 4.5,
-        minScore = 1000
-    ),
-    MEDIUM(
-        crashAccel = 22.0,
-        snatchAccel = 12.0,
-        gyro = 4.0,
-        minScore = 850
-    ),
-    HIGH(
-        crashAccel = 20.0,
-        snatchAccel = 10.0,
-        gyro = 3.5,
-        minScore = 700
-    )
+    // LOW: Only triggers on a literal drop to a hard floor or car impact
+    LOW(60.0, 45.0, 15.0, 1000),
+
+    // MEDIUM: Standard "hard shake" or fall
+    MEDIUM(35.0, 25.0, 8.0, 850),
+
+    // HIGH: Very easy to trigger; a quick hand flick will do it
+    HIGH(12.0, 8.0, 3.0, 700)
 }

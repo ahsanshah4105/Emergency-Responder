@@ -1,6 +1,7 @@
 package com.example.emergencyresponder.core.navigation
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import com.example.emergencyresponder.modules.auth.ui.ForgotPasswordActivity
 import com.example.emergencyresponder.modules.auth.ui.LoginActivity
@@ -12,23 +13,27 @@ import com.example.emergencyresponder.modules.timestamp.ui.TimeStampActivity
 object AppNavigator {
 
     fun navigate(
-        activity: Activity,
+        context: Context,
         route: AppRoute,
         finishCurrent: Boolean = true
     ) {
         val intent = when (route) {
-            AppRoute.Login -> Intent(activity, LoginActivity::class.java)
-            AppRoute.SignUp -> Intent(activity, SignUpActivity::class.java)
-            AppRoute.ForgotPassword -> Intent(activity, ForgotPasswordActivity::class.java)
-            AppRoute.Dashboard -> Intent(activity, SafetyDashboardActivity::class.java)
-            AppRoute.TimeStamp -> Intent(activity, TimeStampActivity::class.java)
-            AppRoute.Onboarding -> Intent(activity, OnboardingActivity::class.java)
+            AppRoute.Login -> Intent(context, LoginActivity::class.java)
+            AppRoute.SignUp -> Intent(context, SignUpActivity::class.java)
+            AppRoute.ForgotPassword -> Intent(context, ForgotPasswordActivity::class.java)
+            AppRoute.Dashboard -> Intent(context, SafetyDashboardActivity::class.java)
+            AppRoute.TimeStamp -> Intent(context, TimeStampActivity::class.java)
+            AppRoute.Onboarding -> Intent(context, OnboardingActivity::class.java)
         }
 
-        activity.startActivity(intent)
+        if (context !is Activity) {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
 
-        if (finishCurrent) {
-            activity.finish()
+        context.startActivity(intent)
+
+        if (finishCurrent && context is Activity) {
+            context.finish()
         }
     }
 }

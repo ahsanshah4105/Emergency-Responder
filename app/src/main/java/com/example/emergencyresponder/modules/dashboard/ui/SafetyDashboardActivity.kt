@@ -13,14 +13,19 @@ import com.example.emergencyresponder.modules.dashboard.adapters.NearbyServicesA
 import com.example.emergencyresponder.modules.dashboard.data.EmergencyContacts
 import com.example.emergencyresponder.modules.dashboard.data.NearbyService
 import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
+import com.example.emergencyresponder.modules.dashboard.domain.useCase.viewmodel.SafetyDashboardViewModel
+import androidx.activity.viewModels
+
 
 class SafetyDashboardActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySafetyDashboardBinding
+    private val viewModel: SafetyDashboardViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySafetyDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        startCrashDetectionService()
         val contacts = listOf(
             EmergencyContacts(
                 iconRes = R.drawable.aid, // replace with your drawable
@@ -36,9 +41,6 @@ class SafetyDashboardActivity : AppCompatActivity() {
             )
         )
 
-        binding.membersDetails.setOnClickListener {
-                stopCrashDetection()
-        }
 
         binding.contactsList.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
@@ -52,31 +54,20 @@ class SafetyDashboardActivity : AppCompatActivity() {
         val adapter = NearbyServicesAdapter(getSampleNearbyServices())
         binding.nearbyServices.adapter = adapter
 
-        binding.sellAllContacts.setOnClickListener {
-           startCrashDetection()
-        }
-
-
-
-
     }
 
 
-    private fun startCrashDetection() {
+    private fun startCrashDetectionService() {
         val intent = Intent(this, CrashDetectionService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent)
         } else {
             startService(intent)
         }
-        Toast.makeText(this, "Detection Started", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Emergency detection started", Toast.LENGTH_SHORT).show()
     }
 
-    private fun stopCrashDetection() {
-        val intent = Intent(this, CrashDetectionService::class.java)
-        stopService(intent)
-        Toast.makeText(this, "Detection Stopped", Toast.LENGTH_SHORT).show()
-    }
+
     private fun getSampleNearbyServices(): List<NearbyService> {
         return listOf(
             NearbyService(R.drawable.aid, "Ambulance", "Ghori Town", "15km") {

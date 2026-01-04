@@ -14,7 +14,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.example.emergencyresponder.R
-import com.example.emergencyresponder.core.constants.Sensitivity
+import com.example.emergencyresponder.core.navigation.AppNavigator
+import com.example.emergencyresponder.core.navigation.AppRoute
+import com.example.emergencyresponder.modules.dashboard.data.model.DetectionResult
 import com.example.emergencyresponder.modules.dashboard.domain.useCase.CrashDetectionUseCase
 import com.example.emergencyresponder.modules.dashboard.domain.useCase.SensorState
 import kotlin.math.acos
@@ -24,8 +26,8 @@ class CrashDetectionService : Service(), SensorEventListener {
 
 
     private lateinit var sensorManager: SensorManager
-    private var sensitivity = Sensitivity.LOW
-    private val crashUseCase = CrashDetectionUseCase(sensitivity)
+    private var sensitivity = Sensitivity.HIGH
+    private var crashUseCase = CrashDetectionUseCase(sensitivity)
 
     // --- Sensor storage ---
     private var lastAccel: FloatArray? = null
@@ -41,7 +43,7 @@ class CrashDetectionService : Service(), SensorEventListener {
     override fun onCreate() {
         super.onCreate()
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-
+        crashUseCase = CrashDetectionUseCase(sensitivity)
         register(Sensor.TYPE_LINEAR_ACCELERATION)
         register(Sensor.TYPE_GYROSCOPE)
         register(Sensor.TYPE_GRAVITY)
@@ -56,28 +58,31 @@ class CrashDetectionService : Service(), SensorEventListener {
         }
     }
 
-
     override fun onSensorChanged(event: SensorEvent) {
-        when(event.sensor.type){
+        when (event.sensor.type) {
             Sensor.TYPE_LINEAR_ACCELERATION -> lastAccel = event.values.clone()
             Sensor.TYPE_GYROSCOPE -> lastGyro = event.values.clone()
             Sensor.TYPE_GRAVITY -> lastGravity = event.values.clone()
-            Sensor.TYPE_PROXIMITY -> isProximityNear = event.values[0] < event.sensor.maximumRange
+            Sensor.TYPE_PROXIMITY ->
+                isProximityNear = event.values[0] < event.sensor.maximumRange
         }
 
-        if(lastAccel != null && lastGyro != null && lastGravity != null){
-            val state = SensorState(
-                accel = CrashDetectionUseCase.magnitude(lastAccel!!),
-                gyro = CrashDetectionUseCase.magnitude(lastGyro!!),
-                gravityAngle = CrashDetectionUseCase.gravityAngle(
-                    previousGravity ?: lastGravity!!,
-                    lastGravity!!
-                ),
-                proximityNear = isProximityNear
-            )
+        if (lastAccel == null || lastGyro == null || lastGravity == null) return
 
-            if(crashUseCase.evaluateCrash(state)) triggerCrashAlert()
-            if(crashUseCase.evaluateSnatch(state)) triggerSnatchAlert()
+        val state = SensorState(
+            accel = CrashDetectionUseCase.magnitude(lastAccel!!),
+            gyro = CrashDetectionUseCase.magnitude(lastGyro!!),
+            gravityAngle = CrashDetectionUseCase.gravityAngle(
+                previousGravity ?: lastGravity!!,
+                lastGravity!!
+            ),
+            proximityNear = isProximityNear
+        )
+
+        when (crashUseCase.process(state)) {
+            DetectionResult.Crash -> triggerCrashAlert()
+            DetectionResult.Snatch -> triggerSnatchAlert()
+            DetectionResult.None -> Unit
         }
 
         previousGravity = lastGravity?.clone()
@@ -86,12 +91,33 @@ class CrashDetectionService : Service(), SensorEventListener {
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
 
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val level = intent?.getStringExtra("sensitivity") ?: "$sensitivity"
 
+        // 1. Update Sensitivity
+        sensitivity = when(level.uppercase()) {
+            "MEDIUM" -> Sensitivity.MEDIUM
+            "HIGH" -> Sensitivity.HIGH
+            else -> Sensitivity.LOW
+        }
 
-    // --- Alert triggers ---
+        crashUseCase = CrashDetectionUseCase(sensitivity)
+
+        lastAccel = null
+        lastGyro = null
+        lastGravity = null
+        previousGravity = null
+
+        return START_STICKY
+    }
+
     private fun triggerCrashAlert() {
-        Log.d("CrashDetection", "🚨 Crash detected")
-        Toast.makeText(this, "🚨 Crash detected", Toast.LENGTH_SHORT).show()
+        AppNavigator.navigate(
+            context = this,
+            route = AppRoute.TimeStamp,
+            finishCurrent = false
+        )
+
     }
 
     private fun triggerSnatchAlert() {
@@ -137,5 +163,4 @@ class CrashDetectionService : Service(), SensorEventListener {
         super.onDestroy()
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_STICKY
 }
