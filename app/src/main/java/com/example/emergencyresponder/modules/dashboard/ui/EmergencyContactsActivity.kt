@@ -3,14 +3,11 @@ package com.example.emergencyresponder.modules.dashboard.ui
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.emergencyresponder.R
 import com.example.emergencyresponder.databinding.ActivityEmergencyContactsBinding
-import com.example.emergencyresponder.databinding.ActivitySafetyDashboardBinding
-import com.example.emergencyresponder.modules.dashboard.adapters.EmergencyContactsAdapter
-import com.example.emergencyresponder.modules.dashboard.data.EmergencyContacts
+import com.example.emergencyresponder.modules.dashboard.domain.adapters.EmergencyContactsAdapter
+import com.example.emergencyresponder.modules.dashboard.data.model.EmergencyContacts
 
 class EmergencyContactsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEmergencyContactsBinding

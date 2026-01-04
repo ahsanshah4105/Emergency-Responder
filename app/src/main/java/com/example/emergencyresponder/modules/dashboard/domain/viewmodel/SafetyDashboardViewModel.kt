@@ -1,4 +1,4 @@
-package com.example.emergencyresponder.modules.dashboard.domain.useCase.viewmodel
+package com.example.emergencyresponder.modules.dashboard.domain.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

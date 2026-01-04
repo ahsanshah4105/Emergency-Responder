@@ -1,4 +1,4 @@
-package com.example.emergencyresponder.modules.dashboard.data
+package com.example.emergencyresponder.modules.dashboard.data.model
 
 data class EmergencyContacts(
     val iconRes: Int,

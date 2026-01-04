@@ -1,4 +1,4 @@
-package com.example.emergencyresponder.modules.dashboard.adapters
+package com.example.emergencyresponder.modules.dashboard.domain.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +10,7 @@ import android.widget.Button
 import com.example.emergencyresponder.R
 
 import androidx.recyclerview.widget.RecyclerView
-import com.example.emergencyresponder.modules.dashboard.data.NearbyService
+import com.example.emergencyresponder.modules.dashboard.data.model.NearbyService
 
 class NearbyServicesAdapter(
     private val items: List<NearbyService>

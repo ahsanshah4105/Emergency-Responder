@@ -8,12 +8,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.emergencyresponder.databinding.ActivitySafetyDashboardBinding
-import com.example.emergencyresponder.modules.dashboard.adapters.EmergencyContactsAdapter
-import com.example.emergencyresponder.modules.dashboard.adapters.NearbyServicesAdapter
-import com.example.emergencyresponder.modules.dashboard.data.EmergencyContacts
-import com.example.emergencyresponder.modules.dashboard.data.NearbyService
+import com.example.emergencyresponder.modules.dashboard.domain.adapters.EmergencyContactsAdapter
+import com.example.emergencyresponder.modules.dashboard.domain.adapters.NearbyServicesAdapter
+import com.example.emergencyresponder.modules.dashboard.data.model.EmergencyContacts
+import com.example.emergencyresponder.modules.dashboard.data.model.NearbyService
 import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
-import com.example.emergencyresponder.modules.dashboard.domain.useCase.viewmodel.SafetyDashboardViewModel
+import com.example.emergencyresponder.modules.dashboard.domain.viewmodel.SafetyDashboardViewModel
 import androidx.activity.viewModels
 
 
@@ -91,5 +91,6 @@ class SafetyDashboardActivity : AppCompatActivity() {
             }
         )
     }
+
 
 }

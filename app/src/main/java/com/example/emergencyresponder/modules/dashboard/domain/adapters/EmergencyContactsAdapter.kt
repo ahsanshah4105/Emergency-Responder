@@ -1,4 +1,4 @@
-package com.example.emergencyresponder.modules.dashboard.adapters
+package com.example.emergencyresponder.modules.dashboard.domain.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -8,7 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.emergencyresponder.R
-import com.example.emergencyresponder.modules.dashboard.data.EmergencyContacts
+import com.example.emergencyresponder.modules.dashboard.data.model.EmergencyContacts
 
 class EmergencyContactsAdapter(
     private val items: List<EmergencyContacts>

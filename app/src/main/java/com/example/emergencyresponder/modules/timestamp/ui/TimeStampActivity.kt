@@ -4,8 +4,9 @@ package com.example.emergencyresponder.modules.timestamp.ui
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.example.emergencyresponder.modules.timestamp.domain.viewmodel.TimeStampViewModel
+import com.example.emergencyresponder.core.utils.SOSUtils
 import com.example.emergencyresponder.databinding.ActivityTimeStampBinding
+import com.example.emergencyresponder.modules.timestamp.domain.viewmodel.TimeStampViewModel
 
 class TimeStampActivity : AppCompatActivity() {
 
@@ -32,7 +33,9 @@ class TimeStampActivity : AppCompatActivity() {
             finish()
         }
         binding.sendAlert.setOnClickListener {
-            finish()
+            SOSUtils.sendSOSViaSMS(this, "+923068988678")
         }
+
     }
+
 }

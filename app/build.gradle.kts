@@ -64,5 +64,5 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
 // Use a specific version, like 8.13.26
     implementation("com.googlecode.libphonenumber:libphonenumber:8.13.26")
-
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 }
