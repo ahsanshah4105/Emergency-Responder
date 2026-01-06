@@ -1,9 +1,12 @@
 package com.example.emergencyresponder.modules.dashboard.ui
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import com.example.emergencyresponder.R
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,17 +18,21 @@ import com.example.emergencyresponder.modules.dashboard.data.model.NearbyService
 import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
 import com.example.emergencyresponder.modules.dashboard.domain.viewmodel.SafetyDashboardViewModel
 import androidx.activity.viewModels
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 
 
 class SafetyDashboardActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySafetyDashboardBinding
     private val viewModel: SafetyDashboardViewModel by viewModels()
+    private val REQUEST_NOTIFICATION_PERMISSION = 100
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySafetyDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
         startCrashDetectionService()
+        ensureNotificationPermission()
         val contacts = listOf(
             EmergencyContacts(
                 iconRes = R.drawable.aid, // replace with your drawable
@@ -90,6 +97,43 @@ class SafetyDashboardActivity : AppCompatActivity() {
                 Toast.makeText(this, "Security SOS triggered", Toast.LENGTH_SHORT).show()
             }
         )
+    }
+
+    private fun ensureNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    REQUEST_NOTIFICATION_PERMISSION
+                )
+            }
+        }
+    }
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == REQUEST_NOTIFICATION_PERMISSION) {
+            if (grantResults.isNotEmpty() &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED
+            ) {
+                Log.d("Permission", "Notification permission granted")
+            } else {
+                Toast.makeText(
+                    this,
+                    "Notification permission is required for crash alerts",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
 

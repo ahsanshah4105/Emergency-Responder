@@ -2,8 +2,10 @@ package com.example.emergencyresponder.modules.dashboard.ui.service
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -19,6 +21,7 @@ import com.example.emergencyresponder.core.navigation.AppRoute
 import com.example.emergencyresponder.modules.dashboard.data.model.DetectionResult
 import com.example.emergencyresponder.modules.dashboard.domain.useCase.CrashDetectionUseCase
 import com.example.emergencyresponder.modules.dashboard.domain.useCase.SensorState
+import com.example.emergencyresponder.modules.timestamp.ui.TimeStampActivity
 import kotlin.math.acos
 import kotlin.math.sqrt
 
@@ -111,14 +114,51 @@ class CrashDetectionService : Service(), SensorEventListener {
         return START_STICKY
     }
 
-    private fun triggerCrashAlert() {
-        AppNavigator.navigate(
-            context = this,
-            route = AppRoute.TimeStamp,
-            finishCurrent = false
-        )
+//    private fun triggerCrashAlert() {
+//        AppNavigator.navigate(
+//            context = this,
+//            route = AppRoute.TimeStamp,
+//            finishCurrent = false
+//        )
+//
+//  }
+private fun triggerCrashAlert() {
 
+    val hasPermission =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) ==
+                    PackageManager.PERMISSION_GRANTED
+        } else true
+
+    if (!hasPermission) {
+        Log.d("CrashDetectionService", "Notification permission missing — crash detected silently")
+        return
     }
+
+    val intent = Intent(this, TimeStampActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+    }
+
+    val pendingIntent = PendingIntent.getActivity(
+        this,
+        0,
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    val notification = NotificationCompat.Builder(this, "safety_channel")
+        .setSmallIcon(R.drawable.app_logo)
+        .setContentTitle("🚨 Crash Detected")
+        .setContentText("Tap to open emergency details")
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .setCategory(NotificationCompat.CATEGORY_ALARM)
+        .setAutoCancel(true)
+        .setContentIntent(pendingIntent)
+        .build()
+
+    val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+    manager.notify(102, notification)
+}
 
     private fun triggerSnatchAlert() {
         Log.d("SnatchingDetection", "📱 Snatching detected")
@@ -162,5 +202,4 @@ class CrashDetectionService : Service(), SensorEventListener {
         stopForeground(true)
         super.onDestroy()
     }
-
 }

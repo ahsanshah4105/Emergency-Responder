@@ -9,11 +9,13 @@
     <uses-permission android:name="android.permission.HIGH_SAMPLING_RATE_SENSORS" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
 
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
 
     <application
@@ -26,9 +28,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.EmergencyResponder">
+
+
         <activity
-            android:name=".modules.SettingActivity"
+            android:name=".modules.dashboard.ui.SettingActivity"
             android:exported="false" />
+
+        <receiver
+            android:name=".core.receivers.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
 
         <service
             android:name=".modules.dashboard.ui.service.CrashDetectionService"
@@ -45,7 +59,7 @@
             android:exported="false" />
         <activity
             android:name=".modules.timestamp.ui.TimeStampActivity"
-            android:exported="false" />
+            android:launchMode="singleTop"/>
         <activity
             android:name=".modules.dashboard.ui.SafetyDashboardActivity"
             android:exported="false" />
@@ -60,7 +74,7 @@
         </activity>
         <activity
             android:name=".modules.onboarding.ui.OnboardingActivity"
-            android:exported="true"></activity>
+            android:exported="false"/>
         <activity
             android:name=".modules.auth.ui.ForgotPasswordActivity"
             android:exported="false"
