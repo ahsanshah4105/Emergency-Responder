@@ -1,5 +1,6 @@
 package com.example.emergencyresponder.modules.dashboard.ui.service
 
+import Sensitivity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -16,37 +17,41 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.example.emergencyresponder.R
-import com.example.emergencyresponder.core.navigation.AppNavigator
-import com.example.emergencyresponder.core.navigation.AppRoute
+import com.example.emergencyresponder.core.utils.TFLiteModelHelper
 import com.example.emergencyresponder.modules.dashboard.data.model.DetectionResult
+import com.example.emergencyresponder.modules.dashboard.data.model.SensorState
 import com.example.emergencyresponder.modules.dashboard.domain.useCase.CrashDetectionUseCase
-import com.example.emergencyresponder.modules.dashboard.domain.useCase.SensorState
+import com.example.emergencyresponder.modules.dashboard.domain.useCase.CrashDetectionUseCase.Companion.magnitude
 import com.example.emergencyresponder.modules.timestamp.ui.TimeStampActivity
-import kotlin.math.acos
-import kotlin.math.sqrt
+import kotlin.math.pow
 
 class CrashDetectionService : Service(), SensorEventListener {
+    private val accelBuffer = mutableListOf<Float>()
+    private val gyroBuffer = mutableListOf<Float>()
+    private val linBuffer = mutableListOf<Float>()
 
+    private val BUFFER_SIZE = 50
 
+    private lateinit var modelHelper: TFLiteModelHelper
     private lateinit var sensorManager: SensorManager
     private var sensitivity = Sensitivity.HIGH
-    private var crashUseCase = CrashDetectionUseCase(sensitivity)
+    private lateinit var crashUseCase: CrashDetectionUseCase
 
     // --- Sensor storage ---
     private var lastAccel: FloatArray? = null
     private var lastGyro: FloatArray? = null
     private var lastGravity: FloatArray? = null
-    private var previousGravity: FloatArray? = null
     private var isProximityNear = true
-
-
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
-        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        modelHelper = TFLiteModelHelper(this)
         crashUseCase = CrashDetectionUseCase(sensitivity)
+
+        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+
         register(Sensor.TYPE_LINEAR_ACCELERATION)
         register(Sensor.TYPE_GYROSCOPE)
         register(Sensor.TYPE_GRAVITY)
@@ -70,113 +75,133 @@ class CrashDetectionService : Service(), SensorEventListener {
                 isProximityNear = event.values[0] < event.sensor.maximumRange
         }
 
-        if (lastAccel == null || lastGyro == null || lastGravity == null) return
+        if (lastAccel == null || lastGyro == null) return
 
-        val state = SensorState(
-            accel = CrashDetectionUseCase.magnitude(lastAccel!!),
-            gyro = CrashDetectionUseCase.magnitude(lastGyro!!),
-            gravityAngle = CrashDetectionUseCase.gravityAngle(
-                previousGravity ?: lastGravity!!,
-                lastGravity!!
-            ),
-            proximityNear = isProximityNear
-        )
+        val accelMag = magnitude(lastAccel!!).toFloat()
+        val gyroMag = magnitude(lastGyro!!).toFloat()
+        val linMag = accelMag
 
-        when (crashUseCase.process(state)) {
-            DetectionResult.Crash -> triggerCrashAlert()
-            DetectionResult.Snatch -> triggerSnatchAlert()
-            DetectionResult.None -> Unit
+        accelBuffer.add(accelMag)
+        gyroBuffer.add(gyroMag)
+        linBuffer.add(linMag)
+
+        if (accelBuffer.size >= BUFFER_SIZE) {
+
+            val features = floatArrayOf(
+                accelBuffer.maxOrNull()!!,
+                gyroBuffer.maxOrNull()!!,
+                kurtosis(accelBuffer),
+                kurtosis(gyroBuffer),
+                linBuffer.maxOrNull()!!,
+                skewness(accelBuffer),
+                skewness(gyroBuffer),
+                gyroBuffer.takeLast(5).maxOrNull()!!,
+                linBuffer.takeLast(5).maxOrNull()!!
+            )
+
+            // **ML returns confidence**
+            val confidence = modelHelper.predict(features)
+
+            // **Create state**
+            val state = SensorState(
+                accel = accelBuffer.maxOrNull()!!.toDouble(),
+                gyro = gyroBuffer.maxOrNull()!!.toDouble(),
+                gravityAngle = CrashDetectionUseCase.gravityAngle(
+                    lastGravity!!,
+                    lastAccel!!
+                ),
+                proximityNear = isProximityNear,
+                mlConfidence = confidence.toFloat()
+            )
+
+            // **UseCase decides**
+            when (crashUseCase.process(state)) {
+                DetectionResult.Crash -> triggerCrashAlert()
+                DetectionResult.Snatch -> triggerSnatchAlert()
+                DetectionResult.None -> { /* do nothing */ }
+            }
+
+            accelBuffer.clear()
+            gyroBuffer.clear()
+            linBuffer.clear()
         }
+    }
+    private fun mean(data: List<Float>): Float =
+        data.sum() / data.size
 
-        previousGravity = lastGravity?.clone()
+    private fun skewness(data: List<Float>): Float {
+        val m = mean(data)
+        val sd = kotlin.math.sqrt(data.map { (it - m) * (it - m) }.sum() / data.size)
+        if (sd == 0f) return 0f
+        return (data.map { (it - m).pow(3) }.sum() / data.size) / sd.pow(3)
+    }
+
+    private fun kurtosis(data: List<Float>): Float {
+        val m = mean(data)
+        val sd = kotlin.math.sqrt(data.map { (it - m) * (it - m) }.sum() / data.size)
+        if (sd == 0f) return 0f
+        return (data.map { (it - m).pow(4) }.sum() / data.size) / sd.pow(4)
     }
 
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // sensitivity update
         val level = intent?.getStringExtra("sensitivity") ?: "$sensitivity"
 
-        // 1. Update Sensitivity
         sensitivity = when(level.uppercase()) {
             "MEDIUM" -> Sensitivity.MEDIUM
             "HIGH" -> Sensitivity.HIGH
             else -> Sensitivity.LOW
         }
 
-        crashUseCase = CrashDetectionUseCase(sensitivity)
-
-        lastAccel = null
-        lastGyro = null
-        lastGravity = null
-        previousGravity = null
-
+        crashUseCase = CrashDetectionUseCase(sensitivity)  // update usecase
         return START_STICKY
     }
 
-//    private fun triggerCrashAlert() {
-//        AppNavigator.navigate(
-//            context = this,
-//            route = AppRoute.TimeStamp,
-//            finishCurrent = false
-//        )
-//
-//  }
-private fun triggerCrashAlert() {
+    private fun triggerCrashAlert() {
+        val hasPermission =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) ==
+                        PackageManager.PERMISSION_GRANTED
+            } else true
 
-    val hasPermission =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) ==
-                    PackageManager.PERMISSION_GRANTED
-        } else true
+        if (!hasPermission) {
+            Log.d("CrashDetectionService", "Notification permission missing — crash detected silently")
+            return
+        }
 
-    if (!hasPermission) {
-        Log.d("CrashDetectionService", "Notification permission missing — crash detected silently")
-        return
+        val intent = Intent(this, TimeStampActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(this, "safety_channel")
+            .setSmallIcon(R.drawable.app_logo)
+            .setContentTitle("🚨 Crash Detected")
+            .setContentText("Tap to open emergency details")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(102, notification)
     }
-
-    val intent = Intent(this, TimeStampActivity::class.java).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-    }
-
-    val pendingIntent = PendingIntent.getActivity(
-        this,
-        0,
-        intent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    )
-
-    val notification = NotificationCompat.Builder(this, "safety_channel")
-        .setSmallIcon(R.drawable.app_logo)
-        .setContentTitle("🚨 Crash Detected")
-        .setContentText("Tap to open emergency details")
-        .setPriority(NotificationCompat.PRIORITY_HIGH)
-        .setCategory(NotificationCompat.CATEGORY_ALARM)
-        .setAutoCancel(true)
-        .setContentIntent(pendingIntent)
-        .build()
-
-    val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-    manager.notify(102, notification)
-}
 
     private fun triggerSnatchAlert() {
         Log.d("SnatchingDetection", "📱 Snatching detected")
         Toast.makeText(this, "📱 Snatching detected", Toast.LENGTH_SHORT).show()
     }
 
-    // --- Utility ---
-    private fun magnitude(v: FloatArray): Double =
-        sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2].toDouble())
-
-    private fun gravityAngle(a: FloatArray, b: FloatArray): Double {
-        val dot = a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
-        val mag = magnitude(a) * magnitude(b)
-        val cos = (dot / mag).coerceIn(-1.0, 1.0)
-        return Math.toDegrees(acos(cos))
-    }
-
-    // --- Foreground service ---
     private fun startForegroundService() {
         val channelId = "safety_channel"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

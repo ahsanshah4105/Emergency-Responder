@@ -65,4 +65,9 @@ dependencies {
 // Use a specific version, like 8.13.26
     implementation("com.googlecode.libphonenumber:libphonenumber:8.13.26")
     implementation("com.google.android.gms:play-services-location:21.0.1")
+
+
+    implementation("org.tensorflow:tensorflow-lite:2.14.0")
+    implementation("org.tensorflow:tensorflow-lite-support:0.4.0")
+    implementation("com.google.code.gson:gson:2.10.1")
 }

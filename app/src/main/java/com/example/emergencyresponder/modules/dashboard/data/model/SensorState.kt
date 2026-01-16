@@ -4,5 +4,6 @@ data class SensorState(
     val accel: Double,
     val gyro: Double,
     val gravityAngle: Double,
-    val proximityNear: Boolean
+    val proximityNear: Boolean,
+    val mlConfidence: Float
 )
