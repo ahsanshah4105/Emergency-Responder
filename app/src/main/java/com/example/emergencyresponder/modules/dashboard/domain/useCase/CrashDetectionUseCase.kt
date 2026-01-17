@@ -13,25 +13,29 @@ class CrashDetectionUseCase(
 ) {
 
     private var lastCrashTime = 0L
-    private var lastSnatchTime = 0L
 
     private val cooldownMs = 3000L
 
     fun process(state: SensorState): DetectionResult {
         val now = System.currentTimeMillis()
 
-        if (isSnatch(state) && now - lastSnatchTime > cooldownMs) {
-            lastSnatchTime = now
-            return DetectionResult.Snatch
+        val threshold = when (sensitivity) {
+            Sensitivity.LOW -> 0.90f
+            Sensitivity.MEDIUM -> 0.75f
+            Sensitivity.HIGH -> 0.60f
         }
 
-        if (isCrash(state) && now - lastCrashTime > cooldownMs) {
+        val modelDecision = state.mlConfidence >= threshold
+        val ruleDecision = isCrash(state)
+
+        if (modelDecision && ruleDecision && now - lastCrashTime > cooldownMs) {
             lastCrashTime = now
             return DetectionResult.Crash
         }
 
         return DetectionResult.None
     }
+
 
     private fun isCrash(state: SensorState): Boolean {
         val scale = when(sensitivity) {

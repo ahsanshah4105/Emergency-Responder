@@ -2,6 +2,7 @@ package com.example.emergencyresponder.core.utils
 
 
 import android.content.Context
+import android.util.Log
 import org.json.JSONObject
 import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
@@ -35,7 +36,6 @@ class TFLiteModelHelper(context: Context) {
             FloatArray(arr.length()) { i -> arr.getDouble(i).toFloat() }
         }
     }
-
     fun predict(input: FloatArray): Float {
         val scaledInput = FloatArray(input.size)
         for (i in input.indices) {
@@ -44,17 +44,30 @@ class TFLiteModelHelper(context: Context) {
 
         val inputBuffer = ByteBuffer.allocateDirect(4 * scaledInput.size)
         inputBuffer.order(ByteOrder.nativeOrder())
+        inputBuffer.rewind()
         scaledInput.forEach { inputBuffer.putFloat(it) }
         inputBuffer.rewind()
 
-        val outputBuffer = ByteBuffer.allocateDirect(4)
+        // Output buffer for 2 classes (safe)
+        val outputBuffer = ByteBuffer.allocateDirect(4 * 2)
         outputBuffer.order(ByteOrder.nativeOrder())
         outputBuffer.rewind()
 
         interpreter.run(inputBuffer, outputBuffer)
         outputBuffer.rewind()
 
-        val confidence = outputBuffer.float
-        return confidence
+        // If output is 2 values: [notCrash, crash]
+        val out0 = outputBuffer.float
+        val out1 = outputBuffer.float
+//        val confidence = outputBuffer.float
+        Log.d("TFLiteModel", "Confidence = $out0")
+        Log.d("TFLiteModel", "Confidence = $out1")
+
+//        return confidence
+
+        // If model returns single output, out1 will be 0 but safe.
+        return if (out1 > out0) out1 else out0
     }
+
+
 }

@@ -100,26 +100,23 @@ class CrashDetectionService : Service(), SensorEventListener {
             )
 
             // **ML returns confidence**
-            val confidence = modelHelper.predict(features)
+            val confidence = modelHelper.predict(features)  // this is crash probability
 
-            // **Create state**
             val state = SensorState(
                 accel = accelBuffer.maxOrNull()!!.toDouble(),
                 gyro = gyroBuffer.maxOrNull()!!.toDouble(),
-                gravityAngle = CrashDetectionUseCase.gravityAngle(
-                    lastGravity!!,
-                    lastAccel!!
-                ),
+                gravityAngle = CrashDetectionUseCase.gravityAngle(lastGravity!!, lastAccel!!),
                 proximityNear = isProximityNear,
-                mlConfidence = confidence.toFloat()
+                mlConfidence = confidence
             )
 
-            // **UseCase decides**
+
             when (crashUseCase.process(state)) {
                 DetectionResult.Crash -> triggerCrashAlert()
                 DetectionResult.Snatch -> triggerSnatchAlert()
-                DetectionResult.None -> { /* do nothing */ }
+                DetectionResult.None -> {}
             }
+
 
             accelBuffer.clear()
             gyroBuffer.clear()
@@ -147,7 +144,6 @@ class CrashDetectionService : Service(), SensorEventListener {
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // sensitivity update
         val level = intent?.getStringExtra("sensitivity") ?: "$sensitivity"
 
         sensitivity = when(level.uppercase()) {
@@ -156,9 +152,10 @@ class CrashDetectionService : Service(), SensorEventListener {
             else -> Sensitivity.LOW
         }
 
-        crashUseCase = CrashDetectionUseCase(sensitivity)  // update usecase
+        crashUseCase = CrashDetectionUseCase(sensitivity)
         return START_STICKY
     }
+
 
     private fun triggerCrashAlert() {
         val hasPermission =
