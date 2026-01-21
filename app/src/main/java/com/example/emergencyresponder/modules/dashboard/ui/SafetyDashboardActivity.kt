@@ -8,6 +8,7 @@ import com.example.emergencyresponder.R
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.emergencyresponder.databinding.ActivitySafetyDashboardBinding
@@ -20,19 +21,45 @@ import com.example.emergencyresponder.modules.dashboard.domain.viewmodel.SafetyD
 import androidx.activity.viewModels
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.emergencyresponder.modules.dashboard.ui.service.MicListenService
 
 
 class SafetyDashboardActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySafetyDashboardBinding
     private val viewModel: SafetyDashboardViewModel by viewModels()
     private val REQUEST_NOTIFICATION_PERMISSION = 100
+    private val micPermissionRequest = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[Manifest.permission.RECORD_AUDIO] == true &&
+                (permissions[Manifest.permission.FOREGROUND_SERVICE_MICROPHONE] == true
+                        || Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+
+        if (granted) {
+            startMicService()
+        } else {
+            Toast.makeText(this, "Mic permission required", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySafetyDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         startCrashDetectionService()
         ensureNotificationPermission()
+
+        binding.btnEnableMic.setOnClickListener {
+            micPermissionRequest.launch(
+                arrayOf(
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.FOREGROUND_SERVICE_MICROPHONE
+                )
+            )
+        }
+
+
         val contacts = listOf(
             EmergencyContacts(
                 iconRes = R.drawable.aid, // replace with your drawable
@@ -47,6 +74,7 @@ class SafetyDashboardActivity : AppCompatActivity() {
                 sosAction = { /* handle SOS call */ }
             )
         )
+
 
 
         binding.contactsList.layoutManager =
@@ -135,6 +163,13 @@ class SafetyDashboardActivity : AppCompatActivity() {
             }
         }
     }
+
+
+    private fun startMicService() {
+        val intent = Intent(this, MicListenService::class.java)
+        ContextCompat.startForegroundService(this, intent)
+    }
+
 
 
 }

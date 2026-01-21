@@ -31,6 +31,7 @@
             android:layout_height="1dp"/>
 
         <androidx.cardview.widget.CardView
+            android:id="@+id/btnEnableMic"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:backgroundTint="@color/light_pink"
