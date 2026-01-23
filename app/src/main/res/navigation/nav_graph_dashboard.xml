@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_dashboard"
+    app:startDestination="@id/safetyDashboardFragment">
+
+    <fragment
+        android:id="@+id/safetyDashboardFragment"
+        android:name="com.example.emergencyresponder.modules.dashboard.ui.SafetyDashboardFragment"
+        android:label="fragment_safety_dashboard"
+        tools:layout="@layout/fragment_safety_dashboard" />
+
+    <fragment
+        android:id="@+id/emergencyContactFragment"
+        android:name="com.example.emergencyresponder.modules.dashboard.ui.EmergencyContactFragment"
+        android:label="fragment_emergency_contact"
+        tools:layout="@layout/fragment_emergency_contact" />
+    <fragment
+        android:id="@+id/profileFragment2"
+        android:name="com.example.emergencyresponder.modules.dashboard.ui.ProfileFragment"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" />
+</navigation>

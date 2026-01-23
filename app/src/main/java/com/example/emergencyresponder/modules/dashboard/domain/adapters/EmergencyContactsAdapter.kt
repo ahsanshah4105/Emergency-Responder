@@ -15,7 +15,7 @@ class EmergencyContactsAdapter(
 ) : RecyclerView.Adapter<EmergencyContactsAdapter.ServiceViewHolder>() {
 
     inner class ServiceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val imgIcon: ImageView = itemView.findViewById(R.id.person_img)
+        //val imgIcon: ImageView = itemView.findViewById(R.id.person_img)
         val txtName: TextView = itemView.findViewById(R.id.personName)
         val txtPhone: TextView = itemView.findViewById(R.id.personPhone)
         val btnSos: Button = itemView.findViewById(R.id.sosButton)
@@ -30,7 +30,7 @@ class EmergencyContactsAdapter(
     override fun onBindViewHolder(holder: ServiceViewHolder, position: Int) {
         val item = items[position]
 
-        holder.imgIcon.setImageResource(item.iconRes)
+      //  holder.imgIcon.setImageResource(item.iconRes)
         holder.txtName.text = item.name
         holder.txtPhone.text = item.phone
 

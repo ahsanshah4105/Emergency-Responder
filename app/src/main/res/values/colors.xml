@@ -16,6 +16,19 @@
     <color name="app_background">#F8FAFC</color>
     <color name="green">#40CD74</color>
 
+    <color name="divider">#F0F0F0</color>
+
+    <color name="text_primary">#1A1A1A</color>
+    <color name="text_secondary">#757575</color>
+
+    <color name="icon_bell_yellow">#FFC107</color>
+    <color name="icon_star_purple">#9C27B0</color>
+    <color name="icon_doc_orange">#FF7043</color>
+    <color name="icon_shield_blue">#2196F3</color>
+    <color name="icon_support_grey">#424242</color>
+
+    <color name="switch_track_green">#4CD964</color>
+    <color name="edit_bg_grey">#F0F0F0</color>
 
 
 

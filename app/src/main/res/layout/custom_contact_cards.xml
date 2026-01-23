@@ -11,16 +11,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="12dp"
+        android:padding="6dp"
         android:gravity="center_vertical">
 
         <!-- Profile / Service Icon -->
-        <ImageView
-            android:id="@+id/person_img"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@drawable/circle"
-            android:scaleType="centerCrop" />
+
 
         <!-- Name & Phone -->
         <LinearLayout

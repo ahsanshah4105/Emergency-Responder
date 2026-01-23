@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/safetyDashboardFragment"
+        android:icon="@drawable/ic_home"
+        android:title="Home" />
+
+    <item
+        android:id="@+id/emergencyContactFragment"
+        android:icon="@drawable/ic_call"
+        android:title="Contacts" />
+
+    <item
+        android:id="@+id/profileFragment2"
+        android:icon="@drawable/ic_profile"
+        android:title="Profile" />
+
+</menu>
