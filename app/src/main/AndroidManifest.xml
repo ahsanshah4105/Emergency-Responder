@@ -58,9 +58,7 @@
             android:exported="false"
             android:foregroundServiceType="microphone" />
 
-        <activity
-            android:name=".modules.dashboard.ui.EmergencyContactsActivity"
-            android:exported="false" />
+
         <activity
             android:name=".modules.timestamp.ui.TimeStampActivity"
             android:launchMode="singleTop" /> <!-- <activity -->

@@ -9,16 +9,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.emergencyresponder.R
 import com.example.emergencyresponder.databinding.FragmentSafetyDashboardBinding
-import com.example.emergencyresponder.modules.dashboard.data.model.EmergencyContacts
 import com.example.emergencyresponder.modules.dashboard.data.model.NearbyService
-import com.example.emergencyresponder.modules.dashboard.domain.adapters.EmergencyContactsAdapter
 import com.example.emergencyresponder.modules.dashboard.domain.adapters.NearbyServicesAdapter
 import com.example.emergencyresponder.modules.dashboard.domain.viewmodel.SafetyDashboardViewModel
 import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
@@ -32,21 +29,10 @@ class SafetyDashboardFragment : Fragment() {
     private val viewModel: SafetyDashboardViewModel by viewModels()
 
     private val REQUEST_NOTIFICATION_PERMISSION = 100
+    private val REQUEST_MIC_PERMISSION = 101
 
-    private val micPermissionRequest =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
 
-            val granted =
-                permissions[Manifest.permission.RECORD_AUDIO] == true &&
-                        (Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
-                                permissions[Manifest.permission.FOREGROUND_SERVICE_MICROPHONE] == true)
 
-            if (granted) {
-                startMicService()
-            } else {
-                Toast.makeText(requireContext(), "Mic permission required", Toast.LENGTH_SHORT).show()
-            }
-        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -64,28 +50,33 @@ class SafetyDashboardFragment : Fragment() {
         ensureNotificationPermission()
 
         binding.btnEnableMic.setOnClickListener {
-            val permissions = mutableListOf(Manifest.permission.RECORD_AUDIO)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                permissions.add(Manifest.permission.FOREGROUND_SERVICE_MICROPHONE)
-            }
-            micPermissionRequest.launch(permissions.toTypedArray())
+            requestMicPermissions()
+            Toast.makeText(requireContext(),"Mic permission granted",Toast.LENGTH_SHORT).show()
         }
 
         //setupEmergencyContacts()
         setupNearbyServices()
     }
+    private fun requestMicPermissions() {
+        val permissions = mutableListOf(Manifest.permission.RECORD_AUDIO)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissions.add(Manifest.permission.FOREGROUND_SERVICE_MICROPHONE)
+        }
 
-//    private fun setupEmergencyContacts() {
-//        val contacts = listOf(
-//            EmergencyContacts(R.drawable.aid, "Ambulance Service", "0311-1234567") {},
-//            EmergencyContacts(R.drawable.aid, "Police", "0312-7654321") {}
-//        )
-//
-//        binding.contactsList.layoutManager =
-//            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-//
-//        binding.contactsList.adapter = EmergencyContactsAdapter(contacts)
-//    }
+        requestPermissions(permissions.toTypedArray(), REQUEST_MIC_PERMISSION)
+    }
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == 101 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            val intent = Intent(requireContext(), MicListenService::class.java)
+            ContextCompat.startForegroundService(requireContext(), intent)
+        }
+    }
 
     private fun setupNearbyServices() {
         binding.nearbyServices.layoutManager =
@@ -107,10 +98,11 @@ class SafetyDashboardFragment : Fragment() {
         ContextCompat.startForegroundService(requireContext(), intent)
     }
 
-    private fun startMicService() {
-        val intent = Intent(requireContext(), MicListenService::class.java)
-        ContextCompat.startForegroundService(requireContext(), intent)
-    }
+//    private fun startMicService() {
+//        val intent = Intent(requireContext(), MicListenService::class.java)
+//        ContextCompat.startForegroundService(requireContext(), intent)
+//        Toast.makeText(requireContext(), "Trying to start service...", Toast.LENGTH_SHORT).show()
+//    }
 
     private fun ensureNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

@@ -11,4 +11,12 @@ class LoginUseCase(
             throw Exception("Email not verified. Please check your email.")
         }
     }
+
+    suspend fun executeGoogleLogin(idToken: String) {
+        val user = repository.loginWithGoogle(idToken)
+        // Usually, Google users are pre-verified, but you can check logic here
+        if (user == null) {
+            throw Exception("Google authentication failed.")
+        }
+    }
 }

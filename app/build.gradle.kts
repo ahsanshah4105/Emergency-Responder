@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.tools.core)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -71,6 +72,10 @@ dependencies {
     implementation("org.tensorflow:tensorflow-lite-support:0.4.0")
     implementation("com.google.code.gson:gson:2.10.1")
 
+    implementation("org.tensorflow:tensorflow-lite-task-audio:0.4.0")
+
+
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
+    implementation("com.github.wendykierp:JTransforms:3.1")
 }

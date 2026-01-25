@@ -31,6 +31,19 @@ class LoginViewModel(
         }
     }
 
+    fun loginWithGoogle(idToken: String) {
+        viewModelScope.launch {
+            _state.value = AuthState.Loading
+            try {
+                loginUseCase.executeGoogleLogin(idToken)
+                _state.value = AuthState.Success
+                _route.value = AppRoute.Dashboard
+            } catch (e: Exception) {
+                _state.value = AuthState.Error(e.message ?: "Google Login failed")
+            }
+        }
+    }
+
 }
 
 sealed class AuthState {

@@ -1,7 +1,9 @@
 package com.example.emergencyresponder.modules.auth.data.dataSource
 
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.tasks.await
 
 
@@ -22,6 +24,10 @@ class AuthRemoteDataSource(
     suspend fun sendPasswordResetEmail(email: String) =
         auth.sendPasswordResetEmail(email).await()
 
+    suspend fun loginWithGoogle(idToken: String): AuthResult {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        return FirebaseAuth.getInstance().signInWithCredential(credential).await()
+    }
     fun logout() {
         auth.signOut()
     }
