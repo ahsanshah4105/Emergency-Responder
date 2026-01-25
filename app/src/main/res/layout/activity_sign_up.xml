@@ -13,35 +13,39 @@
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:clickable="true"
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="30dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_height="match_parent">
+
         <ImageView
             android:id="@+id/emergency_alert_image"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-             android:src="@drawable/register_icon"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@drawable/register_icon"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/textView"
+            style="@style/CustomText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="@string/register_to_your_account"
-            style="@style/CustomText"
+            android:text="@string/sign_up"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/emergency_alert_image" />
 
         <TextView
             android:id="@+id/textView2"
+            style="@style/CustomSubText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/join_to_enable_instant_safety"
-            style="@style/CustomSubText"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/textView"
+            app:layout_constraintStart_toStartOf="@+id/textView"
             app:layout_constraintTop_toBottomOf="@+id/textView" />
 
         <androidx.cardview.widget.CardView
@@ -309,35 +313,12 @@
 
         </androidx.cardview.widget.CardView>
 
-        <LinearLayout
-            android:id="@+id/add_more_contacts"
-            android:layout_width="match_parent"
-            android:layout_marginTop="24dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/border_line"
-            android:theme="@style/Theme.App.BlueBorder"
-            android:gravity="center"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/emergency_Contact">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/add_more_contacts"
-                android:fontFamily="@font/inter_medium"
-                android:drawableStart="@drawable/round_add_24"
-                android:textSize="16sp"
-                android:layout_margin="16dp"
-                android:textColor="@color/primaryBlue"
-                android:gravity="center"
-                />
-        </LinearLayout>
 
         <FrameLayout
             android:id="@+id/frameLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/add_more_contacts"
+            app:layout_constraintTop_toBottomOf="@+id/emergency_Contact"
             tools:layout_editor_absoluteX="20dp">
 
             <com.google.android.material.button.MaterialButton

@@ -35,7 +35,11 @@ class SignUpActivity : BaseActivity() {
         val useCase = SignUpUseCase(repository)
         val factory = SignUpViewModelFactory(useCase)
         viewModel = ViewModelProvider(this, factory).get(SignUpViewModel::class.java)
+        binding.loginButton.setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
 
+            }
         setupListeners()
         setupValidationListeners()
         navigator()
@@ -49,6 +53,7 @@ class SignUpActivity : BaseActivity() {
                 finish()
             }
         }
+
     }
 
     private fun stateObserver() {
@@ -112,6 +117,8 @@ class SignUpActivity : BaseActivity() {
 
             viewModel.signUp(name, email, password, confirmPassword, phone, name)
         }
+
+
     }
 
 }

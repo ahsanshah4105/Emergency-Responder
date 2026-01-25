@@ -62,7 +62,17 @@ class MicListenService : Service() {
     private fun loadModel() {
         val model = loadModelFile("yamnet.tflite")
         interpreter = Interpreter(model)
+
+        // IMPORTANT: allocate tensors before running inference
+        interpreter.allocateTensors()
+
+        // OPTIONAL: print input/output shapes to verify
+        val inputShape = interpreter.getInputTensor(0).shape()
+        val outputShape = interpreter.getOutputTensor(0).shape()
+        Log.d("MicListenService", "Input shape: ${inputShape.contentToString()}")
+        Log.d("MicListenService", "Output shape: ${outputShape.contentToString()}")
     }
+
 
     private fun loadModelFile(modelName: String): MappedByteBuffer {
         val fileDescriptor = assets.openFd(modelName)
@@ -303,6 +313,10 @@ class MicListenService : Service() {
         audioRecord = null
         super.onDestroy()
 
+    }
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        startForegroundNotification()
+        return START_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
