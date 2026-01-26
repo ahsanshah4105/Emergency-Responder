@@ -1,5 +1,6 @@
 package com.example.emergencyresponder.modules.dashboard.ui.service
 
+import android.Manifest
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -15,6 +16,9 @@ import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.tensorflow.lite.Interpreter
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -45,17 +49,32 @@ class MicListenService : Service() {
     private var detecting = true
     override fun onCreate() {
         super.onCreate()
-
         if (!hasAudioPermission()) {
             stopSelf()
             return
         }
-
-        loadModel()
-        loadLabelIndices()
-        startForegroundNotification()
-        startListening()
     }
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        startForegroundNotification()
+
+        if (!checkMicPermissions()) {
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        // MUST be first
+
+        // load model in background
+        CoroutineScope(Dispatchers.IO).launch {
+            loadModel()
+            loadLabelIndices()
+            startListening()
+        }
+
+
+        return START_STICKY
+    }
+
 
     // ---------------- MODEL ----------------
 
@@ -127,6 +146,12 @@ class MicListenService : Service() {
             AudioFormat.ENCODING_PCM_16BIT,
             bufferSize
         )
+
+        if (audioRecord?.state != AudioRecord.STATE_INITIALIZED) {
+            Log.e("MicListenService", "AudioRecord initialization failed")
+            stopSelf()
+            return
+        }
 
         audioRecord?.startRecording()
         running = true
@@ -306,6 +331,18 @@ class MicListenService : Service() {
 
     // ---------------- LIFECYCLE ----------------
 
+
+
+    private fun checkMicPermissions(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            return ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED &&
+                    ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE_MICROPHONE) == PackageManager.PERMISSION_GRANTED
+        }
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+    }
+
+
+    override fun onBind(intent: Intent?): IBinder? = null
     override fun onDestroy() {
         running = false
         audioRecord?.stop()
@@ -314,10 +351,4 @@ class MicListenService : Service() {
         super.onDestroy()
 
     }
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForegroundNotification()
-        return START_STICKY
-    }
-
-    override fun onBind(intent: Intent?): IBinder? = null
 }

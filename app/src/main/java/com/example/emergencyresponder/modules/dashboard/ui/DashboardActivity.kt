@@ -21,26 +21,13 @@ class DashboardActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDashboardBinding
     private val REQUEST_NOTIFICATION_PERMISSION = 100
-    private val micPermissionRequest =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            val granted =
-                permissions[Manifest.permission.RECORD_AUDIO] == true &&
-                        (Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
-                                permissions[Manifest.permission.FOREGROUND_SERVICE_MICROPHONE] == true)
 
-            if (granted) {
-              //  startMicService()
-            } else {
-                Toast.makeText(this, "Mic permission required", Toast.LENGTH_SHORT).show()
-            }
-        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val intent = Intent(this, MicListenService::class.java)
-        ContextCompat.startForegroundService(this, intent)
+
 
         startCrashDetectionService()
         ensureNotificationPermission()
@@ -50,7 +37,7 @@ class DashboardActivity : AppCompatActivity() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 permissions.add(Manifest.permission.FOREGROUND_SERVICE_MICROPHONE)
             }
-            micPermissionRequest.launch(permissions.toTypedArray())
+
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
