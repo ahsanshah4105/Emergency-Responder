@@ -53,12 +53,6 @@ class DashboardActivity : AppCompatActivity() {
         ContextCompat.startForegroundService(this, intent)
     }
 
-//    fun startMicService() {
-//        val intent = Intent(this, MicListenService::class.java)
-//        ContextCompat.startForegroundService(this, intent)
-//        Toast.makeText(this, "Mic service started", Toast.LENGTH_SHORT).show()
-//    }
-
     private fun ensureNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(

@@ -30,5 +30,22 @@
     <color name="switch_track_green">#4CD964</color>
     <color name="edit_bg_grey">#F0F0F0</color>
 
+        <color name="bg_color">#F8F9FA</color>
+        <color name="text_dark">#1A1A1A</color>
+        <color name="text_grey">#757575</color>
+        <color name="accent_green_light">#E0F7EA</color>
+        <color name="accent_green_text">#00C853</color>
+        <color name="card_white">#FFFFFF</color>
 
+        <color name="icon_bg_blue">#E3F2FD</color>
+        <color name="icon_bg_purple">#F3E5F5</color>
+        <color name="icon_bg_orange">#FFF3E0</color>
+
+        <color name="icon_blue">#2979FF</color>
+        <color name="icon_purple">#AA00FF</color>
+        <color name="icon_orange">#FF9100</color>
+
+        <color name="sos_red">#FF453A</color>
+        <color name="sos_ripple_1">#FFCDD2</color>
+        <color name="sos_ripple_2">#FFEBEE</color>
 </resources>

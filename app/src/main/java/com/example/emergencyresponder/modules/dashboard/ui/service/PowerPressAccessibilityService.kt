@@ -2,11 +2,10 @@ package com.example.emergencyresponder.modules.dashboard.ui.service
 
 
 import android.accessibilityservice.AccessibilityService
-import android.view.accessibility.AccessibilityEvent
-import android.os.SystemClock
 import android.content.Intent
+import android.os.SystemClock
+import android.view.accessibility.AccessibilityEvent
 import androidx.core.content.ContextCompat
-import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
 
 class PowerPressAccessibilityService : AccessibilityService() {
 

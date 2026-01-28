@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -73,11 +74,10 @@ class EmergencyContactFragment : Fragment() {
 
     private fun showAddDialog(uid: String) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_add_contact, null)
-
         val name = dialogView.findViewById<EditText>(R.id.contactName)
         val phone = dialogView.findViewById<EditText>(R.id.emergency_Contact_Phone)
 
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Add Emergency Contact")
             .setView(dialogView)
             .setPositiveButton("Add") { _, _ ->
@@ -88,7 +88,13 @@ class EmergencyContactFragment : Fragment() {
                 viewModel.addContact(uid, contact)
             }
             .setNegativeButton("Cancel", null)
-            .show()
+            .create() // Use .create() instead of .show() immediately
+
+        dialog.show()
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(requireContext(), R.color.primaryColor))
+
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(requireContext(), R.color.text_grey))
     }
 
     private fun setupRecycler() {
