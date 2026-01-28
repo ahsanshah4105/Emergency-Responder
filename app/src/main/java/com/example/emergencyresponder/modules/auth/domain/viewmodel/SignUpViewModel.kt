@@ -100,7 +100,14 @@ class SignUpViewModel(
         viewModelScope.launch {
             _state.value = AuthState.Loading
             try {
-                val user = User(name ,email, password, confirmPassword, phone, emergencyName)
+                val user = User(
+                    uid = "",
+                    name = name,
+                    email = email,
+                    phone = phone,
+                    emergencyContacts = emptyList()
+                )
+
                 signUpUseCase(email, password, user)
                 _state.value = AuthState.Success
                 _route.value = AppRoute.Login

@@ -18,7 +18,7 @@ class AuthRemoteDataSource(
 
     suspend fun sendEmailVerification() {
         val user = auth.currentUser
-        user?.sendEmailVerification()?.await() ?: throw Exception("No user logged in to verify")
+        user?.sendEmailVerification()?.await() ?: throw Exception("Verification Link has been sent to your email. Please verify your email to login.")
     }
 
     suspend fun sendPasswordResetEmail(email: String) =

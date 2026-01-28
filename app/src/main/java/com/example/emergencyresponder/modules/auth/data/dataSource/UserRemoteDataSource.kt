@@ -9,7 +9,7 @@ class UserRemoteDataSource(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 ) {
     suspend fun saveUser(uid: String, user: User) {
-        firestore.collection("Users")
+        firestore.collection("users")
             .document(uid)
             .set(user)
             .await()
