@@ -13,12 +13,19 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.example.emergencyresponder.R
 import com.example.emergencyresponder.databinding.FragmentSafetyDashboardBinding
+import com.example.emergencyresponder.modules.dashboard.data.model.DashboardStatus
 import com.example.emergencyresponder.modules.dashboard.domain.viewmodel.SafetyDashboardViewModel
 import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
 import com.example.emergencyresponder.modules.dashboard.ui.service.MicListenService
 import com.example.emergencyresponder.modules.dashboard.ui.service.PowerPressAccessibilityService
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+
+
+
 
 class SafetyDashboardFragment : Fragment() {
 
@@ -26,10 +33,7 @@ class SafetyDashboardFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: SafetyDashboardViewModel by viewModels()
-
     private val REQUEST_NOTIFICATION_PERMISSION = 100
-    private val REQUEST_MIC_PERMISSION = 101
-
 
     private val micPermissionRequest =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
@@ -42,11 +46,12 @@ class SafetyDashboardFragment : Fragment() {
                 val intent = Intent(requireContext(), MicListenService::class.java)
                 ContextCompat.startForegroundService(requireContext(), intent)
                 Toast.makeText(requireContext(), "Mic permission granted", Toast.LENGTH_SHORT).show()
+                viewModel.updateAudioStatus(true)
             } else {
                 Toast.makeText(requireContext(), "Mic permission required", Toast.LENGTH_SHORT).show()
+                viewModel.updateAudioStatus(false)
             }
         }
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,14 +60,21 @@ class SafetyDashboardFragment : Fragment() {
     ): View {
         _binding = FragmentSafetyDashboardBinding.inflate(inflater, container, false)
 
+        binding.itemAudio.setOnClickListener { requestMicPermission() }
+
         binding.itemSnatch.setOnClickListener {
-            if (!isAccessibilityServiceEnabled()) {
+            val enabled = isAccessibilityServiceEnabled()
+            viewModel.updateSnatchStatus(enabled)
+            if (!enabled) {
                 Toast.makeText(requireContext(), "Please enable Emergency Responder in Accessibility Settings", Toast.LENGTH_LONG).show()
                 startActivity(Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))
             } else {
                 Toast.makeText(requireContext(), "Snatch Guard is Active", Toast.LENGTH_SHORT).show()
             }
         }
+
+        binding.capsuleSystem.setOnClickListener { ensureNotificationPermission() }
+
         return binding.root
     }
 
@@ -71,43 +83,43 @@ class SafetyDashboardFragment : Fragment() {
 
         startCrashDetectionService()
         ensureNotificationPermission()
-
-        // Initial check
-        updateIndicators()
-
-        binding.itemAudio.setOnClickListener {
-            val permissions = mutableListOf(Manifest.permission.RECORD_AUDIO)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                permissions.add(Manifest.permission.FOREGROUND_SERVICE_MICROPHONE)
+        updateSystemStatus()
+        lifecycleScope.launch {
+            viewModel.dashboardStatus.collectLatest { status ->
+                updateIndicators(status)
             }
-            micPermissionRequest.launch(permissions.toTypedArray())
         }
-
-        binding.capsuleSystem.setOnClickListener { ensureNotificationPermission() }
     }
 
-    // Call this whenever you want to refresh the UI (e.g., in onResume)
-    private fun updateIndicators() {
-        // --- 1. Audio Check ---
-        val hasMic = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
-        binding.dotAudio.setBackgroundResource(if (hasMic) R.drawable.circle_indicator_green else R.drawable.circle_indicator_red)
+    private fun requestMicPermission() {
+        val permissions = mutableListOf(Manifest.permission.RECORD_AUDIO)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) permissions.add(Manifest.permission.FOREGROUND_SERVICE_MICROPHONE)
+        micPermissionRequest.launch(permissions.toTypedArray())
+    }
 
-        // --- 2. Crash Check (Critical for System Status) ---
+    private fun updateSystemStatus() {
+        val hasMic = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
         val hasLocation = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
         val hasNotif = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
         } else true
-
-        binding.dotCrash.setBackgroundResource(if (hasLocation && hasNotif) R.drawable.circle_indicator_green else R.drawable.circle_indicator_red)
-
-        // --- 3. Snatch Check ---
         val hasAccessibility = isAccessibilityServiceEnabled()
-        binding.dotSnatch.setBackgroundResource(if (hasAccessibility) R.drawable.circle_indicator_green else R.drawable.circle_indicator_red)
 
-        // --- 4. TOP CAPSULE SYSTEM STATUS ---
-        // If Notifications or Location are missing, the system is NOT fully active
-        if (hasNotif && hasLocation) {
-            // Active State
+        viewModel.updateStatus(
+            hasMic = hasMic,
+            hasLocation = hasLocation,
+            hasNotif = hasNotif,
+            hasAccessibility = hasAccessibility
+        )
+    }
+
+    private fun updateIndicators(status: DashboardStatus) {
+        binding.dotAudio.setBackgroundResource(if (status.audio) R.drawable.circle_indicator_green else R.drawable.circle_indicator_red)
+        binding.dotCrash.setBackgroundResource(if (status.crash) R.drawable.circle_indicator_green else R.drawable.circle_indicator_red)
+        binding.dotSnatch.setBackgroundResource(if (status.snatch) R.drawable.circle_indicator_green else R.drawable.circle_indicator_red)
+
+        // Capsule system status
+        if (status.crash) {
             binding.capsuleSystem.setBackgroundResource(R.drawable.bg_capsule_green)
             binding.capsuleSystem.findViewById<View>(R.id.indicatorDot).setBackgroundResource(R.drawable.circle_indicator_green)
             binding.capsuleSystem.findViewById<android.widget.TextView>(R.id.tvSystemStatus).apply {
@@ -115,8 +127,7 @@ class SafetyDashboardFragment : Fragment() {
                 setTextColor(ContextCompat.getColor(requireContext(), R.color.accent_green_text))
             }
         } else {
-            // Inactive/Warning State
-            binding.capsuleSystem.setBackgroundResource(R.drawable.bg_capsule_red) // You need to create this drawable
+            binding.capsuleSystem.setBackgroundResource(R.drawable.bg_capsule_red)
             binding.capsuleSystem.findViewById<View>(R.id.indicatorDot).setBackgroundResource(R.drawable.circle_indicator_red)
             binding.capsuleSystem.findViewById<android.widget.TextView>(R.id.tvSystemStatus).apply {
                 text = "NOT ACTIVE"
@@ -124,29 +135,11 @@ class SafetyDashboardFragment : Fragment() {
             }
         }
     }
-    // Helper to check if your Accessibility Service is actually running
+
     private fun isAccessibilityServiceEnabled(): Boolean {
         val expectedComponentName = android.content.ComponentName(requireContext(), PowerPressAccessibilityService::class.java)
         val enabledServices = android.provider.Settings.Secure.getString(requireContext().contentResolver, android.provider.Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)
         return enabledServices?.contains(expectedComponentName.flattenToString()) == true
-    }
-
-    override fun onResume() {
-        super.onResume()
-        updateIndicators() // Refresh when user returns from settings
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        if (requestCode == REQUEST_NOTIFICATION_PERMISSION) {
-            // IMPORTANT: Update UI immediately after user interacts with dialog
-            updateIndicators()
-
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startCrashDetectionService()
-            }
-        }
     }
 
     private fun startCrashDetectionService() {
@@ -156,27 +149,15 @@ class SafetyDashboardFragment : Fragment() {
 
     private fun ensureNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val status = ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.POST_NOTIFICATIONS
-            )
-
+            val status = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS)
             if (status == PackageManager.PERMISSION_DENIED) {
-                // Check if user previously denied permanently
                 if (shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
-                    // User denied once, show the system dialog again
-                    requestPermissions(
-                        arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                        REQUEST_NOTIFICATION_PERMISSION
-                    )
+                    requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), REQUEST_NOTIFICATION_PERMISSION)
                 } else {
-                    // Either first time OR permanently denied
-                    // We try to request, but if the dialog doesn't show, we send to settings
                     val intent = Intent().apply {
                         action = android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS
                         putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, requireContext().packageName)
                     }
-
                     Toast.makeText(requireContext(), "Please enable notifications for full protection", Toast.LENGTH_LONG).show()
                     startActivity(intent)
                 }
@@ -184,6 +165,10 @@ class SafetyDashboardFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        updateSystemStatus() // refresh when returning from settings
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
