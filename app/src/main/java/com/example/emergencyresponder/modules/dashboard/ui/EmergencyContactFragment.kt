@@ -59,7 +59,6 @@ class EmergencyContactFragment : Fragment() {
 
         val uid = auth.currentUser?.uid ?: return
 
-        // Observe contacts from ViewModel
         viewModel.observeContacts(uid)
         viewModel.contacts.observe(viewLifecycleOwner) { list ->
             contactsList.clear()

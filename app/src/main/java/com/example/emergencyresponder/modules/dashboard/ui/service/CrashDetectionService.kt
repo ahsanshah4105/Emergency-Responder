@@ -4,6 +4,7 @@ import Sensitivity
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import androidx.core.content.ContextCompat
 import com.example.emergencyresponder.modules.dashboard.data.ml.TFLiteCrashMlAnalyzer
 import com.example.emergencyresponder.modules.dashboard.data.model.DetectionResult
 import com.example.emergencyresponder.modules.dashboard.data.sensor.AndroidSensorProvider
@@ -12,6 +13,7 @@ import com.example.emergencyresponder.modules.dashboard.domain.engine.CrashDetec
 import com.example.emergencyresponder.modules.dashboard.domain.engine.FeatureExtractor
 import com.example.emergencyresponder.modules.dashboard.domain.notifier.AlertNotifier
 import com.example.emergencyresponder.modules.dashboard.domain.notifier.AndroidAlertNotifier
+import com.example.emergencyresponder.modules.dashboard.domain.notifier.VoiceAlertManager
 import com.example.emergencyresponder.modules.dashboard.domain.useCase.CrashDetectionUseCase
 
 
@@ -22,12 +24,15 @@ class CrashDetectionService : Service() {
     private lateinit var engine: CrashDetectionEngine
     private lateinit var notifier: AlertNotifier
 
+    private lateinit var voiceManager: VoiceAlertManager
+
+
     override fun onCreate() {
         super.onCreate()
 
         sensorProvider = AndroidSensorProvider(this)
         notifier = AndroidAlertNotifier(this)
-
+        voiceManager = VoiceAlertManager(this)
         engine = CrashDetectionEngine(
             mlAnalyzer = TFLiteCrashMlAnalyzer(this),
             useCase = CrashDetectionUseCase(Sensitivity.HIGH)
@@ -39,8 +44,19 @@ class CrashDetectionService : Service() {
             val result = engine.evaluate(state, features)
 
             when (result) {
-                DetectionResult.Crash -> notifier.notifyCrash()
-                DetectionResult.Snatch -> notifier.notifySnatch()
+                DetectionResult.Crash -> {
+
+                    // ✅ Speak + Countdown
+                    voiceManager.startCrashCountdown {
+
+                        // After countdown ends → Notify crash
+                        notifier.notifyCrash()
+                    }
+                }
+                DetectionResult.Snatch -> {
+                    voiceManager.speak("Phone snatching detected!")
+                    notifier.notifySnatch()
+                }
                 DetectionResult.None -> Unit
             }
         }
@@ -51,6 +67,7 @@ class CrashDetectionService : Service() {
 
     override fun onDestroy() {
         sensorProvider.stop()
+        voiceManager.shutdown()
         super.onDestroy()
     }
 
@@ -78,6 +95,22 @@ class CrashDetectionService : Service() {
             .build()
 
         startForeground(1, notification)
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
+        val triggeredByPower = intent?.getBooleanExtra("TRIPLE_POWER_PRESS", false) ?: false
+
+        if (triggeredByPower) {
+
+            voiceManager.speak("Emergency shortcut activated.")
+
+            voiceManager.startCrashCountdown {
+                notifier.notifyCrash()
+            }
+        }
+
+        return START_STICKY
     }
 
 }
