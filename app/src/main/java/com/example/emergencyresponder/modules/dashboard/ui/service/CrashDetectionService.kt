@@ -5,6 +5,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import androidx.core.content.ContextCompat
+import com.example.emergencyresponder.core.utils.SOSUtils
 import com.example.emergencyresponder.modules.dashboard.data.ml.TFLiteCrashMlAnalyzer
 import com.example.emergencyresponder.modules.dashboard.data.model.DetectionResult
 import com.example.emergencyresponder.modules.dashboard.data.sensor.AndroidSensorProvider
@@ -24,7 +25,7 @@ class CrashDetectionService : Service() {
     private lateinit var engine: CrashDetectionEngine
     private lateinit var notifier: AlertNotifier
 
-    private lateinit var voiceManager: VoiceAlertManager
+    lateinit var voiceManager: VoiceAlertManager
 
 
     override fun onCreate() {
@@ -43,22 +44,27 @@ class CrashDetectionService : Service() {
 
             val result = engine.evaluate(state, features)
 
-            when (result) {
-                DetectionResult.Crash -> {
+            sensorProvider.start { state ->
+                val features = featureExtractor.extract(state) ?: return@start
+                val result = engine.evaluate(state, features)
 
-                    // ✅ Speak + Countdown
-                    voiceManager.startCrashCountdown {
-
-                        // After countdown ends → Notify crash
+                when (result) {
+                    DetectionResult.Crash -> {
                         notifier.notifyCrash()
+
+                        // 2️⃣ Start voice countdown asynchronously
+                        voiceManager.startCrashCountdown {
+                            SOSUtils.sendSOSOnWhatsApp(this, "+923068988678") // send SOS automatically
+                        }
                     }
+                    DetectionResult.Snatch -> {
+                        voiceManager.speak("Phone snatching detected!")
+                        notifier.notifySnatch()
+                    }
+                    DetectionResult.None -> Unit
                 }
-                DetectionResult.Snatch -> {
-                    voiceManager.speak("Phone snatching detected!")
-                    notifier.notifySnatch()
-                }
-                DetectionResult.None -> Unit
             }
+
         }
 
 

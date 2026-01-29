@@ -1,11 +1,13 @@
 package com.example.emergencyresponder.modules.dashboard.ui
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
@@ -15,7 +17,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.emergencyresponder.R
+import com.example.emergencyresponder.core.utils.SOSUtils
 import com.example.emergencyresponder.databinding.FragmentSafetyDashboardBinding
+import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
 import com.example.emergencyresponder.modules.dashboard.data.model.DashboardStatus
 import com.example.emergencyresponder.modules.dashboard.domain.viewmodel.SafetyDashboardViewModel
 import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
@@ -31,6 +35,7 @@ class SafetyDashboardFragment : Fragment() {
 
     private var _binding: FragmentSafetyDashboardBinding? = null
     private val binding get() = _binding!!
+    private var sosRunnable: Runnable? = null
 
     private val viewModel: SafetyDashboardViewModel by viewModels()
     private val REQUEST_NOTIFICATION_PERMISSION = 100
@@ -72,6 +77,59 @@ class SafetyDashboardFragment : Fragment() {
                 Toast.makeText(requireContext(), "Snatch Guard is Active", Toast.LENGTH_SHORT).show()
             }
         }
+
+
+        binding.sendAlert.setOnTouchListener { v, event ->
+
+            when (event.action) {
+
+                MotionEvent.ACTION_DOWN -> {
+
+                    // 🔥 Scale button slightly bigger
+                    v.animate()
+                        .scaleX(1.1f)
+                        .scaleY(1.1f)
+                        .setDuration(200)
+                        .start()
+
+                    // Start 3-second hold timer
+                    sosRunnable = Runnable {
+
+                        Toast.makeText(requireContext(), "Fetching contacts...", Toast.LENGTH_SHORT).show()
+
+                        viewModel.fetchEmergencyContacts(
+                            onResult = { contacts ->
+                                showContactsDialog(contacts)
+                            },
+                            onError = {
+                                Toast.makeText(requireContext(), "Failed to fetch contacts", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    }
+
+                    v.postDelayed(sosRunnable!!, 3000) // ⏳ 3 seconds hold
+                }
+
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL -> {
+
+                    // Reset button size if user releases early
+                    v.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(200)
+                        .start()
+
+                    // Cancel SOS trigger if not completed
+                    sosRunnable?.let { v.removeCallbacks(it) }
+                }
+            }
+
+            true
+        }
+
+
+
 
         binding.capsuleSystem.setOnClickListener { ensureNotificationPermission() }
 
@@ -168,6 +226,28 @@ class SafetyDashboardFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         updateSystemStatus() // refresh when returning from settings
+    }
+    private fun showContactsDialog(contacts: List<EmergencyContact>) {
+
+        if (contacts.isEmpty()) {
+            Toast.makeText(requireContext(), "No emergency contacts found", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Send SOS Alert")
+            .setMessage("Are you sure you want to send SOS to ALL emergency contacts?")
+            .setPositiveButton("Yes") { _, _ ->
+
+                contacts.forEach {
+                    SOSUtils.sendSOSOnWhatsApp(requireContext(), it.phone)
+                }
+
+                Toast.makeText(requireContext(), "Sending SOS to all contacts...", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+
     }
 
     override fun onDestroyView() {

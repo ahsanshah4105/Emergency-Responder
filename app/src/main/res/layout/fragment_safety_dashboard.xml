@@ -230,6 +230,7 @@
             android:background="@drawable/circle_stroke_ripple" />
 
         <TextView
+            android:id="@+id/sendAlert"
             android:layout_width="160dp"
             android:layout_height="160dp"
             android:layout_gravity="center"
