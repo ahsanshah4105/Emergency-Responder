@@ -1,4 +1,4 @@
-package com.example.emergencyresponder.modules.dashboard.data.sensor
+package com.example.emergencyresponder.modules.dashboard.data.provider
 
 import android.content.Context
 import android.hardware.Sensor
@@ -6,6 +6,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import com.example.emergencyresponder.modules.dashboard.data.model.SensorState
+import com.example.emergencyresponder.modules.dashboard.domain.repository.SensorProvider
 import kotlin.math.sqrt
 
 class AndroidSensorProvider(

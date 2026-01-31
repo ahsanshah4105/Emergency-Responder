@@ -9,6 +9,7 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaPlayer
 import android.media.MediaRecorder
+import android.media.audiofx.NoiseSuppressor
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
@@ -16,6 +17,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import com.example.emergencyresponder.modules.dashboard.domain.notifier.VoiceAlertManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,19 +33,20 @@ class MicListenService : Service() {
     private var audioRecord: AudioRecord? = null
     private var running = false
     private lateinit var interpreter: Interpreter
+    private lateinit var voiceManager: VoiceAlertManager
 
     private val sampleRate = 16000
     private val frameSize = 15600 // YAMNet input size (0.975 sec)
 
     private var clapIndex = -1
     private var whistleIndex = -1
-    private val windowSize = 4
+    private val windowSize = 8
     private val clapWindow = ArrayDeque<Float>()
     private val whistleWindow = ArrayDeque<Float>()
 
     private var clapStartTime = 0L
     private var whistleStartTime = 0L
-    private val stableDuration = 2000L  // 2 seconds
+    private val stableDuration = 1000L  // 2 seconds
 
     // <-- ADD THIS FLAG
     private var detecting = true
@@ -53,10 +56,14 @@ class MicListenService : Service() {
             stopSelf()
             return
         }
+        voiceManager = VoiceAlertManager(this)
+
+
     }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForegroundNotification()
 
+        Log.d("MicListenService", "✅ Service Started Running")
+        startForegroundNotification()
         if (!checkMicPermissions()) {
             stopSelf()
             return START_NOT_STICKY
@@ -147,6 +154,11 @@ class MicListenService : Service() {
             bufferSize
         )
 
+        if (NoiseSuppressor.isAvailable()) {
+            NoiseSuppressor.create(audioRecord!!.audioSessionId)
+        }
+
+
         if (audioRecord?.state != AudioRecord.STATE_INITIALIZED) {
             Log.e("MicListenService", "AudioRecord initialization failed")
             stopSelf()
@@ -172,6 +184,17 @@ class MicListenService : Service() {
 
                     // <-- SKIP DETECTION WHEN SIREN IS PLAYING
                     if (!detecting) continue
+                    val rms = calculateRMS(audioBuffer)
+
+                    Log.d("MicListenService", "RMS = $rms")
+
+// Ignore only very silent frames
+                    if (rms < 600) {
+                        Log.d("MicListenService", "Weak sound, skipping...")
+                        continue
+                    }
+
+
 
                     val inputTensor = Array(1) { FloatArray(frameSize) }
                     for (i in 0 until frameSize) {
@@ -195,8 +218,13 @@ class MicListenService : Service() {
                     val clapAvg = clapWindow.average().toFloat()
                     val whistleAvg = whistleWindow.average().toFloat()
 
-                    val clapDetected = clapAvg > 0.15f && clapAvg > whistleAvg + 0.05f
-                    val whistleDetected = whistleAvg > 0.10f && whistleAvg > clapAvg + 0.05f
+
+
+                    // ✅ Fixed low threshold detection
+                    val clapDetected = clapAvg >= 0.05f
+                    val whistleDetected = whistleAvg >= 0.05f
+
+
 
                     val currentTime = System.currentTimeMillis()
 
@@ -233,6 +261,15 @@ class MicListenService : Service() {
             }
         }.start()
     }
+
+    private fun calculateRMS(buffer: ShortArray): Float {
+        var sum = 0.0
+        for (s in buffer) {
+            sum += s * s.toDouble()
+        }
+        return kotlin.math.sqrt(sum / buffer.size).toFloat()
+    }
+
     // ---------------- PERMISSIONS ----------------
 
     private fun hasAudioPermission(): Boolean {
@@ -320,16 +357,9 @@ class MicListenService : Service() {
     }
 
     private fun playSiren() {
-        val player = MediaPlayer.create(this, com.example.emergencyresponder.R.raw.siren)
-        player.start()
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            player.stop()
-            player.release()
-        }, 10000)
+        voiceManager.speak("Hi, I am here")
     }
 
-    // ---------------- LIFECYCLE ----------------
 
 
 
@@ -344,11 +374,18 @@ class MicListenService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
     override fun onDestroy() {
+        Log.d("MicListenService", "❌ Service Destroyed / Stopped")
+
         running = false
         audioRecord?.stop()
         audioRecord?.release()
         audioRecord = null
+        voiceManager.shutdown()
+
         super.onDestroy()
 
     }
 }
+
+
+

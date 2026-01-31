@@ -1,4 +1,4 @@
-package com.example.emergencyresponder.modules.dashboard.data.sensor
+package com.example.emergencyresponder.modules.dashboard.domain.repository
 
 import com.example.emergencyresponder.modules.dashboard.data.model.SensorState
 

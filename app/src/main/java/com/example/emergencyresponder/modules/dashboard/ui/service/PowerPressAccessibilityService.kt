@@ -28,7 +28,7 @@ class PowerPressAccessibilityService : AccessibilityService() {
             lastPressTime = currentTime
 
             // Triple press detected
-            if (pressCount == 3) {
+            if (pressCount == 5) {
                 pressCount = 0
                 triggerEmergency()
             }

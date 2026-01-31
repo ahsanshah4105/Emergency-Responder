@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -142,10 +143,30 @@ class SafetyDashboardFragment : Fragment() {
         startCrashDetectionService()
         ensureNotificationPermission()
         updateSystemStatus()
+
+
+        startMicServiceIfPermissionGranted() // ✅ ADD THIS
+
         lifecycleScope.launch {
             viewModel.dashboardStatus.collectLatest { status ->
                 updateIndicators(status)
             }
+        }
+    }
+    private fun startMicServiceIfPermissionGranted() {
+
+        val granted = ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (granted) {
+            val intent = Intent(requireContext(), MicListenService::class.java)
+            ContextCompat.startForegroundService(requireContext(), intent)
+
+            Log.d("SafetyDashboard", "✅ MicListenService started automatically")
+        } else {
+            Log.d("SafetyDashboard", "❌ Mic permission not granted yet")
         }
     }
 

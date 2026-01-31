@@ -12,24 +12,31 @@ class VoiceAlertManager(context: Context) : TextToSpeech.OnInitListener {
     var remainingSeconds: Long = 60 // default countdown
     private var timer: CountDownTimer? = null
 
+    private var tts: TextToSpeech? = null
     private var isReady = false
-    private var tts: TextToSpeech = TextToSpeech(context, TextToSpeech.OnInitListener { status ->
-        if (status == TextToSpeech.SUCCESS) {
-            tts.language = Locale.US
-            tts.setSpeechRate(1.0f)
+
+    init {
+        tts = TextToSpeech(context) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                tts?.language = Locale.US
+                tts?.setSpeechRate(1.0f)
+                isReady = true
+            }
         }
-    })
+    }
+
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
-            tts.language = Locale.US
-            tts.setSpeechRate(1.0f)
+            tts?.language = Locale.US
+            tts?.setSpeechRate(1.0f)
             isReady = true
         }
     }
 
     fun speak(text: String) {
-        tts.stop()
-        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+        if (isReady) {
+            tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "VOICE_ALERT")
+        }
     }
     fun startCrashCountdown(onFinish: () -> Unit) {
         speak(
@@ -55,13 +62,9 @@ class VoiceAlertManager(context: Context) : TextToSpeech.OnInitListener {
         )
     }
 
-    fun cancel() {
-        tts.stop()
-        CrashCountdownManager.cancel()
-        speak("Okay! You are safe. Have a safe journey.")
-    }
+
     fun shutdown() {
-        tts.shutdown()
+        tts?.shutdown()
         timer?.cancel()
 
     }
