@@ -68,16 +68,38 @@ class SafetyDashboardFragment : Fragment() {
 
         binding.itemAudio.setOnClickListener { requestMicPermission() }
 
+//        binding.itemSnatch.setOnClickListener {
+//            val enabled = isAccessibilityServiceEnabled()
+//            viewModel.updateSnatchStatus(enabled)
+//            if (!enabled) {
+//                Toast.makeText(requireContext(), "Please enable Emergency Responder in Accessibility Settings", Toast.LENGTH_LONG).show()
+//                startActivity(Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))
+//            } else {
+//                Toast.makeText(requireContext(), "Snatch Guard is Active", Toast.LENGTH_SHORT).show()
+//            }
+//        }
+
         binding.itemSnatch.setOnClickListener {
-            val enabled = isAccessibilityServiceEnabled()
-            viewModel.updateSnatchStatus(enabled)
-            if (!enabled) {
-                Toast.makeText(requireContext(), "Please enable Emergency Responder in Accessibility Settings", Toast.LENGTH_LONG).show()
-                startActivity(Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))
+
+            if (!isAccessibilityServiceEnabled()) {
+
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Enable Snatch Guard")
+                    .setMessage(
+                        "To detect phone snatching, Emergency Responder needs Accessibility Permission.\n\n" +
+                                "Just tap Enable on the next screen."
+                    )
+                    .setPositiveButton("Enable Now") { _, _ ->
+                        openDirectAccessibilitySettings()
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+
             } else {
-                Toast.makeText(requireContext(), "Snatch Guard is Active", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Snatch Guard is Active ✅", Toast.LENGTH_SHORT).show()
             }
         }
+
 
 
         binding.sendAlert.setOnTouchListener { v, event ->
@@ -153,6 +175,8 @@ class SafetyDashboardFragment : Fragment() {
             }
         }
     }
+
+
     private fun startMicServiceIfPermissionGranted() {
 
         val granted = ContextCompat.checkSelfPermission(
@@ -175,6 +199,19 @@ class SafetyDashboardFragment : Fragment() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) permissions.add(Manifest.permission.FOREGROUND_SERVICE_MICROPHONE)
         micPermissionRequest.launch(permissions.toTypedArray())
     }
+
+    private fun openDirectAccessibilitySettings() {
+        val intent = Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
+
+        Toast.makeText(
+            requireContext(),
+            "Scroll down and enable Emergency Responder",
+            Toast.LENGTH_LONG
+        ).show()
+    }
+
 
     private fun updateSystemStatus() {
         val hasMic = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
