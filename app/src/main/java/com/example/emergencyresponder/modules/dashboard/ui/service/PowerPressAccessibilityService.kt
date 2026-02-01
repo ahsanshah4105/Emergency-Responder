@@ -3,48 +3,31 @@ package com.example.emergencyresponder.modules.dashboard.ui.service
 
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
-import android.os.SystemClock
+import com.example.emergencyresponder.modules.dashboard.domain.engine.PowerPressDetector
 import android.view.accessibility.AccessibilityEvent
-import androidx.core.content.ContextCompat
-
+import com.example.emergencyresponder.modules.dashboard.domain.useCase.TriggerEmergencyUseCase
+import com.example.emergencyresponder.modules.dashboard.data.notifierImpl.AndroidEmergencyTrigger
 class PowerPressAccessibilityService : AccessibilityService() {
 
-    private var pressCount = 0
-    private var lastPressTime = 0L
+    private val detector by lazy {
+
+        val trigger = AndroidEmergencyTrigger(applicationContext)
+        val useCase = TriggerEmergencyUseCase(trigger)
+
+        PowerPressDetector(
+            requiredPresses = 5,
+            maxDelay = 1000L
+        ) {
+            useCase.execute()
+        }
+    }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
 
-        // Detect screen ON/OFF events (Power button triggers these)
         if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-
-            val currentTime = SystemClock.elapsedRealtime()
-
-            // Reset counter if delay > 1 second
-            if (currentTime - lastPressTime > 1000) {
-                pressCount = 0
-            }
-
-            pressCount++
-            lastPressTime = currentTime
-
-            // Triple press detected
-            if (pressCount == 5) {
-                pressCount = 0
-                triggerEmergency()
-            }
+            detector.registerPress()
         }
     }
 
-    private fun triggerEmergency() {
-
-        val intent = Intent(this, CrashDetectionService::class.java).apply {
-            putExtra("TRIPLE_POWER_PRESS", true)
-        }
-
-        ContextCompat.startForegroundService(this, intent)
-    }
-
-    override fun onInterrupt() {
-        // Required override
-    }
+    override fun onInterrupt() {}
 }
