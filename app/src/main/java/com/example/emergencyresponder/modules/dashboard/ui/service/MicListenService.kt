@@ -228,21 +228,19 @@ class MicListenService : Service() {
 
                     val currentTime = System.currentTimeMillis()
 
-// clap stability timer
+
                     if (clapDetected) {
                         if (clapStartTime == 0L) clapStartTime = currentTime
                     } else {
                         clapStartTime = 0L
                     }
 
-// whistle stability timer
                     if (whistleDetected) {
                         if (whistleStartTime == 0L) whistleStartTime = currentTime
                     } else {
                         whistleStartTime = 0L
                     }
 
-// if stable for 2 seconds then trigger
                     val stableClap = clapStartTime != 0L && (currentTime - clapStartTime >= stableDuration)
                     val stableWhistle = whistleStartTime != 0L && (currentTime - whistleStartTime >= stableDuration)
 

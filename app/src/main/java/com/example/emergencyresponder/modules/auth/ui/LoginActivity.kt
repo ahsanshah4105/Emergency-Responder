@@ -19,6 +19,7 @@ import com.example.emergencyresponder.core.objects.SPreferenceManager
 import com.example.emergencyresponder.core.utils.ValidationUtils
 import com.example.emergencyresponder.databinding.ActivityLoginBinding
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
+import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.repository.LoginRepositoryImpl
 import com.example.emergencyresponder.modules.auth.domain.useCase.LoginUseCase
 import com.example.emergencyresponder.modules.auth.domain.viewModelFactory.LoginViewModelFactory
@@ -40,18 +41,19 @@ class LoginActivity : AppCompatActivity() {
 
         // Manual Injection (Consider using Hilt/Koin in the future)
         val authRemoteDataSource = AuthRemoteDataSource()
-        val repository = LoginRepositoryImpl(authRemoteDataSource)
+        val remoteDataSource = UserRemoteDataSource()
+        val repository = LoginRepositoryImpl(authRemoteDataSource,remoteDataSource)
         val useCase = LoginUseCase(repository)
         val factory = LoginViewModelFactory(useCase)
         viewModel = ViewModelProvider(this, factory)[LoginViewModel::class.java]
 
         setupValidationListeners()
         setupListeners()
-        setupObservers() // Consistently use one method for observers
+        setupObservers()
     }
 
     private fun setupObservers() {
-        // Observe Auth State (Loading, Success, Error)
+
         viewModel.state.observe(this) { state ->
             when (state) {
                 is AuthState.Loading -> {
