@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.emergencyresponder.R
+import com.example.emergencyresponder.core.objects.SPreferenceManager
 import com.example.emergencyresponder.core.utils.SOSUtils
 import com.example.emergencyresponder.databinding.FragmentSafetyDashboardBinding
 import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
@@ -37,10 +38,8 @@ class SafetyDashboardFragment : Fragment() {
     private var _binding: FragmentSafetyDashboardBinding? = null
     private val binding get() = _binding!!
     private var sosRunnable: Runnable? = null
-
     private val viewModel: SafetyDashboardViewModel by viewModels()
     private val REQUEST_NOTIFICATION_PERMISSION = 100
-
     private val micPermissionRequest =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
             val granted =
@@ -67,17 +66,8 @@ class SafetyDashboardFragment : Fragment() {
         _binding = FragmentSafetyDashboardBinding.inflate(inflater, container, false)
 
         binding.itemAudio.setOnClickListener { requestMicPermission() }
-
-//        binding.itemSnatch.setOnClickListener {
-//            val enabled = isAccessibilityServiceEnabled()
-//            viewModel.updateSnatchStatus(enabled)
-//            if (!enabled) {
-//                Toast.makeText(requireContext(), "Please enable Emergency Responder in Accessibility Settings", Toast.LENGTH_LONG).show()
-//                startActivity(Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS))
-//            } else {
-//                Toast.makeText(requireContext(), "Snatch Guard is Active", Toast.LENGTH_SHORT).show()
-//            }
-//        }
+        val userName = SPreferenceManager.getUserName()
+        binding.txtWelcome.text = "Welcome, ${userName ?: "User"}"
 
         binding.itemSnatch.setOnClickListener {
 

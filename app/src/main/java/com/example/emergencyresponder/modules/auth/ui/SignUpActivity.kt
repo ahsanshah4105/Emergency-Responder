@@ -105,17 +105,25 @@ class SignUpActivity : BaseActivity() {
     private fun setupListeners() {
         binding.signUptButton.setOnClickListener {
             binding.btnProgressBar.visibility = View.VISIBLE
-            val email = binding.emailEditText.text.toString()
-            val password = binding.newPassword.text.toString()
-            val confirmPassword = binding.confirmPassword.text.toString()
-            val name = binding.contactName.text.toString()
-            val phone = binding.emergencyContactPhone.text.toString()
+            val email = binding.emailEditText.text.toString().trim()
+            val password = binding.newPassword.text.toString().trim()
+            val confirmPassword = binding.confirmPassword.text.toString().trim()
 
-            if (!viewModel.validateInput(name, email, password, confirmPassword, name, phone)) {
+            val userName = binding.userNameEditText.text.toString().trim() // User's Name
+            val contactName = binding.contactName.text.toString().trim()   // Emergency Contact Name
+            val emergencyPhone = binding.emergencyContactPhone.text.toString().trim() // Emergency Phone
+            if (!viewModel.validateInput(userName, email, password, confirmPassword, contactName, emergencyPhone)) {
                 return@setOnClickListener
             }
 
-            viewModel.signUp(name, email, password, confirmPassword, phone, name)
+            viewModel.signUp(
+                userName = userName,
+                email = email,
+                password = password,
+                confirmPassword = confirmPassword,
+                emergencyPhone = emergencyPhone,
+                emergencyName = contactName
+            )
         }
 
 

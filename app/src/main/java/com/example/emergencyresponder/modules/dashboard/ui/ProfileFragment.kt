@@ -4,34 +4,54 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.emergencyresponder.R
-
+import androidx.fragment.app.Fragment
+import com.example.emergencyresponder.core.objects.SPreferenceManager
+import com.example.emergencyresponder.databinding.FragmentProfileBinding
+import com.example.emergencyresponder.modules.auth.ui.LoginActivity
 
 class ProfileFragment : Fragment() {
 
+    private var _binding: FragmentProfileBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        val view =  inflater.inflate(R.layout.fragment_profile, container, false)
-        val btnEnableSOS = view.findViewById<View>(R.id.btnEditProfile)
-        btnEnableSOS.setOnClickListener {
+    ): View {
+        _binding = FragmentProfileBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // ✅ FIXED: Use binding to access views
+        // Assuming your XML ID is btnEditProfile
+        binding.btnEditProfile.setOnClickListener {
             openAccessibilitySettings(requireContext())
         }
 
-        return  view
+        // Assuming your XML ID is btnLogout (Check your XML if it's logoutBtn or btnLogout)
+        binding.logoutBtn.setOnClickListener {
+            SPreferenceManager.logoutUser()
+            val intent = Intent(requireActivity(), LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            requireActivity().finish()
+        }
     }
 
-    fun openAccessibilitySettings(context: Context) {
+    private fun openAccessibilitySettings(context: Context) {
         val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         context.startActivity(intent)
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

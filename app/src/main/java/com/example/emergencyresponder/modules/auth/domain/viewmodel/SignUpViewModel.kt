@@ -8,6 +8,7 @@ import com.example.emergencyresponder.core.navigation.AppRoute
 import com.example.emergencyresponder.core.utils.ValidationUtils
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
+import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
 import com.example.emergencyresponder.modules.auth.data.model.User
 import com.example.emergencyresponder.modules.auth.data.repository.SignUpRepositoryImpl
 import com.example.emergencyresponder.modules.auth.domain.useCase.SignUpUseCase
@@ -90,24 +91,27 @@ class SignUpViewModel(
     }
 
     fun signUp(
-        name: String,
+        userName: String,
         email: String,
         password: String,
         confirmPassword: String,
-        phone: String,
+        emergencyPhone: String,
         emergencyName: String
     ) {
         viewModelScope.launch {
             _state.value = AuthState.Loading
             try {
+
+                val primaryContact = EmergencyContact(
+                    name = emergencyName,
+                    phone = emergencyPhone
+                )
                 val user = User(
                     uid = "",
-                    name = name,
+                    name = userName,
                     email = email,
-                    phone = phone,
-                    emergencyContacts = emptyList()
+                    emergencyContacts = listOf(primaryContact)
                 )
-
                 signUpUseCase(email, password, user)
                 _state.value = AuthState.Success
                 _route.value = AppRoute.Login

@@ -28,7 +28,7 @@ class SplashActivity : AppCompatActivity() {
 
         Handler(Looper.getMainLooper()).postDelayed({
             when {
-                SPreferenceManager.isUserLoggedIn() -> {
+                SPreferenceManager.isUserLoggedIn(true) -> {
                     AppNavigator.navigate(this, AppRoute.Dashboard)
                 }
                 SPreferenceManager.isOnboardingCompleted() -> {

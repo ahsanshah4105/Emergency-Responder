@@ -59,6 +59,7 @@
     <string name="if_you_do_not_respond_we_will_automatically_notify_your_emergency_contacts">If you don’t respond, we wil automatically notify your emergency contacts.</string>
     <string name="am_okay">I’m OK / Cancel Alert</string>
     <string name="send_alert">Send Alert Now</string>
+    <string name="logout">Logout</string>
 
 
     <string name="default_web_client_id">646296022035-5oqgl20lnqmbe56jnlkl9995m14i86fa.apps.googleusercontent.com </string>

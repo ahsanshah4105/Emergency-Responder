@@ -20,6 +20,7 @@ import com.example.emergencyresponder.core.utils.ValidationUtils
 import com.example.emergencyresponder.databinding.ActivityLoginBinding
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
+import com.example.emergencyresponder.modules.auth.data.model.User
 import com.example.emergencyresponder.modules.auth.data.repository.LoginRepositoryImpl
 import com.example.emergencyresponder.modules.auth.domain.useCase.LoginUseCase
 import com.example.emergencyresponder.modules.auth.domain.viewModelFactory.LoginViewModelFactory
@@ -33,6 +34,9 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private lateinit var viewModel: LoginViewModel
+
+    private lateinit var user: User
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +77,9 @@ class LoginActivity : AppCompatActivity() {
         // Observe Navigation/Routing
         viewModel.route.observe(this) { route ->
             if (route == AppRoute.Dashboard) {
+                // Ensure the flag is set (Redundant if Repo handles it, but safe to keep for logic checks)
                 SPreferenceManager.setUserLoggedIn(true)
+
                 AppNavigator.navigate(
                     context = this,
                     route = AppRoute.Dashboard,

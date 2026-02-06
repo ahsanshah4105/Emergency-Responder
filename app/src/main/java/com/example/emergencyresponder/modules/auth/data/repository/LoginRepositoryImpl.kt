@@ -1,5 +1,6 @@
 package com.example.emergencyresponder.modules.auth.data.repository
 
+import com.example.emergencyresponder.core.objects.SPreferenceManager
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
@@ -12,9 +13,32 @@ class LoginRepositoryImpl(
     private val userRemoteDataSource: UserRemoteDataSource
 ) : LoginRepository {
 
-    override suspend fun login(email: String, password: String): FirebaseUser {
+// In modules/auth/data/repository/LoginRepositoryImpl.kt
+
+    override suspend fun login(email: String, password: String): User {
+        // 1. Authenticate with Firebase
         val result = authDataSource.loginUser(email, password)
-        val user = result.user ?: throw Exception("User not found")
+        val firebaseUser = result.user ?: throw Exception("Login failed")
+
+        // 2. CHECK VERIFICATION HERE
+        if (!firebaseUser.isEmailVerified) {
+            // Optional: Logout immediately so they aren't stuck in a half-logged-in state
+            authDataSource.logout()
+            throw Exception("Email not verified. Please check your inbox.")
+        }
+
+        // 3. Fetch User Details from Firestore
+        // (Assuming you added getUser() to UserRemoteDataSource as discussed)
+        val user = userRemoteDataSource.getUser(firebaseUser.uid)
+       // userRemoteDataSource.saveUserOnlyIfNew(user)
+
+        // 4. Save to SharedPreferences
+        SPreferenceManager.saveUserSession(
+            uid = user.uid,
+            name = user.name,
+            email = user.email,
+        )
+
         return user
     }
     override suspend fun loginWithGoogle(idToken: String): User {
@@ -26,11 +50,15 @@ class LoginRepositoryImpl(
 
         val user = User(
             uid = firebaseUser.uid,
+            name = firebaseUser.displayName ?: "Google User",
             email = firebaseUser.email ?: "",
-            name = firebaseUser.displayName ?: ""
         )
         userRemoteDataSource.saveUserOnlyIfNew(user)
-
+        SPreferenceManager.saveUserSession(
+            uid = user.uid,
+            name = user.name,
+            email = user.email,
+        )
         return user
     }
 
