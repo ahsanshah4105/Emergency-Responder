@@ -26,7 +26,7 @@ class CrashDetectionService : Service() {
     private lateinit var notifier: AlertNotifier
     lateinit var voiceManager: VoiceAlertManager
 
-    // ✅ Prevent multiple crash triggers
+    private val EMERGENCY_NUMBER = "+923199596412"
     private var crashAlreadyDetected = false
 
     override fun onCreate() {
@@ -76,7 +76,12 @@ class CrashDetectionService : Service() {
 
                         SOSUtils.sendSOSViaSMS(
                             this@CrashDetectionService,
-                            "03068988678"
+                            EMERGENCY_NUMBER
+                        )
+
+                        SOSUtils.sendSOSViaGreenApi(
+                            this@CrashDetectionService,
+                            EMERGENCY_NUMBER
                         )
 
                         // Optional WhatsApp fallback
@@ -109,7 +114,13 @@ class CrashDetectionService : Service() {
 
                 SOSUtils.sendSOSViaSMS(
                     this@CrashDetectionService,
-                    "03068988678"
+                    EMERGENCY_NUMBER
+                )
+
+                // 2. Send WhatsApp via Green API (🔥 NEW ADDED)
+                SOSUtils.sendSOSViaGreenApi(
+                    this@CrashDetectionService,
+                    EMERGENCY_NUMBER
                 )
             }
         }

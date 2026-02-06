@@ -9,7 +9,7 @@ import java.util.Locale
 class VoiceAlertManager(context: Context) : TextToSpeech.OnInitListener {
 
     //private var tts: TextToSpeech = TextToSpeech(context, this)
-    var remainingSeconds: Long = 60 // default countdown
+    var remainingSeconds: Long = 30 // default countdown
     private var timer: CountDownTimer? = null
 
     private var tts: TextToSpeech? = null
@@ -50,7 +50,7 @@ class VoiceAlertManager(context: Context) : TextToSpeech.OnInitListener {
                 remainingSeconds = sec
                 // 🔊 speak at important intervals
                 when (sec) {
-                    60L,50L,40L,30L,20L,10L -> speak("$sec seconds remaining")
+                    20L,10L -> speak("$sec seconds remaining")
                     in 1..5 -> speak(sec.toString())
                 }
             },
