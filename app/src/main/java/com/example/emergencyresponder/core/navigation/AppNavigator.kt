@@ -25,7 +25,11 @@ object AppNavigator {
             AppRoute.Dashboard -> Intent(context, DashboardActivity::class.java)
             AppRoute.TimeStamp -> Intent(context, TimeStampActivity::class.java)
             AppRoute.Onboarding -> Intent(context, OnboardingActivity::class.java)
-        }
+            AppRoute.AddEmergencyContact -> {
+                Intent(context, DashboardActivity::class.java).apply {
+                    putExtra("NAV_DESTINATION", "SAFETY_FRAGMENT")
+                }
+            }        }
 
         if (context !is Activity) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

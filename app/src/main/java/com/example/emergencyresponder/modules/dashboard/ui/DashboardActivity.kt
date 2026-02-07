@@ -39,8 +39,6 @@ class DashboardActivity : AppCompatActivity() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 permissions.add(Manifest.permission.FOREGROUND_SERVICE_MICROPHONE)
             }
-
-
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
 
@@ -48,6 +46,15 @@ class DashboardActivity : AppCompatActivity() {
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
         bottomNav.setupWithNavController(navController)
+        val destination = intent.getStringExtra("NAV_DESTINATION")
+
+        if (destination == "SAFETY_FRAGMENT") {
+            EmergencyContactFragment()
+        } else {
+            // Load default fragment (e.g., Home)
+            SafetyDashboardFragment()
+        }
+
     }
 
     private fun startCrashDetectionService() {
@@ -97,7 +104,6 @@ class DashboardActivity : AppCompatActivity() {
         ) {
             // Explain why it's needed
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.SEND_SMS)) {
-                // Professional explanation
                 AlertDialog.Builder(this)
                     .setTitle("Permission Needed")
                     .setMessage(
@@ -113,7 +119,6 @@ class DashboardActivity : AppCompatActivity() {
                     .setNegativeButton("Deny") { dialog, _ -> dialog.dismiss() }
                     .show()
             } else {
-                // First-time request
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.SEND_SMS),
@@ -122,5 +127,4 @@ class DashboardActivity : AppCompatActivity() {
             }
         }
     }
-
 }

@@ -9,7 +9,11 @@
         android:id="@+id/safetyDashboardFragment"
         android:name="com.example.emergencyresponder.modules.dashboard.ui.SafetyDashboardFragment"
         android:label="fragment_safety_dashboard"
-        tools:layout="@layout/fragment_safety_dashboard" />
+        tools:layout="@layout/fragment_safety_dashboard" >
+        <action
+            android:id="@+id/action_safetyDashboardFragment_to_emergencyContactFragment2"
+            app:destination="@id/emergencyContactFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/emergencyContactFragment"

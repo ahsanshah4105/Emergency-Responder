@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.example.emergencyresponder.R
 import com.example.emergencyresponder.core.objects.SPreferenceManager
 import com.example.emergencyresponder.core.utils.SOSUtils
@@ -27,6 +28,7 @@ import com.example.emergencyresponder.modules.dashboard.domain.viewmodel.SafetyD
 import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
 import com.example.emergencyresponder.modules.dashboard.ui.service.MicListenService
 import com.example.emergencyresponder.modules.dashboard.ui.service.PowerPressAccessibilityService
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -164,8 +166,39 @@ class SafetyDashboardFragment : Fragment() {
                 updateIndicators(status)
             }
         }
+        viewModel.checkEmergencyContactsExist()
+
+        viewModel.navigateToEmergencyContacts.observe(viewLifecycleOwner) { shouldNavigate ->
+            Log.d("SafetyFragment", "Observer triggered. Should Navigate: $shouldNavigate") // <--- ADD LOG
+
+            if (shouldNavigate) {
+                showEmptyContactsWarning()
+                viewModel.onNavigationHandled()
+            }
+        }
+    }
+    private fun showEmptyContactsWarning() {
+        Snackbar.make(binding.root, "⚠️ No Emergency Contacts Found!", Snackbar.LENGTH_INDEFINITE)
+            .setAction("ADD NOW") {
+                navigateToEmergencyContactFragment()
+            }
+            .setActionTextColor(ContextCompat.getColor(requireContext(), R.color.primaryColor)) // Use a red/alert color
+            .show()
+
     }
 
+    private fun navigateToEmergencyContactFragment() {
+        try {
+            findNavController().navigate(R.id.action_safetyDashboardFragment_to_emergencyContactFragment2)
+        } catch (e: Exception) {
+            // Fallback if action ID is different, try global ID
+            try {
+                findNavController().navigate(R.id.emergencyContactFragment)
+            } catch (e2: Exception) {
+                Log.e("Navigation", "Could not navigate: ${e2.message}")
+            }
+        }
+    }
 
     private fun startMicServiceIfPermissionGranted() {
 
@@ -273,7 +306,8 @@ class SafetyDashboardFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        updateSystemStatus() // refresh when returning from settings
+        updateSystemStatus()
+        viewModel.checkEmergencyContactsExist()
     }
     private fun showContactsDialog(contacts: List<EmergencyContact>) {
 
