@@ -53,6 +53,7 @@ class LoginRepositoryImpl(
 
             emergencyContacts = emptyList()
         )
+        SPreferenceManager.saveUserSession(uid = user.uid, name = user.name, email = user.email)
         userRemoteDataSource.saveUserOnlyIfNew(user)
 
         return user

@@ -74,29 +74,52 @@ class EmergencyContactFragment : Fragment() {
 
     private fun showAddDialog(uid: String) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_add_contact, null)
-        val name = dialogView.findViewById<EditText>(R.id.contactName)
-        val phone = dialogView.findViewById<EditText>(R.id.emergency_Contact_Phone)
+        val nameEt = dialogView.findViewById<EditText>(R.id.contactName)
+        val phoneEt = dialogView.findViewById<EditText>(R.id.emergency_Contact_Phone)
 
         val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Add Emergency Contact")
             .setView(dialogView)
-            .setPositiveButton("Add") { _, _ ->
-                val contact = EmergencyContact(
-                    name.text.toString().trim(),
-                    phone.text.toString().trim()
-                )
-                viewModel.addContact(uid, contact)
-            }
+            .setPositiveButton("Add", null)
             .setNegativeButton("Cancel", null)
-            .create() // Use .create() instead of .show() immediately
+            .create()
 
         dialog.show()
 
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(requireContext(), R.color.primaryColor))
+        val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+        val negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+        positiveButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.primaryColor))
+        negativeButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_grey))
 
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(requireContext(), R.color.text_grey))
+        positiveButton.setOnClickListener {
+            val nameText = nameEt.text.toString().trim()
+            val phoneText = phoneEt.text.toString().trim()
+            var isValid = true
+
+            if (nameText.isEmpty()) {
+                nameEt.error = "Name is required"
+                isValid = false
+            }
+
+            if (phoneText.isEmpty()) {
+                phoneEt.error = "Phone is required"
+                isValid = false
+            } else if (!com.example.emergencyresponder.core.utils.ValidationUtils.isPhoneValid(phoneText, "PK")) {
+                phoneEt.error = "Invalid phone format"
+                isValid = false
+            }
+
+            if (isValid) {
+                val contact = EmergencyContact(
+                    name = nameText,
+                    phone = phoneText
+                )
+                viewModel.addContact(uid, contact)
+
+                dialog.dismiss()
+            }
+        }
     }
-
     private fun setupRecycler() {
         adapter = EmergencyContactsAdapter(contactsList)
         binding.emergencyContactsList.layoutManager =

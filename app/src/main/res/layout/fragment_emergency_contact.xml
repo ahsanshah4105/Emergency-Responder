@@ -5,6 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_height="match_parent"
+    android:background="@color/app_background"
     tools:context=".modules.dashboard.ui.EmergencyContactFragment">
 
     <LinearLayout
@@ -27,23 +28,10 @@
             android:textSize="16sp"
             android:textColor="@color/black"/>
 
-        <Space
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"/>
 
-        <TextView
-            android:id="@+id/sellAllContacts"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/see_all"
-            android:fontFamily="@font/poppins_medium"
-            android:textSize="16sp"
-            android:textColor="@color/primaryBlue"/>
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:layout_margin="20dp"
         android:id="@+id/emergency_contacts_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
