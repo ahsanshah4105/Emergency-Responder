@@ -25,13 +25,16 @@ class UserRemoteDataSource(
             // ✅ Save only first time
             docRef.set(user).await()
         }
-
-        // ✅ If already exists → do not overwrite anything
     }
     suspend fun getUser(uid: String): User {
         val snapshot = firestore.collection("users").document(uid).get().await()
         return snapshot.toObject(User::class.java)
             ?: throw Exception("User data not found in database")
     }
-
+    suspend fun updateUserDetails(uid: String, updates: Map<String, Any>) {
+        firestore.collection("users")
+            .document(uid)
+            .update(updates) // .update() changes only specific fields
+            .await()
+    }
 }

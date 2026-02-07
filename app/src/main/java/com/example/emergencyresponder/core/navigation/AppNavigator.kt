@@ -18,6 +18,7 @@ object AppNavigator {
         route: AppRoute,
         finishCurrent: Boolean = true
     ) {
+        // Create the basic intent
         val intent = when (route) {
             AppRoute.Login -> Intent(context, LoginActivity::class.java)
             AppRoute.SignUp -> Intent(context, SignUpActivity::class.java)
@@ -25,11 +26,20 @@ object AppNavigator {
             AppRoute.Dashboard -> Intent(context, DashboardActivity::class.java)
             AppRoute.TimeStamp -> Intent(context, TimeStampActivity::class.java)
             AppRoute.Onboarding -> Intent(context, OnboardingActivity::class.java)
-            AppRoute.AddEmergencyContact -> {
+
+            // ✅ HANDLE EDIT PROFILE: Open Dashboard but add a specific "extra"
+            AppRoute.EditProfile -> {
                 Intent(context, DashboardActivity::class.java).apply {
-                    putExtra("NAV_DESTINATION", "SAFETY_FRAGMENT")
+                    putExtra("NAV_DESTINATION", "EDIT_PROFILE")
                 }
-            }        }
+            }
+            // ✅ HANDLE EMERGENCY CONTACTS
+            AppRoute.EmergencyContacts -> {
+                Intent(context, DashboardActivity::class.java).apply {
+                    putExtra("NAV_DESTINATION", "EMERGENCY_CONTACTS")
+                }
+            }
+        }
 
         if (context !is Activity) {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

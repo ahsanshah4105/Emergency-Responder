@@ -1,30 +1,28 @@
 package com.example.emergencyresponder.modules.dashboard.ui
 
-import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+
 import android.widget.Toast
-import androidx.fragment.app.Fragment
+
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import com.example.emergencyresponder.R
 import com.example.emergencyresponder.core.objects.SPreferenceManager
-import com.example.emergencyresponder.databinding.FragmentProfileBinding
+import com.example.emergencyresponder.databinding.FragmentEditProfileBinding
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.repository.ProfileRepositoryImpl
 import com.example.emergencyresponder.modules.auth.domain.useCase.UpdateProfileUseCase
-import com.example.emergencyresponder.modules.auth.ui.LoginActivity
+
 import com.example.emergencyresponder.modules.dashboard.domain.viewModelFactory.ProfileViewModelFactory
 import com.example.emergencyresponder.modules.dashboard.domain.viewmodel.ProfileState
 import com.example.emergencyresponder.modules.dashboard.domain.viewmodel.ProfileViewModel
 
+class EditProfileFragment : Fragment() {
 
-class ProfileFragment : Fragment() {
-
-    private var _binding: FragmentProfileBinding? = null
+    private var _binding: FragmentEditProfileBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: ProfileViewModel
 
@@ -32,44 +30,76 @@ class ProfileFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentProfileBinding.inflate(inflater, container, false)
+        _binding = FragmentEditProfileBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Manual Dependency Injection
+        setupViewModel()
+        populateCurrentData()
+        setupListeners()
+        setupObservers()
+    }
+
+    private fun setupViewModel() {
+        // Manual DI (Same as ProfileFragment to share the logic)
         val dataSource = UserRemoteDataSource()
         val repository = ProfileRepositoryImpl(dataSource)
         val useCase = UpdateProfileUseCase(repository)
         val factory = ProfileViewModelFactory(useCase)
         viewModel = ViewModelProvider(this, factory)[ProfileViewModel::class.java]
+    }
 
-        setupObservers()
-        setupListeners()
+    private fun populateCurrentData() {
+        // Pre-fill fields from SharedPreferences or ViewModel
+        binding.userNameEditText.setText(SPreferenceManager.getUserName())
+        binding.emailEditText.setText(SPreferenceManager.getUserEmail())
 
-        // Load initial data
-        viewModel.loadCurrentUserData()
+        // If you have phone saved, set it here:
+        // binding.etPhone.setText(SPreferenceManager.getUserPhone())
+    }
+
+    private fun setupListeners() {
+        binding.btnSave.setOnClickListener {
+            findNavController().navigateUp()
+        }
+
+        binding.btnSave.setOnClickListener {
+            val newName = binding.userNameEditText.text.toString().trim()
+            val newEmail = binding.emailEditText.text.toString().trim()
+
+            if (newName.isEmpty()) {
+                binding.userNameEditText.error = "Name cannot be empty"
+                return@setOnClickListener
+            }
+
+            viewModel.updateProfile(newName, newEmail)
+        }
     }
 
     private fun setupObservers() {
-        viewModel.userName.observe(viewLifecycleOwner) { name ->
-            binding.tvUserName.text = name
-        }
-        viewModel.userEmail.observe(viewLifecycleOwner) { email ->
-            binding.tvUserEmail.text = email
-        }
-
         viewModel.state.observe(viewLifecycleOwner) { state ->
             when (state) {
                 is ProfileState.Loading -> {
-                    // Show progress bar if you have one
+                    binding.progressBar.visibility = View.VISIBLE
+                    binding.btnSave.isEnabled = false
+                    binding.btnSave.text = "Saving..."
                 }
                 is ProfileState.Success -> {
+                    binding.progressBar.visibility = View.GONE
+                    binding.btnSave.isEnabled = true
+                    binding.btnSave.text = "Save Changes"
                     Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+
+                    // Navigate back to Profile Screen
+                    findNavController().navigateUp()
                 }
                 is ProfileState.Error -> {
+                    binding.progressBar.visibility = View.GONE
+                    binding.btnSave.isEnabled = true
+                    binding.btnSave.text = "Save Changes"
                     Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
                 }
                 else -> {}
@@ -77,23 +107,10 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    private fun setupListeners() {
-        binding.logoutBtn.setOnClickListener {
-            SPreferenceManager.logoutUser()
-            val intent = Intent(requireActivity(), LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-            requireActivity().finish()
-        }
-
-        binding.btnEditProfile.setOnClickListener {
-            findNavController().navigate(R.id.action_profileFragment2_to_editProfileFragment)
-        }
-    }
-
-
     override fun onDestroyView() {
         super.onDestroyView()
+        // Reset state so it doesn't auto-trigger when coming back
+        viewModel.resetState()
         _binding = null
     }
 }

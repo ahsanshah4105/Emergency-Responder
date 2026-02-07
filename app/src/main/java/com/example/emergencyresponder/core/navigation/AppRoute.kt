@@ -7,5 +7,6 @@ sealed class AppRoute {
     object Dashboard : AppRoute()
     object TimeStamp : AppRoute()
     object Onboarding : AppRoute()
-    object AddEmergencyContact: AppRoute()
+    object EditProfile: AppRoute()
+    object EmergencyContacts: AppRoute()
 }
