@@ -1,9 +1,12 @@
 package com.example.emergencyresponder.modules.dashboard.ui
 
+
 import android.Manifest
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -28,11 +31,10 @@ import com.example.emergencyresponder.modules.dashboard.domain.viewmodel.SafetyD
 import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
 import com.example.emergencyresponder.modules.dashboard.ui.service.MicListenService
 import com.example.emergencyresponder.modules.dashboard.ui.service.PowerPressAccessibilityService
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-
-
 
 
 class SafetyDashboardFragment : Fragment() {
@@ -308,6 +310,85 @@ class SafetyDashboardFragment : Fragment() {
         super.onResume()
         updateSystemStatus()
         viewModel.checkEmergencyContactsExist()
+
+        checkSensitivityTrigger()
+    }
+
+    private fun checkSensitivityTrigger() {
+        // If user cancelled 3 or more times, ask them to adjust
+        if (SPreferenceManager.getCancelCount() >= 3) {
+            showSensitivityDialog()
+        }
+    }
+
+    private fun showSensitivityDialog() {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_sensitivity_settings, null)
+
+        val builder = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setCancelable(false) // Force user to choose or click Not Now
+
+        val dialog = builder.create()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.RED)) // Make corners transparent
+
+        // Bind Views
+        val cardHigh = dialogView.findViewById<MaterialCardView>(R.id.cardHigh)
+        val cardMed = dialogView.findViewById<MaterialCardView>(R.id.cardMedium)
+        val cardLow = dialogView.findViewById<MaterialCardView>(R.id.cardLow)
+        val btnSave = dialogView.findViewById<View>(R.id.btnSave)
+        val btnCancel = dialogView.findViewById<View>(R.id.btnCancel)
+
+        // Initial Selection State (Get current)
+        var selectedLevel = SPreferenceManager.getSensitivity()
+
+        // Helper to update UI
+        fun updateSelectionUI(level: String) {
+            val activeColor = ContextCompat.getColor(requireContext(), R.color.primaryColor) // Your app color
+            val inactiveColor = Color.parseColor("#E0E0E0")
+
+            // Reset all
+            cardHigh.strokeColor = inactiveColor
+            cardMed.strokeColor = inactiveColor
+            cardLow.strokeColor = inactiveColor
+
+            // Highlight selected
+            when(level) {
+                "HIGH" -> cardHigh.strokeColor = activeColor
+                "MEDIUM" -> cardMed.strokeColor = activeColor
+                "LOW" -> cardLow.strokeColor = activeColor
+            }
+        }
+
+        updateSelectionUI(selectedLevel)
+
+        // Click Listeners
+        cardHigh.setOnClickListener { selectedLevel = "HIGH"; updateSelectionUI("HIGH") }
+        cardMed.setOnClickListener { selectedLevel = "MEDIUM"; updateSelectionUI("MEDIUM") }
+        cardLow.setOnClickListener { selectedLevel = "LOW"; updateSelectionUI("LOW") }
+
+        btnSave.setOnClickListener {
+            // 1. Save new sensitivity
+            SPreferenceManager.setSensitivity(selectedLevel)
+
+            // 2. Reset the counter to 0 so it doesn't show again immediately
+            SPreferenceManager.resetCancelCount()
+
+            // 3. Restart Service to apply changes
+            val intent = Intent(requireContext(), CrashDetectionService::class.java)
+            requireContext().stopService(intent)
+            ContextCompat.startForegroundService(requireContext(), intent)
+
+            Toast.makeText(requireContext(), "Sensitivity updated to $selectedLevel", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
+
+        btnCancel.setOnClickListener {
+            // Just reset counter so it doesn't bug them immediately again
+            SPreferenceManager.resetCancelCount()
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
     private fun showContactsDialog(contacts: List<EmergencyContact>) {
 

@@ -11,7 +11,6 @@ import kotlin.math.sqrt
 class CrashDetectionUseCase(
     private val sensitivity: Sensitivity
 ) {
-
     private var lastCrashTime = 0L
 
     private val cooldownMs = 3000L

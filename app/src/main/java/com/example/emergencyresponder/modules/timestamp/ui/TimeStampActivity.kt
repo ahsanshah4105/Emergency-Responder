@@ -4,6 +4,7 @@ package com.example.emergencyresponder.modules.timestamp.ui
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.example.emergencyresponder.core.objects.SPreferenceManager
 import com.example.emergencyresponder.core.utils.SOSUtils
 import com.example.emergencyresponder.databinding.ActivityTimeStampBinding
 import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
@@ -49,13 +50,10 @@ class TimeStampActivity : AppCompatActivity() {
         }
 
         binding.iAmOkay.setOnClickListener {
-            // ✅ Cancel global countdown and any pending alert
+            SPreferenceManager.incrementCancelCount()
             CrashCountdownManager.cancel()
 
-            // ✅ Stop voice
             (application as? CrashDetectionService)?.voiceManager?.shutdown()
-
-            // ✅ Optionally speak safe message
             (application as? CrashDetectionService)?.voiceManager?.speak("You are safe. Countdown cancelled.")
 
             finish()

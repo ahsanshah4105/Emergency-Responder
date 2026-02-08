@@ -5,4 +5,5 @@ import android.content.Context
 interface AlertNotifier {
     fun notifyCrash()
     fun notifySnatch()
+    fun notifyManualSOS()
 }

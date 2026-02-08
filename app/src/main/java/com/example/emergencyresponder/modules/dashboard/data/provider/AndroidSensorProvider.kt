@@ -26,15 +26,19 @@ class AndroidSensorProvider(
     override fun start(onUpdate: (SensorState) -> Unit) {
         callback = onUpdate
 
+        // Use SENSOR_DELAY_GAME instead of SENSOR_DELAY_NORMAL
+        val delay = SensorManager.SENSOR_DELAY_GAME
+
         sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
-            ?.also { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL) }
+            ?.also { sensorManager.registerListener(this, it, delay) }
 
         sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
-            ?.also { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL) }
+            ?.also { sensorManager.registerListener(this, it, delay) }
 
         sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY)
-            ?.also { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL) }
+            ?.also { sensorManager.registerListener(this, it, delay) }
 
+        // Proximity is fine with NORMAL, but GAME is okay too
         sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
             ?.also { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL) }
     }
