@@ -6,4 +6,5 @@ interface AlertNotifier {
     fun notifyCrash()
     fun notifySnatch()
     fun notifyManualSOS()
+    fun cancel()
 }

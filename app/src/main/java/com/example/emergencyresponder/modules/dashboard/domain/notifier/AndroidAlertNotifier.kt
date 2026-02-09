@@ -49,7 +49,10 @@ class AndroidAlertNotifier(
             message = "Emergency shortcut triggered."
         )
     }
-
+    override fun cancel() {
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.cancel(101) // 101 is the ID we used for the notification
+    }
     // ✅ Shared Helper Function to build the notification
     private fun showEmergencyNotification(title: String, message: String) {
 

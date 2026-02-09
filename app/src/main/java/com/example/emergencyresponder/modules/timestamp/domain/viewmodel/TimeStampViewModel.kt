@@ -16,22 +16,6 @@ class TimeStampViewModel : ViewModel() {
 
     private var timer: CountDownTimer? = null
 
-    fun startCountdown(totalSeconds: Int = 60) {
-        timer?.cancel()
-        val totalMillis = totalSeconds * 1000L
-        timer = object : CountDownTimer(totalMillis, 1000L) {
-            override fun onTick(millisUntilFinished: Long) {
-                val seconds = (millisUntilFinished / 1000).toInt()
-                _secondsRemaining.value = seconds
-                _progress.value = (seconds.toFloat() / totalSeconds * 100).toInt()
-            }
-
-            override fun onFinish() {
-                _secondsRemaining.value = 0
-                _progress.value = 0
-            }
-        }.start()
-    }
 
     // ✅ Add helper function to update manually
     fun updateCountdown(seconds: Int) {

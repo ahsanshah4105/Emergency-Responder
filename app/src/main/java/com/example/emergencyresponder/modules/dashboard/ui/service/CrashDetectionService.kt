@@ -229,6 +229,7 @@
 package com.example.emergencyresponder.modules.dashboard.ui.service
 
 import Sensitivity
+import android.annotation.SuppressLint
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -239,6 +240,7 @@ import android.os.Looper
 import android.os.PowerManager
 import android.util.Log
 import com.example.emergencyresponder.core.objects.SPreferenceManager
+import com.example.emergencyresponder.core.utils.SOSBlastManager
 import com.example.emergencyresponder.core.utils.SOSUtils
 import com.example.emergencyresponder.modules.dashboard.data.ml.TFLiteCrashMlAnalyzer
 import com.example.emergencyresponder.modules.dashboard.data.model.DetectionResult
@@ -269,7 +271,7 @@ class CrashDetectionService : Service() {
     // --- POWER BUTTON LOGIC ---
     private var powerPressCount = 0
     private var lastPressTime = 0L
-
+    private val ACTION_CANCEL = "ACTION_CANCEL_EMERGENCY"
     // This receiver detects Screen ON / OFF events (Power Button presses)
     private val screenReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -278,7 +280,15 @@ class CrashDetectionService : Service() {
             }
         }
     }
-
+    private val cancelReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == "ACTION_CANCEL_EMERGENCY") {
+                Log.d("CrashService", "🛑 Emergency Cancelled by User")
+                stopEmergencySequence()
+            }
+        }
+    }
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate() {
         super.onCreate()
 
@@ -304,18 +314,46 @@ class CrashDetectionService : Service() {
             useCase = CrashDetectionUseCase(sensitivityEnum)
         )
 
-        // 4. Register Power Button Receiver (Dynamic Registration is required for SCREEN events)
-        val filter = IntentFilter().apply {
+        val screenFilter = IntentFilter().apply {
             addAction(Intent.ACTION_SCREEN_ON)
             addAction(Intent.ACTION_SCREEN_OFF)
         }
-        registerReceiver(screenReceiver, filter)
+        registerReceiver(screenReceiver, screenFilter)
 
+        // -------------------------------------------------
+        // REGISTER CANCEL RECEIVER (I am Okay)
+        // -------------------------------------------------
+        val cancelFilter = IntentFilter(ACTION_CANCEL)
+
+        // For Android 13+ (Tiramisu), explicitly state it's not exported to other apps
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(cancelReceiver, cancelFilter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(cancelReceiver, cancelFilter)
+        }
         // 5. Start Service
         startCrashMonitoring()
         startForegroundInternal()
     }
 
+
+    private fun stopEmergencySequence() {
+        Log.d("CrashService", "🛑 STOPPING EMERGENCY SEQUENCE")
+
+        // 1. Stop the Countdown Timer (Prevents SOS)
+        CrashCountdownManager.cancel()
+
+        // 2. Speak Feedback
+        voiceManager.speak("You are safe. Countdown cancelled.")
+
+        // 3. Remove Notification from Status Bar
+        notifier.cancel()
+
+        // Reset all flags immediately so the app is ready again
+        crashAlreadyDetected = false
+        snatchAlreadyDetected = false
+        powerPressCount = 0
+    }
     // --- MANUAL POWER BUTTON LOGIC ---
     private fun handlePowerButtonPress() {
         val now = System.currentTimeMillis()
@@ -349,8 +387,7 @@ class CrashDetectionService : Service() {
         // 3. Start Countdown & Send SMS/GreenAPI
         voiceManager.startCrashCountdown {
             Log.d("SOS", "Manual SOS Countdown finished → Sending Messages")
-            SOSUtils.sendSOSViaSMS(this@CrashDetectionService, EMERGENCY_NUMBER)
-            SOSUtils.sendSOSViaGreenApi(this@CrashDetectionService, EMERGENCY_NUMBER)
+            SOSBlastManager.sendBlastToAllUsers(this@CrashDetectionService)
         }
     }
 
@@ -372,8 +409,7 @@ class CrashDetectionService : Service() {
 
                     // 2. Start Countdown
                     voiceManager.startCrashCountdown {
-                        SOSUtils.sendSOSViaSMS(this@CrashDetectionService, EMERGENCY_NUMBER)
-                        SOSUtils.sendSOSViaGreenApi(this@CrashDetectionService, EMERGENCY_NUMBER)
+                        SOSBlastManager.sendBlastToAllUsers(this@CrashDetectionService)
                     }
 
                     // 3. Reset Lock after 15 seconds
@@ -405,22 +441,19 @@ class CrashDetectionService : Service() {
     override fun onDestroy() {
         super.onDestroy()
 
-        // Unregister receiver to prevent crashes/leaks
+        // ✅ Unregister BOTH receivers to prevent crashes
         try {
             unregisterReceiver(screenReceiver)
-        } catch (e: Exception) {
-            Log.e("CrashService", "Receiver not registered: ${e.message}")
-        }
+        } catch (e: Exception) { Log.e("CrashService", "ScreenReceiver error: ${e.message}") }
+
+        try {
+            unregisterReceiver(cancelReceiver)
+        } catch (e: Exception) { Log.e("CrashService", "CancelReceiver error: ${e.message}") }
 
         sensorProvider.stop()
         voiceManager.shutdown()
-
-        if (wakeLock?.isHeld == true) {
-            wakeLock?.release()
-        }
-        Log.d("CrashService", "Service destroyed")
+        if (wakeLock?.isHeld == true) wakeLock?.release()
     }
-
     override fun onBind(intent: Intent?) = null
 
     // Start Foreground Notification (Required for Service to run in background)

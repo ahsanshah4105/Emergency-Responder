@@ -40,8 +40,8 @@ class VoiceAlertManager(context: Context) : TextToSpeech.OnInitListener {
     }
     fun startCrashCountdown(onFinish: () -> Unit) {
         speak(
-            "A crash has been detected. " +
-                    "If you are safe, please cancel the alert within 60 seconds. " +
+            "A emergency has been detected. " +
+                    "If you are safe, please cancel the alert within 30 seconds. " +
                     "Otherwise, an emergency message will be sent automatically."
         )
 
@@ -58,7 +58,7 @@ class VoiceAlertManager(context: Context) : TextToSpeech.OnInitListener {
                 // countdown finished, you can update UI if needed
                 remainingSeconds = 0
             },
-            finalAction = onFinish // only triggered if not cancelled
+
         )
     }
 

@@ -6,6 +6,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="24dp"
     app:cardCornerRadius="24dp"
+    android:background="@color/app_background"
     app:cardElevation="8dp"
     app:cardBackgroundColor="@android:color/white">
 
@@ -113,9 +114,11 @@
 
             <Button
                 android:id="@+id/btnSave"
+                style="@style/AppButton"
                 android:layout_width="wrap_content"
+                android:textStyle="bold"
                 android:layout_height="wrap_content"
-                android:text="UPDATE"
+                android:text="@string/update"
                 android:backgroundTint="@color/primaryColor"/>
         </LinearLayout>
 

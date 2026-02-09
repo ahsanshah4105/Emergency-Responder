@@ -74,73 +74,13 @@ class SafetyDashboardFragment : Fragment() {
         binding.txtWelcome.text = "Welcome, ${userName ?: "User"}"
 
         binding.itemSnatch.setOnClickListener {
-
-            if (!isAccessibilityServiceEnabled()) {
-
-                AlertDialog.Builder(requireContext())
-                    .setTitle("Enable Snatch Guard")
-                    .setMessage(
-                        "To detect phone snatching, Emergency Responder needs Accessibility Permission.\n\n" +
-                                "Just tap Enable on the next screen."
-                    )
-                    .setPositiveButton("Enable Now") { _, _ ->
-                        openDirectAccessibilitySettings()
-                    }
-                    .setNegativeButton("Cancel", null)
-                    .show()
-
-            } else {
-                Toast.makeText(requireContext(), "Snatch Guard is Active ✅", Toast.LENGTH_SHORT).show()
-            }
+            enableSnatchGuard()
         }
-
 
 
         binding.sendAlert.setOnTouchListener { v, event ->
 
-            when (event.action) {
-
-                MotionEvent.ACTION_DOWN -> {
-
-                    // 🔥 Scale button slightly bigger
-                    v.animate()
-                        .scaleX(1.1f)
-                        .scaleY(1.1f)
-                        .setDuration(200)
-                        .start()
-
-                    // Start 3-second hold timer
-                    sosRunnable = Runnable {
-
-                        Toast.makeText(requireContext(), "Fetching contacts...", Toast.LENGTH_SHORT).show()
-
-                        viewModel.fetchEmergencyContacts(
-                            onResult = { contacts ->
-                                showContactsDialog(contacts)
-                            },
-                            onError = {
-                                Toast.makeText(requireContext(), "Failed to fetch contacts", Toast.LENGTH_SHORT).show()
-                            }
-                        )
-                    }
-
-                    v.postDelayed(sosRunnable!!, 3000) // ⏳ 3 seconds hold
-                }
-
-                MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_CANCEL -> {
-
-                    // Reset button size if user releases early
-                    v.animate()
-                        .scaleX(1f)
-                        .scaleY(1f)
-                        .setDuration(200)
-                        .start()
-
-                    // Cancel SOS trigger if not completed
-                    sosRunnable?.let { v.removeCallbacks(it) }
-                }
-            }
+            sendSoS(event, v)
 
             true
         }
@@ -151,6 +91,77 @@ class SafetyDashboardFragment : Fragment() {
         binding.capsuleSystem.setOnClickListener { ensureNotificationPermission() }
 
         return binding.root
+    }
+
+    private fun sendSoS(event: MotionEvent?, v: View?) {
+        when (event?.action) {
+
+            MotionEvent.ACTION_DOWN -> {
+
+                // 🔥 Scale button slightly bigger
+                v?.animate()
+                    ?.scaleX(1.1f)
+                    ?.scaleY(1.1f)
+                    ?.setDuration(200)
+                    ?.start()
+
+                // Start 3-second hold timer
+                sosRunnable = Runnable {
+
+                    // Provide immediate feedback
+                    Toast.makeText(requireContext(), "Opening WhatsApp...", Toast.LENGTH_SHORT).show()
+
+                    // ✅ CALL THE NEW FUNCTION
+                    SOSUtils.sendSOSOnWhatsApp(requireContext())
+                }
+
+                v?.postDelayed(sosRunnable!!, 3000) // ⏳ 3 seconds hold
+            }
+
+            MotionEvent.ACTION_UP,
+            MotionEvent.ACTION_CANCEL -> {
+
+                // Reset button size
+                v?.animate()
+                    ?.scaleX(1f)
+                    ?.scaleY(1f)
+                    ?.setDuration(200)
+                    ?.start()
+
+                // Cancel if released early
+                sosRunnable?.let { v?.removeCallbacks(it) }
+            }
+        }
+    }
+    private fun enableSnatchGuard() {
+        if (!isAccessibilityServiceEnabled()) {
+
+            // 1. Create the dialog but don't show it yet (or capture the result of show())
+            val dialog = AlertDialog.Builder(requireContext())
+                .setTitle("Enable Snatch Guard")
+                .setMessage(
+                    "To detect phone snatching, Emergency Responder needs Accessibility Permission.\n\n" +
+                            "Just tap Enable on the next screen."
+                )
+                .setPositiveButton("Enable Now") { _, _ ->
+                    openDirectAccessibilitySettings()
+                }
+                .setNegativeButton("Cancel", null)
+                .show() // Shows the dialog and returns the instance
+
+            // 2. Get the button from the dialog instance and set the color
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(
+                ContextCompat.getColor(requireContext(), R.color.primaryColor)
+            )
+
+            // Optional: Set negative button color too
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(
+                ContextCompat.getColor(requireContext(), R.color.black)
+            )
+
+        } else {
+            Toast.makeText(requireContext(), "Snatch Guard is Active ✅", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -329,7 +340,7 @@ class SafetyDashboardFragment : Fragment() {
             .setCancelable(false) // Force user to choose or click Not Now
 
         val dialog = builder.create()
-        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.RED)) // Make corners transparent
+
 
         // Bind Views
         val cardHigh = dialogView.findViewById<MaterialCardView>(R.id.cardHigh)
@@ -403,7 +414,7 @@ class SafetyDashboardFragment : Fragment() {
             .setPositiveButton("Yes") { _, _ ->
 
                 contacts.forEach {
-                    SOSUtils.sendSOSOnWhatsApp(requireContext(), it.phone)
+                    SOSUtils.sendSOSOnWhatsApp(requireContext())
                 }
 
                 Toast.makeText(requireContext(), "Sending SOS to all contacts...", Toast.LENGTH_SHORT).show()
