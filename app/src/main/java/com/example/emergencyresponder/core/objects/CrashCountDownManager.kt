@@ -14,14 +14,15 @@ object CrashCountdownManager {
 
     // The actual SOS action (SMS/API trigger)
     private var sosAction: (() -> Unit)? = null
-
+    private var finalAction: (() -> Unit)? = null
     private const val TOTAL_TIME_MS = 30_000L
     private const val INTERVAL_MS = 1_000L
 
     fun startCountdown(
         onTick: (Long) -> Unit,
         onFinish: () -> Unit,
-        onSosAction: (() -> Unit)? = null
+        onSosAction: (() -> Unit)? = null,
+        finalAction: (() -> Unit)? = null
     ) {
         // 1. Stop any existing timer first
         cancel()
@@ -33,22 +34,19 @@ object CrashCountdownManager {
         tickListeners.add(onTick)
         finishListeners.add(onFinish)
         sosAction = onSosAction
-
+        this.finalAction = finalAction
         // 4. Start Timer
         timer = object : CountDownTimer(TOTAL_TIME_MS, INTERVAL_MS) {
             override fun onTick(millisUntilFinished: Long) {
                 remainingSeconds = millisUntilFinished / 1000
-                // Notify all active listeners
                 tickListeners.forEach { it.invoke(remainingSeconds) }
             }
 
             override fun onFinish() {
                 remainingSeconds = 0
-                // Notify listeners that time is up
                 finishListeners.forEach { it.invoke() }
-
-                // Trigger the SOS (Only if not cancelled)
                 sosAction?.invoke()
+                finalAction?.invoke()
             }
         }.start()
     }

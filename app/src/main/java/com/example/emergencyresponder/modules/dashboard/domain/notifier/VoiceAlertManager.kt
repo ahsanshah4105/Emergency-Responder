@@ -38,11 +38,11 @@ class VoiceAlertManager(context: Context) : TextToSpeech.OnInitListener {
             tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "VOICE_ALERT")
         }
     }
-    fun startCrashCountdown(onFinish: () -> Unit) {
+    fun startCrashCountdown(onSosTrigger: () -> Unit) {
         speak(
-            "A emergency has been detected. " +
-                    "If you are safe, please cancel the alert within 30 seconds. " +
-                    "Otherwise, an emergency message will be sent automatically."
+            "Emergency detected. " +
+                    "If you are safe, cancel within 30 seconds. " +
+                    "Otherwise, an emergency message will be sent."
         )
 
         CrashCountdownManager.startCountdown(
@@ -50,18 +50,18 @@ class VoiceAlertManager(context: Context) : TextToSpeech.OnInitListener {
                 remainingSeconds = sec
                 // 🔊 speak at important intervals
                 when (sec) {
-                    20L,10L -> speak("$sec seconds remaining")
+                    20L, 10L -> speak("$sec seconds remaining")
                     in 1..5 -> speak(sec.toString())
                 }
             },
             onFinish = {
-                // countdown finished, you can update UI if needed
+                // UI update logic (optional)
                 remainingSeconds = 0
             },
-
+            // 🔥 CRITICAL FIX: Pass the Service's lambda here!
+            finalAction = onSosTrigger
         )
     }
-
 
     fun shutdown() {
         tts?.shutdown()

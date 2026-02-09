@@ -402,7 +402,6 @@ class CrashDetectionService : Service() {
                     if (crashAlreadyDetected) return@start
 
                     crashAlreadyDetected = true
-                    Log.d("CrashService", "🚗 Crash detected! Locking system.")
 
                     // 1. Show Crash Notification
                     notifier.notifyCrash()
@@ -415,7 +414,6 @@ class CrashDetectionService : Service() {
                     // 3. Reset Lock after 15 seconds
                     Handler(Looper.getMainLooper()).postDelayed({
                         crashAlreadyDetected = false
-                        Log.d("CrashService", "System unlocked for new crashes.")
                     }, 15000)
                 }
 
