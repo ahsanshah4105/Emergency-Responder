@@ -288,6 +288,11 @@ class CrashDetectionService : Service() {
             }
         }
     }
+
+    companion object {
+        const val ACTION_TRIGGER_SOS = "com.example.emergencyresponder.ACTION_TRIGGER_SOS"
+        const val ACTION_CANCEL = "ACTION_CANCEL_EMERGENCY"
+    }
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate() {
         super.onCreate()
@@ -335,7 +340,39 @@ class CrashDetectionService : Service() {
         startCrashMonitoring()
         startForegroundInternal()
     }
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
+        // 1. HANDLE MANUAL SOS (From Activity Button)
+        if (intent?.action == ACTION_TRIGGER_SOS) {
+            Log.d("CrashService", "🔥 Starting Background SOS Sequence")
+
+            // A. Ensure Service is Foreground (shows notification)
+            startForegroundInternal()
+
+            // B. Speak Confirmation
+            voiceManager.speak("Emergency protocol initiated. Recording audio.")
+
+            // C. Start the Sequence (SMS -> Audio -> WhatsApp)
+            // Passing 'this' (Service Context) ensures recording keeps running!
+            SOSBlastManager.sendBlastToAllUsers(this)
+
+            return START_STICKY
+        }
+
+        // 2. Handle Power Button
+        val triggeredByPower = intent?.getBooleanExtra("TRIPLE_POWER_PRESS", false) ?: false
+        if (triggeredByPower) {
+            triggerManualSOS()
+            return START_STICKY
+        }
+
+        // 3. Normal Startup
+        if (intent?.action == null) {
+            startCrashMonitoring()
+        }
+
+        return START_STICKY
+    }
 
     private fun stopEmergencySequence() {
         Log.d("CrashService", "🛑 STOPPING EMERGENCY SEQUENCE")

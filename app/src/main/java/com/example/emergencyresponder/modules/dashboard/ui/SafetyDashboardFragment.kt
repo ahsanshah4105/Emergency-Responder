@@ -342,6 +342,7 @@ class SafetyDashboardFragment : Fragment() {
         val dialog = builder.create()
 
 
+
         // Bind Views
         val cardHigh = dialogView.findViewById<MaterialCardView>(R.id.cardHigh)
         val cardMed = dialogView.findViewById<MaterialCardView>(R.id.cardMedium)
@@ -400,28 +401,7 @@ class SafetyDashboardFragment : Fragment() {
         }
 
         dialog.show()
-    }
-    private fun showContactsDialog(contacts: List<EmergencyContact>) {
-
-        if (contacts.isEmpty()) {
-            Toast.makeText(requireContext(), "No emergency contacts found", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        AlertDialog.Builder(requireContext())
-            .setTitle("Send SOS Alert")
-            .setMessage("Are you sure you want to send SOS to ALL emergency contacts?")
-            .setPositiveButton("Yes") { _, _ ->
-
-                contacts.forEach {
-                    SOSUtils.sendSOSOnWhatsApp(requireContext())
-                }
-
-                Toast.makeText(requireContext(), "Sending SOS to all contacts...", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-
+        dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
     }
 
     override fun onDestroyView() {

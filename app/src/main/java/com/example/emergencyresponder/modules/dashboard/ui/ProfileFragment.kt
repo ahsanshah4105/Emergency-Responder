@@ -39,7 +39,7 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Manual Dependency Injection
+
         val dataSource = UserRemoteDataSource()
         val repository = ProfileRepositoryImpl(dataSource)
         val useCase = UpdateProfileUseCase(repository)

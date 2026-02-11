@@ -8,10 +8,9 @@ class ProfileRepositoryImpl(
 ) : ProfileRepository {
 
     override suspend fun updateUserProfile(uid: String, name: String, email: String) {
-        // Create a map of the fields we want to change
         val updates = mapOf(
             "name" to name,
-            "phone" to email
+            "email" to email // ✅ Correct field name
         )
         dataSource.updateUserDetails(uid, updates)
     }

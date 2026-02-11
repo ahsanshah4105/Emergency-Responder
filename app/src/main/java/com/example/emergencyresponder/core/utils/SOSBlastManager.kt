@@ -53,11 +53,8 @@ object SOSBlastManager {
                         // 👇 HERE IS EXACTLY HOW SOSUTILS IS USED 👇
                         // ---------------------------------------------------------
 
-                        // Call 1: Send via WhatsApp (GreenAPI)
-                        SOSUtils.sendSOSViaGreenApi(context, finalContactList)
+                        SOSUtils.startEmergencySequence(context, uniqueNumbers.toList())
 
-                        // Call 2: Send via SMS (Sim Card)
-                        SOSUtils.sendSOSViaSMS(context, finalContactList)
 
                         // ---------------------------------------------------------
 

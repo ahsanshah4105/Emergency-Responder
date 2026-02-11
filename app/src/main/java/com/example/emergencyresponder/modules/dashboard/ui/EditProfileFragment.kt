@@ -69,6 +69,8 @@ class EditProfileFragment : Fragment() {
         binding.btnSave.setOnClickListener {
             val newName = binding.userNameEditText.text.toString().trim()
             val newEmail = binding.emailEditText.text.toString().trim()
+          //  val password = binding.currentPassword.text.toString().trim()
+
 
             if (newName.isEmpty()) {
                 binding.userNameEditText.error = "Name cannot be empty"

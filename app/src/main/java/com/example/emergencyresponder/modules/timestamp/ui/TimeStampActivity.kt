@@ -18,7 +18,6 @@ import com.google.firebase.firestore.firestore
 class TimeStampActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityTimeStampBinding
-    private var db = Firebase.firestore
     private val viewModel: TimeStampViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,13 +68,10 @@ class TimeStampActivity : AppCompatActivity() {
 
 
         binding.sendAlert.setOnClickListener {
-            // Prevent double clicks
             binding.sendAlert.isEnabled = false
 
-            // ✅ One line to do everything
             SOSBlastManager.sendBlastToAllUsers(this)
 
-            // Re-enable button after a short delay
             binding.sendAlert.postDelayed({ binding.sendAlert.isEnabled = true }, 2000)
         }
     }
