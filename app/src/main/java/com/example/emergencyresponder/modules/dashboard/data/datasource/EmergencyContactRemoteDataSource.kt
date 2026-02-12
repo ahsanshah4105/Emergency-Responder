@@ -39,4 +39,43 @@ class EmergencyContactRemoteDataSource(
             .addOnSuccessListener { onResult(true) }
             .addOnFailureListener { onResult(false) }
     }
+
+    fun deleteContact(
+        uid: String,
+        contact: EmergencyContact,
+        onResult: (Boolean) -> Unit
+    ) {
+        // arrayRemove requires the exact object to find and remove it
+        firestore.collection("users")
+            .document(uid)
+            .update("emergencyContacts", FieldValue.arrayRemove(contact))
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener {
+                // If the document doesn't exist or network fails
+                onResult(false)
+            }
+    }
+
+    // NEW: Logic to send an SOS alert to the backend
+    fun sendSOSNotification(
+        uid: String,
+        contact: EmergencyContact,
+        location: String,
+        onResult: (Boolean) -> Unit
+    ) {
+        // Create an alert object to store in Firestore
+        val sosAlert = hashMapOf(
+            "senderUid" to uid,
+            "targetContactName" to contact.name,
+            "targetContactPhone" to contact.phone,
+            "location" to location,
+            "status" to "SENT",
+            "timestamp" to FieldValue.serverTimestamp()
+        )
+
+        firestore.collection("sos_alerts")
+            .add(sosAlert)
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
+    }
 }

@@ -15,4 +15,14 @@ class EmergencyContactRepositoryImpl(
     override fun addContact(uid: String, contact: EmergencyContact, onResult: (Boolean) -> Unit) {
         remote.addContact(uid, contact, onResult)
     }
+
+    override fun deleteContact(uid: String, contact: EmergencyContact, onResult: (Boolean) -> Unit) {
+        remote.deleteContact(uid, contact, onResult) // This will now match the DataSource
+    }
+    // New: Logs an SOS alert to the backend (optional) or triggers a notification
+    override fun sendSOSToContact(uid: String, contact: EmergencyContact, location: String, onResult: (Boolean) -> Unit) {
+        // Logic to send notification to backend
+        remote.sendSOSNotification(uid, contact, location, onResult)
+    }
+
 }

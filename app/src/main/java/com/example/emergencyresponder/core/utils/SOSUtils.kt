@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
+import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -12,6 +13,7 @@ import android.telephony.SmsManager
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import com.example.emergencyresponder.core.objects.SPreferenceManager
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import okhttp3.MediaType.Companion.toMediaType
@@ -119,9 +121,6 @@ object SOSUtils {
         }
     }
 
-    // =========================================================================
-    // 3. GREEN API (Fixed Multipart Caption)
-    // =========================================================================
     private fun sendSOSViaGreenApi(context: Context, targetPhoneNumbers: List<String>, audioFile: File?) {
         getCurrentLocation(context) { lat, lng ->
             val messageText = getMessage(lat, lng)
@@ -183,9 +182,7 @@ object SOSUtils {
         }
     }
 
-    // =========================================================================
-    // 4. SMS & Location Helpers
-    // =========================================================================
+
     fun sendSOSViaSMS(context: Context, phoneNumbers: List<String>) {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) return
 
@@ -219,8 +216,32 @@ object SOSUtils {
         }
     }
 
+    fun sendSOSToSpecificPerson(context: Context, phone: String) {
+        getCurrentLocation(context) { lat, lng ->
+            val messageText = getMessage(lat, lng)
+
+            try {
+                // WhatsApp expects phone number in international format without '+' and spaces, e.g., "923001234567"
+                val cleanedPhone = phone.replace("[^\\d]".toRegex(), "")
+                val url = "https://wa.me/$cleanedPhone?text=${Uri.encode(messageText)}"
+
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    data = Uri.parse(url)
+                    setPackage("com.whatsapp") // Ensure it opens WhatsApp directly
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(intent)
+
+            } catch (e: Exception) {
+                Toast.makeText(context, "WhatsApp not installed or number invalid", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+
     private fun getMessage(lat: Double, lng: Double): String {
-        return "🚨 *SOS! I need help.* \nPlease contact me immediately.\n\n📍 My Location:\nhttps://www.google.com/maps/search/?api=1&query=$lat,$lng"
+        var name = SPreferenceManager.getUserName()
+        return "🚨 Hi I am $name.* \nPlease contact me immediately\n\n📍 My Location:\nhttps://www.google.com/maps/search/?api=1&query=$lat,$lng"
     }
 
     private fun getCurrentLocation(context: Context, callback: (Double, Double) -> Unit) {

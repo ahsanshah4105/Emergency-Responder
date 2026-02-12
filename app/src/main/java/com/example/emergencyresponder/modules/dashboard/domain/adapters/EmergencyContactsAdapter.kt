@@ -10,7 +10,9 @@ import com.example.emergencyresponder.R
 import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
 import com.example.emergencyresponder.modules.dashboard.data.model.EmergencyContacts
 class EmergencyContactsAdapter(
-    private val items: List<EmergencyContact>
+    private val items: List<EmergencyContact>,
+    private val onSosClick: (EmergencyContact) -> Unit,
+    private val onItemLongClick: (EmergencyContact, Int) -> Unit
 ) : RecyclerView.Adapter<EmergencyContactsAdapter.ServiceViewHolder>() {
 
     inner class ServiceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -29,6 +31,16 @@ class EmergencyContactsAdapter(
         val item = items[position]
         holder.txtName.text = item.name
         holder.txtPhone.text = item.phone
+
+
+        holder.btnSos.setOnClickListener {
+            onSosClick(item)
+        }
+
+        holder.itemView.setOnLongClickListener {
+            onItemLongClick(item, position)
+            true
+        }
     }
 
     override fun getItemCount(): Int = items.size

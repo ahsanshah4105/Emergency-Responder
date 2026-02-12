@@ -8,11 +8,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.emergencyresponder.R
+import com.example.emergencyresponder.core.utils.SOSUtils
 import com.example.emergencyresponder.databinding.FragmentEmergencyContactBinding
 import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
 import com.example.emergencyresponder.modules.dashboard.data.datasource.EmergencyContactRemoteDataSource
@@ -22,7 +24,7 @@ import com.example.emergencyresponder.modules.dashboard.domain.viewModelFactory.
 import com.example.emergencyresponder.modules.dashboard.domain.viewmodel.EmergencyContactViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-
+import androidx.cardview.widget.CardView
 
 class EmergencyContactFragment : Fragment() {
 
@@ -55,7 +57,7 @@ class EmergencyContactFragment : Fragment() {
         val observeUseCase = ObserveEmergencyContactsUseCase(repository)
         val addUseCase = AddEmergencyContactUseCase(repository)
 
-        val factory = EmergencyContactViewModelFactory(observeUseCase, addUseCase)
+        val factory = EmergencyContactViewModelFactory(observeUseCase, addUseCase,repository)
         viewModel = ViewModelProvider(this, factory).get(EmergencyContactViewModel::class.java)
 
         val uid = auth.currentUser?.uid ?: return
@@ -120,13 +122,45 @@ class EmergencyContactFragment : Fragment() {
             }
         }
     }
-    private fun setupRecycler() {
-        adapter = EmergencyContactsAdapter(contactsList)
-        binding.emergencyContactsList.layoutManager =
-            LinearLayoutManager(requireContext())
+  private fun setupRecycler() {
+      adapter = EmergencyContactsAdapter(
+          items = contactsList,
+          onSosClick = { contact ->
+              SOSUtils.sendSOSToSpecificPerson(requireContext(), contact.phone)
+          },
+          onItemLongClick = { contact, position ->
+              showDeleteDialog(contact)
+          }
+      )
+
+
+      binding.emergencyContactsList.layoutManager = LinearLayoutManager(requireContext())
         binding.emergencyContactsList.adapter = adapter
     }
 
+    private fun showDeleteDialog(contact: EmergencyContact) {
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle("Delete Contact")
+            .setMessage("Are you sure you want to delete ${contact.name}?")
+            .setPositiveButton("Delete") { _, _ ->
+                val uid = auth.currentUser?.uid ?: return@setPositiveButton
+                viewModel.deleteContact(uid, contact)
+                Toast.makeText(requireContext(), "Contact deleted", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .create() // Create the dialog first so we can modify buttons
+
+        // 1. Show the dialog
+        dialog.show()
+
+        // 2. Access buttons and apply colors from colors.xml
+        val deleteButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+        val cancelButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+
+        // Replace 'red' and 'text_grey' with the exact names in your colors.xml
+        deleteButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.primaryColor))
+        cancelButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_grey))
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
