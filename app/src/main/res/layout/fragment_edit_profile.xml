@@ -176,6 +176,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:padding="5dp"
+            android:visibility="gone"
             app:cardCornerRadius="50dp"
             app:cardElevation="0dp"
             app:cardUseCompatPadding="false"
@@ -198,7 +199,7 @@
                 app:hintTextColor="@color/primaryBlue">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/updatePasswordEditText"
+                    android:id="@+id/newPasswordEditText"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:paddingLeft="16dp"
@@ -211,7 +212,15 @@
             </com.google.android.material.textfield.TextInputLayout>
 
         </androidx.cardview.widget.CardView>
-
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/changePassword"
+            style="@style/AppButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/change_password"
+            android:layout_marginBottom="20dp"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
     </LinearLayout>
 

@@ -38,6 +38,7 @@ class AuthRemoteDataSource(
 
         // Send verification to new email
         user.verifyBeforeUpdateEmail(newEmail).await()
+        logout()
     }
 
     suspend fun sendPasswordResetEmail(email: String) =

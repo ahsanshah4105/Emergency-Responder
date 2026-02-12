@@ -23,7 +23,6 @@ class ProfileRepositoryImpl(
         newEmail: String
     ) {
         authDataSource.verifyBeforeUpdateEmail(
-            currentEmail,
             password,
             newEmail
         )

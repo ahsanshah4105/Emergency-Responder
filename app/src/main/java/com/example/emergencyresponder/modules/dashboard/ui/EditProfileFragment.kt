@@ -47,11 +47,9 @@ class EditProfileFragment : Fragment() {
     private fun setupViewModel() {
         val userDataSource = UserRemoteDataSource()
         val authDataSource = AuthRemoteDataSource()
-
         val repository = ProfileRepositoryImpl(userDataSource, authDataSource)
         val updateProfileUseCase = UpdateProfileUseCase(repository)
         val changeEmailUseCase = ChangeEmailUseCase(repository)
-
         val factory = ProfileViewModelFactory(updateProfileUseCase, changeEmailUseCase)
         viewModel = ViewModelProvider(this, factory)[ProfileViewModel::class.java]
     }
@@ -62,43 +60,63 @@ class EditProfileFragment : Fragment() {
     }
 
     private fun setupEmailWatcher() {
-        // Show password field only if email changed
         val oldEmail = SPreferenceManager.getUserEmail()
         binding.emailEditText.addTextChangedListener {
+            // Show current password field only if email changed or password change requested
             binding.cardView.visibility =
-                if (binding.emailEditText.text.toString().trim() != oldEmail) View.VISIBLE else View.GONE
+                if (binding.emailEditText.text.toString().trim() != oldEmail
+                    || binding.newPasswordEditText.visibility == View.VISIBLE
+                ) View.VISIBLE else View.GONE
         }
     }
 
     private fun setupListeners() {
+        // Optional: Toggle password field visibility if user wants to change password
+        binding.changePassword.setOnClickListener {
+            if (binding.cardVieww.visibility == View.VISIBLE) {
+                binding.cardVieww.visibility = View.GONE
+            } else {
+
+                binding.cardVieww.visibility = View.VISIBLE
+            }
+        }
+
         binding.btnSave.setOnClickListener {
             val newName = binding.userNameEditText.text.toString().trim()
             val newEmail = binding.emailEditText.text.toString().trim()
             val oldEmail = SPreferenceManager.getUserEmail()
+            val currentPassword = binding.currentPasswordEditText.text.toString().trim()
+            val newPassword = binding.newPasswordEditText.text.toString().trim()
 
-            if (newName.isEmpty()) {
-                binding.userNameEditText.error = "Name cannot be empty"
-                return@setOnClickListener
+            var isAnyAction = false
+
+            // --- NAME UPDATE ---
+            if (newName.isNotEmpty() && newName != SPreferenceManager.getUserName()) {
+                isAnyAction = true
+                viewModel.updateProfile(newName)
             }
 
-            if (newEmail.isEmpty()) {
-                binding.emailEditText.error = "Email cannot be empty"
-                return@setOnClickListener
+            // --- PASSWORD UPDATE ---
+            if (binding.newPasswordEditText.visibility == View.VISIBLE && newPassword.isNotEmpty()) {
+                if (currentPassword.isEmpty()) {
+                    binding.currentPasswordEditText.error = "Enter current password to change password"
+                    return@setOnClickListener
+                }
+                isAnyAction = true
+                viewModel.updatePassword(currentPassword, newPassword)
             }
 
             if (newEmail != oldEmail) {
-                val password = binding.currentPasswordEditText.text.toString().trim()
-                if (password.isEmpty()) {
-                    binding.currentPasswordEditText.error = "Enter current password"
+                if (currentPassword.isEmpty()) {
+                    binding.currentPasswordEditText.error = "Enter current password to change email"
                     return@setOnClickListener
                 }
+                isAnyAction = true
+                viewModel.changeEmail(currentPassword, newEmail, newName)
+            }
 
-                // Pass both email and name for proper update
-                viewModel.changeEmail(password, newEmail, newName)
-
-            } else {
-                // Only name changed
-                viewModel.updateProfile(newName, newEmail)
+            if (!isAnyAction) {
+                Toast.makeText(requireContext(), "No changes detected", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -116,14 +134,13 @@ class EditProfileFragment : Fragment() {
                     binding.btnSave.isEnabled = true
                     binding.btnSave.text = "Update Profile"
                     Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
-                    findNavController().navigateUp() // Name-only update
+                    findNavController().navigateUp()
                 }
                 is ProfileState.EmailVerificationSent -> {
                     binding.progressBar.visibility = View.GONE
                     binding.btnSave.isEnabled = true
                     binding.btnSave.text = "Save Changes"
                     Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
-                    // Do NOT navigate; user must verify email
                 }
                 is ProfileState.Error -> {
                     binding.progressBar.visibility = View.GONE

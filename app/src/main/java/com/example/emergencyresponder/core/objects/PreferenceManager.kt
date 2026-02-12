@@ -61,6 +61,9 @@ object SPreferenceManager {
         prefs.edit().putBoolean(KEY_LOGIN, isLoggedIn).apply()
     }
 
+    fun setUserEmail(email: String) {
+        prefs.edit().putString(KEY_USER_EMAIL, email).apply()
+    }
     fun setCounter(int: Int) {
         prefs.edit().putInt(Sensitivity_COUNT, int).apply()
 

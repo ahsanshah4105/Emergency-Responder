@@ -8,12 +8,16 @@ import com.example.emergencyresponder.core.objects.SPreferenceManager
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
 import com.example.emergencyresponder.modules.auth.domain.useCase.ChangeEmailUseCase
 import com.example.emergencyresponder.modules.auth.domain.useCase.UpdateProfileUseCase
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+
 
 class ProfileViewModel(
     private val updateProfileUseCase: UpdateProfileUseCase,
-    private val changeEmailUseCase: ChangeEmailUseCase) : ViewModel() {
+    private val changeEmailUseCase: ChangeEmailUseCase
+) : ViewModel() {
 
     private val _state = MutableLiveData<ProfileState>(ProfileState.Idle)
     val state: LiveData<ProfileState> = _state
@@ -29,9 +33,29 @@ class ProfileViewModel(
         _userEmail.value = SPreferenceManager.getUserEmail() ?: ""
     }
 
-    fun updateProfile(newName: String, newPhone: String) {
+    fun updatePassword(currentPassword: String, newPassword: String) {
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user == null) {
+            _state.value = ProfileState.Error("User not logged in")
+            return
+        }
+
+        viewModelScope.launch {
+            _state.value = ProfileState.Loading
+            try {
+                val credential = EmailAuthProvider.getCredential(user.email!!, currentPassword)
+                user.reauthenticate(credential).await()
+                user.updatePassword(newPassword).await()
+                _state.value = ProfileState.Success("Password updated successfully")
+            } catch (e: Exception) {
+                _state.value = ProfileState.Error(e.message ?: "Password update failed")
+            }
+        }
+    }
+
+    fun updateProfile(newName: String) {
         val uid = SPreferenceManager.getUserId()
-        val email = SPreferenceManager.getUserEmail()
+        val email = SPreferenceManager.getUserEmail() ?: ""
 
         if (uid.isNullOrEmpty()) {
             _state.value = ProfileState.Error("User session not found. Please login again.")
@@ -41,37 +65,30 @@ class ProfileViewModel(
         viewModelScope.launch {
             _state.value = ProfileState.Loading
             try {
-                // 1. Call the Use Case
-                updateProfileUseCase(uid, newName, newPhone)
+                // Call the use case
+                updateProfileUseCase(uid, newName, email)
 
-                // 2. Update Local Preferences on success so UI updates immediately
+                // Update local preferences
                 SPreferenceManager.saveUserSession(
                     uid = uid,
                     name = newName,
-                    email = email ?: ""
-                    // phone = newPhone (If you have a savePhone method)
+                    email = email
                 )
 
-                // 3. Update LiveData to reflect changes instantly
+                // Update LiveData
                 _userName.value = newName
                 _state.value = ProfileState.Success("Profile updated successfully")
 
             } catch (e: Exception) {
-                _state.value = ProfileState.Error(e.message ?: "Update failed")
+                _state.value = ProfileState.Error(e.message ?: "Profile update failed")
             }
         }
     }
-    fun changeEmail(
-        password: String,
-        newEmail: String,
-        newName: String
-    ) {
-        var auth  = FirebaseAuth.getInstance()
-        val currentEmail = auth.currentUser?.email
-            ?: throw Exception("User not logged in")
 
-        if (currentEmail.isNullOrEmpty()) {
-            _state.value = ProfileState.Error("Session expired")
+    fun changeEmail(password: String, newEmail: String, newName: String) {
+        val auth = FirebaseAuth.getInstance()
+        val currentEmail = auth.currentUser?.email ?: run {
+            _state.value = ProfileState.Error("User not logged in")
             return
         }
 
@@ -84,19 +101,16 @@ class ProfileViewModel(
                     newEmail,
                     newName
                 )
-
                 _state.value = ProfileState.EmailVerificationSent(
                     "Verification link sent to new email. Please verify to complete update."
                 )
-
+                auth.signOut()
+                _state.value = ProfileState.Success("Email updated successfully")
             } catch (e: Exception) {
-                _state.value = ProfileState.Error(
-                    e.message ?: "Email change failed"
-                )
+                _state.value = ProfileState.Error(e.message ?: "Email change failed")
             }
         }
     }
-
 
     fun resetState() {
         _state.value = ProfileState.Idle

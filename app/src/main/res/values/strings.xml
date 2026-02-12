@@ -67,7 +67,8 @@
     <string name="accessibility_service_desc">
     Emergency shortcut service for detecting power button presses.
 </string>
-    <string name="save_changing">Save Changings</string>
+    <string name="save_changing">Update Profile</string>
+    <string name="change_password">Change Password</string>
     <string name="update">UPDATE</string>
 
 </resources>
