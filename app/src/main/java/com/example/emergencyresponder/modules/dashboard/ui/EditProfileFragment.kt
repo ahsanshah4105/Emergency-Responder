@@ -1,21 +1,21 @@
 package com.example.emergencyresponder.modules.dashboard.ui
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
 import android.widget.Toast
-
+import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.emergencyresponder.core.objects.SPreferenceManager
 import com.example.emergencyresponder.databinding.FragmentEditProfileBinding
+import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.repository.ProfileRepositoryImpl
+import com.example.emergencyresponder.modules.auth.domain.useCase.ChangeEmailUseCase
 import com.example.emergencyresponder.modules.auth.domain.useCase.UpdateProfileUseCase
-
 import com.example.emergencyresponder.modules.dashboard.domain.viewModelFactory.ProfileViewModelFactory
 import com.example.emergencyresponder.modules.dashboard.domain.viewmodel.ProfileState
 import com.example.emergencyresponder.modules.dashboard.domain.viewmodel.ProfileViewModel
@@ -39,45 +39,67 @@ class EditProfileFragment : Fragment() {
 
         setupViewModel()
         populateCurrentData()
-        setupListeners()
         setupObservers()
+        setupListeners()
+        setupEmailWatcher()
     }
 
     private fun setupViewModel() {
-        // Manual DI (Same as ProfileFragment to share the logic)
-        val dataSource = UserRemoteDataSource()
-        val repository = ProfileRepositoryImpl(dataSource)
-        val useCase = UpdateProfileUseCase(repository)
-        val factory = ProfileViewModelFactory(useCase)
+        val userDataSource = UserRemoteDataSource()
+        val authDataSource = AuthRemoteDataSource()
+
+        val repository = ProfileRepositoryImpl(userDataSource, authDataSource)
+        val updateProfileUseCase = UpdateProfileUseCase(repository)
+        val changeEmailUseCase = ChangeEmailUseCase(repository)
+
+        val factory = ProfileViewModelFactory(updateProfileUseCase, changeEmailUseCase)
         viewModel = ViewModelProvider(this, factory)[ProfileViewModel::class.java]
     }
 
     private fun populateCurrentData() {
-        // Pre-fill fields from SharedPreferences or ViewModel
         binding.userNameEditText.setText(SPreferenceManager.getUserName())
         binding.emailEditText.setText(SPreferenceManager.getUserEmail())
+    }
 
-        // If you have phone saved, set it here:
-        // binding.etPhone.setText(SPreferenceManager.getUserPhone())
+    private fun setupEmailWatcher() {
+        // Show password field only if email changed
+        val oldEmail = SPreferenceManager.getUserEmail()
+        binding.emailEditText.addTextChangedListener {
+            binding.cardView.visibility =
+                if (binding.emailEditText.text.toString().trim() != oldEmail) View.VISIBLE else View.GONE
+        }
     }
 
     private fun setupListeners() {
         binding.btnSave.setOnClickListener {
-            findNavController().navigateUp()
-        }
-
-        binding.btnSave.setOnClickListener {
             val newName = binding.userNameEditText.text.toString().trim()
             val newEmail = binding.emailEditText.text.toString().trim()
-          //  val password = binding.currentPassword.text.toString().trim()
-
+            val oldEmail = SPreferenceManager.getUserEmail()
 
             if (newName.isEmpty()) {
                 binding.userNameEditText.error = "Name cannot be empty"
                 return@setOnClickListener
             }
 
-            viewModel.updateProfile(newName, newEmail)
+            if (newEmail.isEmpty()) {
+                binding.emailEditText.error = "Email cannot be empty"
+                return@setOnClickListener
+            }
+
+            if (newEmail != oldEmail) {
+                val password = binding.currentPasswordEditText.text.toString().trim()
+                if (password.isEmpty()) {
+                    binding.currentPasswordEditText.error = "Enter current password"
+                    return@setOnClickListener
+                }
+
+                // Pass both email and name for proper update
+                viewModel.changeEmail(password, newEmail, newName)
+
+            } else {
+                // Only name changed
+                viewModel.updateProfile(newName, newEmail)
+            }
         }
     }
 
@@ -92,11 +114,16 @@ class EditProfileFragment : Fragment() {
                 is ProfileState.Success -> {
                     binding.progressBar.visibility = View.GONE
                     binding.btnSave.isEnabled = true
-                    binding.btnSave.text = "Save Changes"
+                    binding.btnSave.text = "Update Profile"
                     Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
-
-                    // Navigate back to Profile Screen
-                    findNavController().navigateUp()
+                    findNavController().navigateUp() // Name-only update
+                }
+                is ProfileState.EmailVerificationSent -> {
+                    binding.progressBar.visibility = View.GONE
+                    binding.btnSave.isEnabled = true
+                    binding.btnSave.text = "Save Changes"
+                    Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                    // Do NOT navigate; user must verify email
                 }
                 is ProfileState.Error -> {
                     binding.progressBar.visibility = View.GONE
@@ -111,7 +138,6 @@ class EditProfileFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // Reset state so it doesn't auto-trigger when coming back
         viewModel.resetState()
         _binding = null
     }

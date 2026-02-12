@@ -127,93 +127,90 @@
             </com.google.android.material.textfield.TextInputLayout>
 
 
+        </androidx.cardview.widget.CardView><androidx.cardview.widget.CardView
+        android:id="@+id/cardView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:padding="5dp"
+        app:cardCornerRadius="50dp"
+        app:cardElevation="0dp"
+        app:cardUseCompatPadding="false"
+        app:layout_constraintTop_toBottomOf="@+id/email_card">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            style="@style/CustomSubText"
+            android:hint="Current Password"
+            android:background="@color/background_shadow"
+            android:backgroundTint="@color/background_shadow"
+            android:paddingBottom="10dp"
+            android:paddingRight="10dp"
+            android:textColorHint="@color/hint_color"
+            app:boxBackgroundMode="none"
+            app:endIconMode="password_toggle"
+            app:endIconTint="@color/primaryBlue"
+            app:hintAnimationEnabled="false"
+            app:hintTextColor="@color/primaryBlue">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/currentPasswordEditText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingLeft="16dp"
+                android:paddingTop="5dp"
+                android:textSize="14sp"
+                android:textColorHint="@color/hint_color"
+                android:background="@color/background_shadow"
+                android:inputType="textPassword"
+                android:minHeight="0dp" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </androidx.cardview.widget.CardView>
+
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardVieww"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:padding="5dp"
+            app:cardCornerRadius="50dp"
+            app:cardElevation="0dp"
+            app:cardUseCompatPadding="false"
+            app:layout_constraintTop_toBottomOf="@+id/cardView">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                style="@style/CustomSubText"
+                android:hint="@string/enter_new_password"
+                android:background="@color/background_shadow"
+                android:backgroundTint="@color/background_shadow"
+                android:paddingBottom="10dp"
+                android:paddingRight="10dp"
+                android:textColorHint="@color/hint_color"
+                app:boxBackgroundMode="none"
+                app:endIconMode="password_toggle"
+                app:endIconTint="@color/primaryBlue"
+                app:hintAnimationEnabled="false"
+                app:hintTextColor="@color/primaryBlue">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/updatePasswordEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="16dp"
+                    android:paddingTop="5dp"
+                    android:textSize="14sp"
+                    android:textColorHint="@color/hint_color"
+                    android:background="@color/background_shadow"
+                    android:inputType="textPassword"
+                    android:minHeight="0dp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
         </androidx.cardview.widget.CardView>
-<!--        <androidx.cardview.widget.CardView-->
-<!--            android:id="@+id/cardView"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:padding="5dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginTop="8dp"-->
-<!--            app:cardCornerRadius="50dp"-->
-<!--            app:cardElevation="0dp"-->
-<!--            app:cardUseCompatPadding="false"-->
-<!--            app:layout_constraintTop_toBottomOf="@+id/email_card">-->
-
-<!--            <com.google.android.material.textfield.TextInputLayout-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="52dp"-->
-<!--                style="@style/CustomSubText"-->
-<!--                app:hintTextColor="@color/primaryBlue"-->
-<!--                android:hint="Current Password"-->
-<!--                app:endIconMode="password_toggle"-->
-<!--                app:endIconTint="@color/primaryBlue"-->
-<!--                app:boxBackgroundMode="none"-->
-<!--                android:backgroundTint="@color/background_shadow"-->
-<!--                android:paddingBottom="10dp"-->
-<!--                app:hintAnimationEnabled="false"-->
-<!--                android:paddingRight="10dp"-->
-<!--                android:background="@color/background_shadow"-->
-<!--                android:textColorHint="@color/hint_color"-->
-<!--                >-->
-
-<!--                <com.google.android.material.textfield.TextInputEditText-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:id="@+id/currentPassword"-->
-<!--                    android:layout_height="match_parent"-->
-<!--                    android:paddingLeft="16dp"-->
-<!--                    android:paddingTop="5dp"-->
-<!--                    android:textSize="14sp"-->
-<!--                    android:textColorHint="@color/hint_color"-->
-<!--                    android:background="@color/background_shadow"-->
-<!--                    android:inputType="textPassword"-->
-<!--                    android:minHeight="0dp"/>-->
-<!--            </com.google.android.material.textfield.TextInputLayout>-->
-
-
-<!--        </androidx.cardview.widget.CardView>-->
-<!--        <androidx.cardview.widget.CardView-->
-<!--            android:id="@+id/cardVieww"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:padding="5dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginTop="8dp"-->
-<!--            app:cardCornerRadius="50dp"-->
-<!--            app:cardElevation="0dp"-->
-<!--            app:cardUseCompatPadding="false"-->
-<!--            app:layout_constraintTop_toBottomOf="@+id/email_card">-->
-
-<!--            <com.google.android.material.textfield.TextInputLayout-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="52dp"-->
-<!--                style="@style/CustomSubText"-->
-<!--                app:hintTextColor="@color/primaryBlue"-->
-<!--                android:hint="@string/enter_new_password"-->
-<!--                app:endIconMode="password_toggle"-->
-<!--                app:endIconTint="@color/primaryBlue"-->
-<!--                app:boxBackgroundMode="none"-->
-<!--                android:backgroundTint="@color/background_shadow"-->
-<!--                android:paddingBottom="10dp"-->
-<!--                app:hintAnimationEnabled="false"-->
-<!--                android:paddingRight="10dp"-->
-<!--                android:background="@color/background_shadow"-->
-<!--                android:textColorHint="@color/hint_color"-->
-<!--                >-->
-
-<!--                <com.google.android.material.textfield.TextInputEditText-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:id="@+id/updatePassword"-->
-<!--                    android:layout_height="match_parent"-->
-<!--                    android:paddingLeft="16dp"-->
-<!--                    android:paddingTop="5dp"-->
-<!--                    android:textSize="14sp"-->
-<!--                    android:textColorHint="@color/hint_color"-->
-<!--                    android:background="@color/background_shadow"-->
-<!--                    android:inputType="textPassword"-->
-<!--                    android:minHeight="0dp"/>-->
-<!--            </com.google.android.material.textfield.TextInputLayout>-->
-
-
-<!--        </androidx.cardview.widget.CardView>-->
 
 
     </LinearLayout>

@@ -13,8 +13,10 @@ import androidx.navigation.fragment.findNavController
 import com.example.emergencyresponder.R
 import com.example.emergencyresponder.core.objects.SPreferenceManager
 import com.example.emergencyresponder.databinding.FragmentProfileBinding
+import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.repository.ProfileRepositoryImpl
+import com.example.emergencyresponder.modules.auth.domain.useCase.ChangeEmailUseCase
 import com.example.emergencyresponder.modules.auth.domain.useCase.UpdateProfileUseCase
 import com.example.emergencyresponder.modules.auth.ui.LoginActivity
 import com.example.emergencyresponder.modules.dashboard.domain.viewModelFactory.ProfileViewModelFactory
@@ -41,9 +43,11 @@ class ProfileFragment : Fragment() {
 
 
         val dataSource = UserRemoteDataSource()
-        val repository = ProfileRepositoryImpl(dataSource)
-        val useCase = UpdateProfileUseCase(repository)
-        val factory = ProfileViewModelFactory(useCase)
+        val authDataSource = AuthRemoteDataSource()
+        val repository = ProfileRepositoryImpl(dataSource, authDataSource)
+        val updateProfileUseCase = UpdateProfileUseCase(repository)
+        val changeEmailUseCase = ChangeEmailUseCase(repository)
+        val factory = ProfileViewModelFactory(updateProfileUseCase, changeEmailUseCase )
         viewModel = ViewModelProvider(this, factory)[ProfileViewModel::class.java]
 
         setupObservers()
