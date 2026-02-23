@@ -2,7 +2,6 @@ package com.example.emergencyresponder.modules.dashboard.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,17 +10,17 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.emergencyresponder.R
-import com.example.emergencyresponder.core.objects.SPreferenceManager
+import com.example.emergencyresponder.core.manager.SPreferenceManager
 import com.example.emergencyresponder.databinding.FragmentProfileBinding
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.repository.ProfileRepositoryImpl
-import com.example.emergencyresponder.modules.auth.domain.useCase.ChangeEmailUseCase
-import com.example.emergencyresponder.modules.auth.domain.useCase.UpdateProfileUseCase
+import com.example.emergencyresponder.modules.auth.domain.usecase.ChangeEmailUseCase
+import com.example.emergencyresponder.modules.auth.domain.usecase.UpdateProfileUseCase
 import com.example.emergencyresponder.modules.auth.ui.LoginActivity
-import com.example.emergencyresponder.modules.dashboard.domain.viewModelFactory.ProfileViewModelFactory
-import com.example.emergencyresponder.modules.dashboard.domain.viewmodel.ProfileState
-import com.example.emergencyresponder.modules.dashboard.domain.viewmodel.ProfileViewModel
+import com.example.emergencyresponder.modules.dashboard.ui.viewModelFactory.ProfileViewModelFactory
+import com.example.emergencyresponder.modules.dashboard.ui.viewmodel.ProfileState
+import com.example.emergencyresponder.modules.dashboard.ui.viewmodel.ProfileViewModel
 
 
 class ProfileFragment : Fragment() {

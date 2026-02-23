@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
-import android.media.MediaPlayer
 import android.media.MediaRecorder
 import android.media.audiofx.NoiseSuppressor
 import android.os.Build
@@ -17,6 +16,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import com.example.emergencyresponder.core.manager.SPreferenceManager
 import com.example.emergencyresponder.modules.dashboard.domain.notifier.VoiceAlertManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +26,6 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
-import kotlin.math.abs
 
 class MicListenService : Service() {
 
@@ -355,7 +354,8 @@ class MicListenService : Service() {
     }
 
     private fun playSiren() {
-        voiceManager.speak("Hi, I am here")
+        var name = SPreferenceManager.getUserName()
+        voiceManager.speak("Hi, $name I am here")
     }
 
 

@@ -3,12 +3,13 @@ package com.example.emergencyresponder.modules.dashboard.ui
 
 import android.Manifest
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -22,12 +23,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.emergencyresponder.R
-import com.example.emergencyresponder.core.objects.SPreferenceManager
+import com.example.emergencyresponder.core.manager.SPreferenceManager
 import com.example.emergencyresponder.core.utils.SOSUtils
 import com.example.emergencyresponder.databinding.FragmentSafetyDashboardBinding
-import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
 import com.example.emergencyresponder.modules.dashboard.data.model.DashboardStatus
-import com.example.emergencyresponder.modules.dashboard.domain.viewmodel.SafetyDashboardViewModel
+import com.example.emergencyresponder.modules.dashboard.ui.viewmodel.SafetyDashboardViewModel
 import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
 import com.example.emergencyresponder.modules.dashboard.ui.service.MicListenService
 import com.example.emergencyresponder.modules.dashboard.ui.service.PowerPressAccessibilityService
@@ -85,8 +85,7 @@ class SafetyDashboardFragment : Fragment() {
             true
         }
 
-
-
+        checkBatteryOptimization()
 
         binding.capsuleSystem.setOnClickListener { ensureNotificationPermission() }
 
@@ -164,32 +163,6 @@ class SafetyDashboardFragment : Fragment() {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        startCrashDetectionService()
-        ensureNotificationPermission()
-        updateSystemStatus()
-
-
-        startMicServiceIfPermissionGranted() // ✅ ADD THIS
-
-        lifecycleScope.launch {
-            viewModel.dashboardStatus.collectLatest { status ->
-                updateIndicators(status)
-            }
-        }
-        viewModel.checkEmergencyContactsExist()
-
-        viewModel.navigateToEmergencyContacts.observe(viewLifecycleOwner) { shouldNavigate ->
-            Log.d("SafetyFragment", "Observer triggered. Should Navigate: $shouldNavigate") // <--- ADD LOG
-
-            if (shouldNavigate) {
-                showEmptyContactsWarning()
-                viewModel.onNavigationHandled()
-            }
-        }
-    }
     private fun showEmptyContactsWarning() {
         Snackbar.make(binding.root, "⚠️ No Emergency Contacts Found!", Snackbar.LENGTH_INDEFINITE)
             .setAction("ADD NOW") {
@@ -249,21 +222,6 @@ class SafetyDashboardFragment : Fragment() {
     }
 
 
-    private fun updateSystemStatus() {
-        val hasMic = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
-        val hasLocation = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        val hasNotif = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-        } else true
-        val hasAccessibility = isAccessibilityServiceEnabled()
-
-        viewModel.updateStatus(
-            hasMic = hasMic,
-            hasLocation = hasLocation,
-            hasNotif = hasNotif,
-            hasAccessibility = hasAccessibility
-        )
-    }
 
     private fun updateIndicators(status: DashboardStatus) {
         binding.dotAudio.setBackgroundResource(if (status.audio) R.drawable.circle_indicator_green else R.drawable.circle_indicator_red)
@@ -402,6 +360,95 @@ class SafetyDashboardFragment : Fragment() {
 
         dialog.show()
         dialog.window?.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT))
+    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        startCrashDetectionService()
+        ensureNotificationPermission()
+        updateSystemStatus()
+        startMicServiceIfPermissionGranted()
+
+        lifecycleScope.launch {
+            viewModel.dashboardStatus.collectLatest { status ->
+                updateIndicators(status)
+            }
+        }
+
+        viewModel.checkEmergencyContactsExist()
+        viewModel.navigateToEmergencyContacts.observe(viewLifecycleOwner) { shouldNavigate ->
+            if (shouldNavigate) {
+                showEmptyContactsWarning()
+                viewModel.onNavigationHandled()
+            }
+        }
+    }
+
+    private fun updateSystemStatus() {
+        val hasMic = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        val hasLocation = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+        val hasNotif = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        } else true
+
+        val pm = requireContext().getSystemService(Context.POWER_SERVICE) as PowerManager
+        val isBatteryUnrestricted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            pm.isIgnoringBatteryOptimizations(requireContext().packageName)
+        } else true
+
+        val hasAccessibility = isAccessibilityServiceEnabled()
+
+        // ✅ Pass all parameters to ViewModel (ensure your updateStatus function in VM accepts these)
+        viewModel.updateStatus(
+            hasMic = hasMic,
+            hasLocation = hasLocation,
+            hasNotif = hasNotif,
+            hasAccessibility = hasAccessibility
+            // isBatteryUnrestricted = isBatteryUnrestricted // Optional: add to your status model if you want a dot for it
+        )
+    }
+
+    // --- BATTERY OPTIMIZATION LOGIC ---
+
+    private fun checkBatteryOptimization() {
+        val pm = requireContext().getSystemService(Context.POWER_SERVICE) as PowerManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Only show if not already unrestricted and we haven't asked yet
+            if (!pm.isIgnoringBatteryOptimizations(requireContext().packageName) &&
+                !SPreferenceManager.hasAskedBattery()) {
+                showBatteryGuideDialog()
+            }
+        }
+    }
+
+    private fun showBatteryGuideDialog() {
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle("🚨 SOS Reliability Alert")
+            .setMessage("To ensure SOS messages send immediately when the app is closed, please set battery usage to 'Unrestricted'.")
+            .setCancelable(false)
+            .setPositiveButton("Go to Settings") { _, _ ->
+                SPreferenceManager.setBatteryAsked(true)
+                openBatterySettings()
+            }
+            .setNegativeButton("Later") { _, _ ->
+                SPreferenceManager.setBatteryAsked(true)
+            }
+            .show()
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(
+            ContextCompat.getColor(requireContext(), R.color.primaryColor)
+        )
+    }
+
+    private fun openBatterySettings() {
+        try {
+            val intent = Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+            startActivity(intent)
+        } catch (e: Exception) {
+            val intent = Intent(android.provider.Settings.ACTION_SETTINGS)
+            startActivity(intent)
+        }
     }
 
     override fun onDestroyView() {

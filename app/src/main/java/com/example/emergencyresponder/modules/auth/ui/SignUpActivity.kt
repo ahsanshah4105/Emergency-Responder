@@ -11,10 +11,10 @@ import com.example.emergencyresponder.databinding.ActivitySignUpBinding
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.repository.SignUpRepositoryImpl
-import com.example.emergencyresponder.modules.auth.domain.useCase.SignUpUseCase
-import com.example.emergencyresponder.modules.auth.domain.viewModelFactory.SignUpViewModelFactory
-import com.example.emergencyresponder.modules.auth.domain.viewmodel.AuthState
-import com.example.emergencyresponder.modules.auth.domain.viewmodel.SignUpViewModel
+import com.example.emergencyresponder.modules.auth.domain.usecase.SignUpUseCase
+import com.example.emergencyresponder.modules.auth.ui.viewModelFactory.SignUpViewModelFactory
+import com.example.emergencyresponder.modules.auth.ui.viewmodel.AuthState
+import com.example.emergencyresponder.modules.auth.ui.viewmodel.SignUpViewModel
 
 class SignUpActivity : BaseActivity() {
 

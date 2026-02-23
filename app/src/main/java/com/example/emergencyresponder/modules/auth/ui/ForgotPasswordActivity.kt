@@ -8,10 +8,10 @@ import com.example.emergencyresponder.core.utils.BaseActivity
 import com.example.emergencyresponder.databinding.ActivityForgotPasswordBinding
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.repository.ResetPasswordRepositoryImpl
-import com.example.emergencyresponder.modules.auth.domain.useCase.ResetPasswordUseCase
-import com.example.emergencyresponder.modules.auth.domain.viewModelFactory.ForgotPasswordViewModelFactory
-import com.example.emergencyresponder.modules.auth.domain.viewmodel.AuthState
-import com.example.emergencyresponder.modules.auth.domain.viewmodel.ForgotPasswordViewModel
+import com.example.emergencyresponder.modules.auth.domain.usecase.ResetPasswordUseCase
+import com.example.emergencyresponder.modules.auth.ui.viewModelFactory.ForgotPasswordViewModelFactory
+import com.example.emergencyresponder.modules.auth.ui.viewmodel.AuthState
+import com.example.emergencyresponder.modules.auth.ui.viewmodel.ForgotPasswordViewModel
 
 class ForgotPasswordActivity : BaseActivity() {
     private lateinit var binding: ActivityForgotPasswordBinding

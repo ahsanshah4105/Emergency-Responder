@@ -13,9 +13,13 @@ import android.telephony.SmsManager
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import com.example.emergencyresponder.core.objects.SPreferenceManager
+import com.example.emergencyresponder.core.manager.SPreferenceManager
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -25,16 +29,21 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 object SOSUtils {
 
     // --- Configuration ---
-    private const val INSTANCE_ID = "7103508163"
-    private const val API_TOKEN = "83614a390cd24a5388353b6b2057a91d0c61da30e8bc4d6092"
+    private const val INSTANCE_ID = "7103514169"
+    private const val API_TOKEN = "73f2ce51c6184439be5e9e7a413400709128d9f2e0b94f7b93"
 
     private var mediaRecorder: MediaRecorder? = null
     private var audioFile: File? = null
-
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .build()
     fun startEmergencySequence(context: Context, phoneNumbers: List<String>) {
 
         // 1️⃣ SEND SMS IMMEDIATELY (SIM)
@@ -124,64 +133,64 @@ object SOSUtils {
     private fun sendSOSViaGreenApi(context: Context, targetPhoneNumbers: List<String>, audioFile: File?) {
         getCurrentLocation(context) { lat, lng ->
             val messageText = getMessage(lat, lng)
-            val feedback = if (audioFile != null) "Uploading Audio SOS..." else "Sending Text SOS..."
-            Toast.makeText(context, feedback, Toast.LENGTH_SHORT).show()
 
-            Thread {
-                val client = OkHttpClient()
+            // ✅ Use GlobalScope or a dedicated Service Scope to ensure it survives
+            // the calling function's lifecycle
+            CoroutineScope(Dispatchers.IO).launch {
                 var successCount = 0
 
                 for (rawNumber in targetPhoneNumbers) {
                     try {
                         val cleanNumber = rawNumber.replace("+", "").replace(" ", "")
-                        if (cleanNumber.isNotEmpty()) {
-                            val chatId = "$cleanNumber@c.us"
-                            val request: Request
+                        if (cleanNumber.isEmpty()) continue
 
-                            // --- OPTION A: SEND AUDIO FILE WITH CAPTION ---
-                            if (audioFile != null && audioFile.exists() && audioFile.length() > 0) {
+                        val chatId = "$cleanNumber@c.us"
+                        val request: Request
 
-                                val requestBody = MultipartBody.Builder()
-                                    .setType(MultipartBody.FORM)
-                                    .addFormDataPart("chatId", chatId)
-                                    .addFormDataPart(
-                                        "file",
-                                        audioFile.name,
-                                        audioFile.asRequestBody("audio/m4a".toMediaTypeOrNull())
+                        if (audioFile != null && audioFile.length() > 0) {
+                            val requestBody = MultipartBody.Builder()
+                                .setType(MultipartBody.FORM)
+                                .addFormDataPart("chatId", chatId)
+                                .addFormDataPart(
+                                    "file",
+                                    audioFile.name,
+                                    audioFile.asRequestBody("audio/m4a".toMediaTypeOrNull())
+                                )
+                                .build()
 
-                                    )
-                                    .build()
-
-                                val url = "https://api.green-api.com/waInstance$INSTANCE_ID/sendFileByUpload/$API_TOKEN"
-                                request = Request.Builder().url(url).post(requestBody).build()
-
-
-                                // --- OPTION B: SEND TEXT ONLY (Fallback) ---
-                            } else {
-                                val jsonBody = JSONObject()
-                                jsonBody.put("chatId", chatId)
-                                jsonBody.put("message", messageText)
-                                val mediaType = "application/json; charset=utf-8".toMediaType()
-                                val requestBody = jsonBody.toString().toRequestBody(mediaType)
-
-                                val url = "https://api.green-api.com/waInstance$INSTANCE_ID/sendMessage/$API_TOKEN"
-                                request = Request.Builder().url(url).post(requestBody).build()
+                            request = Request.Builder()
+                                .url("https://api.green-api.com/waInstance$INSTANCE_ID/sendFileByUpload/$API_TOKEN")
+                                .post(requestBody)
+                                .build()
+                        } else {
+                            val jsonBody = JSONObject().apply {
+                                put("chatId", chatId)
+                                put("message", messageText)
                             }
-
-                            val response = client.newCall(request).execute()
-                            if (response.isSuccessful) successCount++
-                            response.close()
+                            val body = jsonBody.toString().toRequestBody("application/json".toMediaType())
+                            request = Request.Builder()
+                                .url("https://api.green-api.com/waInstance$INSTANCE_ID/sendMessage/$API_TOKEN")
+                                .post(body)
+                                .build()
                         }
-                    } catch (e: Exception) { e.printStackTrace() }
+
+                        client.newCall(request).execute().use { response ->
+                            if (response.isSuccessful) successCount++
+                            Log.d("SOSUtils", "Response: ${response.code}")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("SOSUtils", "GreenAPI Error: ${e.message}")
+                    }
                 }
 
-                Handler(Looper.getMainLooper()).post {
-                    if (successCount > 0) Toast.makeText(context, "✅ WhatsApp SOS Sent ($successCount)", Toast.LENGTH_LONG).show()
+                withContext(Dispatchers.Main) {
+                    if (successCount > 0) {
+                        Toast.makeText(context, "✅ WhatsApp SOS Sent ($successCount)", Toast.LENGTH_SHORT).show()
+                    }
                 }
-            }.start()
+            }
         }
     }
-
 
     fun sendSOSViaSMS(context: Context, phoneNumbers: List<String>) {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) return

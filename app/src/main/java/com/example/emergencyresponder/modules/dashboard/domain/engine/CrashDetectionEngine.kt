@@ -3,7 +3,7 @@ package com.example.emergencyresponder.modules.dashboard.domain.engine
 import com.example.emergencyresponder.modules.dashboard.data.ml.CrashMlAnalyzer
 import com.example.emergencyresponder.modules.dashboard.data.model.DetectionResult
 import com.example.emergencyresponder.modules.dashboard.data.model.SensorState
-import com.example.emergencyresponder.modules.dashboard.domain.useCase.CrashDetectionUseCase
+import com.example.emergencyresponder.modules.dashboard.domain.usecase.CrashDetectionUseCase
 
 class CrashDetectionEngine(
     private val mlAnalyzer: CrashMlAnalyzer,

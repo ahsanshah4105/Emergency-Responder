@@ -15,17 +15,17 @@ import androidx.lifecycle.lifecycleScope
 import com.example.emergencyresponder.R // Ensure this is your project's R
 import com.example.emergencyresponder.core.navigation.AppNavigator
 import com.example.emergencyresponder.core.navigation.AppRoute
-import com.example.emergencyresponder.core.objects.SPreferenceManager
+import com.example.emergencyresponder.core.manager.SPreferenceManager
 import com.example.emergencyresponder.core.utils.ValidationUtils
 import com.example.emergencyresponder.databinding.ActivityLoginBinding
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.model.User
 import com.example.emergencyresponder.modules.auth.data.repository.LoginRepositoryImpl
-import com.example.emergencyresponder.modules.auth.domain.useCase.LoginUseCase
-import com.example.emergencyresponder.modules.auth.domain.viewModelFactory.LoginViewModelFactory
-import com.example.emergencyresponder.modules.auth.domain.viewmodel.AuthState
-import com.example.emergencyresponder.modules.auth.domain.viewmodel.LoginViewModel
+import com.example.emergencyresponder.modules.auth.domain.usecase.LoginUseCase
+import com.example.emergencyresponder.modules.auth.ui.viewModelFactory.LoginViewModelFactory
+import com.example.emergencyresponder.modules.auth.ui.viewmodel.AuthState
+import com.example.emergencyresponder.modules.auth.ui.viewmodel.LoginViewModel
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.launch

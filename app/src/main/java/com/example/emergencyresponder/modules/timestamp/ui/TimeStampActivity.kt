@@ -3,17 +3,12 @@ package com.example.emergencyresponder.modules.timestamp.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.example.emergencyresponder.core.objects.SPreferenceManager
+import com.example.emergencyresponder.core.manager.SPreferenceManager
 import com.example.emergencyresponder.core.utils.SOSBlastManager
-import com.example.emergencyresponder.core.utils.SOSUtils
 import com.example.emergencyresponder.databinding.ActivityTimeStampBinding
-import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
-import com.example.emergencyresponder.modules.timestamp.domain.viewmodel.TimeStampViewModel
-import com.google.firebase.Firebase
-import com.google.firebase.firestore.firestore
+import com.example.emergencyresponder.modules.timestamp.ui.viewmodel.TimeStampViewModel
 
 class TimeStampActivity : AppCompatActivity() {
 

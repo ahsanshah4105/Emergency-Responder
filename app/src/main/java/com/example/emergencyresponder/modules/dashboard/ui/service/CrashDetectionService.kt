@@ -239,9 +239,8 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.util.Log
-import com.example.emergencyresponder.core.objects.SPreferenceManager
+import com.example.emergencyresponder.core.manager.SPreferenceManager
 import com.example.emergencyresponder.core.utils.SOSBlastManager
-import com.example.emergencyresponder.core.utils.SOSUtils
 import com.example.emergencyresponder.modules.dashboard.data.ml.TFLiteCrashMlAnalyzer
 import com.example.emergencyresponder.modules.dashboard.data.model.DetectionResult
 import com.example.emergencyresponder.modules.dashboard.data.provider.AndroidSensorProvider
@@ -251,7 +250,7 @@ import com.example.emergencyresponder.modules.dashboard.domain.engine.FeatureExt
 import com.example.emergencyresponder.modules.dashboard.domain.notifier.AlertNotifier
 import com.example.emergencyresponder.modules.dashboard.domain.notifier.AndroidAlertNotifier
 import com.example.emergencyresponder.modules.dashboard.domain.notifier.VoiceAlertManager
-import com.example.emergencyresponder.modules.dashboard.domain.useCase.CrashDetectionUseCase
+import com.example.emergencyresponder.modules.dashboard.domain.usecase.CrashDetectionUseCase
 
 class CrashDetectionService : Service() {
 

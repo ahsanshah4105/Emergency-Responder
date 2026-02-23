@@ -19,12 +19,11 @@ import com.example.emergencyresponder.databinding.FragmentEmergencyContactBindin
 import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
 import com.example.emergencyresponder.modules.dashboard.data.datasource.EmergencyContactRemoteDataSource
 import com.example.emergencyresponder.modules.dashboard.data.repositoryImpl.EmergencyContactRepositoryImpl
-import com.example.emergencyresponder.modules.dashboard.domain.adapters.EmergencyContactsAdapter
-import com.example.emergencyresponder.modules.dashboard.domain.viewModelFactory.EmergencyContactViewModelFactory
-import com.example.emergencyresponder.modules.dashboard.domain.viewmodel.EmergencyContactViewModel
+import com.example.emergencyresponder.modules.dashboard.ui.adapters.EmergencyContactsAdapter
+import com.example.emergencyresponder.modules.dashboard.ui.viewModelFactory.EmergencyContactViewModelFactory
+import com.example.emergencyresponder.modules.dashboard.ui.viewmodel.EmergencyContactViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import androidx.cardview.widget.CardView
 
 class EmergencyContactFragment : Fragment() {
 

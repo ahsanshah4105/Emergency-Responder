@@ -6,7 +6,7 @@ import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.example.emergencyresponder.core.navigation.AppNavigator
 import com.example.emergencyresponder.core.navigation.AppRoute
-import com.example.emergencyresponder.core.objects.SPreferenceManager
+import com.example.emergencyresponder.core.manager.SPreferenceManager
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.view.animation.AnimationUtils

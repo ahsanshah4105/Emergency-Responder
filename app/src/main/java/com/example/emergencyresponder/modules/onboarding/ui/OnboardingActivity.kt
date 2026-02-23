@@ -1,7 +1,5 @@
 package com.example.emergencyresponder.modules.onboarding.ui
 
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -9,12 +7,11 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.emergencyresponder.core.constants.AppConstant
 import com.example.emergencyresponder.core.navigation.AppNavigator
 import com.example.emergencyresponder.core.navigation.AppRoute
-import com.example.emergencyresponder.core.objects.SPreferenceManager
+import com.example.emergencyresponder.core.manager.SPreferenceManager
 import com.example.emergencyresponder.core.utils.AppPermissions
 import com.example.emergencyresponder.databinding.ActivityOnboardingBinding
-import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
-import com.example.emergencyresponder.modules.onboarding.data.adapter.OnboardingViewPagerAdapter
-import com.example.emergencyresponder.modules.onboarding.domain.viewmodel.OnboardingViewModel
+import com.example.emergencyresponder.modules.onboarding.ui.adapter.OnboardingViewPagerAdapter
+import com.example.emergencyresponder.modules.onboarding.ui.viewmodel.OnboardingViewModel
 
 class OnboardingActivity : AppCompatActivity() {
 

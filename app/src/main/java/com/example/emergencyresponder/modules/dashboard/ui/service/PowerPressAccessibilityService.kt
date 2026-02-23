@@ -2,10 +2,9 @@ package com.example.emergencyresponder.modules.dashboard.ui.service
 
 
 import android.accessibilityservice.AccessibilityService
-import android.content.Intent
 import com.example.emergencyresponder.modules.dashboard.domain.engine.PowerPressDetector
 import android.view.accessibility.AccessibilityEvent
-import com.example.emergencyresponder.modules.dashboard.domain.useCase.TriggerEmergencyUseCase
+import com.example.emergencyresponder.modules.dashboard.domain.usecase.TriggerEmergencyUseCase
 import com.example.emergencyresponder.modules.dashboard.data.notifierImpl.AndroidEmergencyTrigger
 class PowerPressAccessibilityService : AccessibilityService() {
 
