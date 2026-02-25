@@ -1,5 +1,5 @@
 package com.example.emergencyresponder.modules.auth.domain.repository
 
-interface ResetPasswordRepository {
+interface ForgotPasswordRepository {
     suspend fun resetPassword(email: String)
 }

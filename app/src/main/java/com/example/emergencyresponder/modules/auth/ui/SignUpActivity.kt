@@ -63,12 +63,10 @@ class SignUpActivity : BaseActivity() {
                     binding.btnProgressBar.visibility = View.VISIBLE
                     binding.signUptButton.isEnabled = false
                 }
-
                 is AuthState.Success -> {
                     binding.btnProgressBar.visibility = View.GONE
-                    binding.signUptButton.isEnabled = true
+                    Toast.makeText(this, state.message, Toast.LENGTH_LONG).show()
                 }
-
                 is AuthState.Error -> {
                     binding.btnProgressBar.visibility = View.GONE
                     binding.signUptButton.isEnabled = true
@@ -80,27 +78,24 @@ class SignUpActivity : BaseActivity() {
 
 
     private fun setupValidationListeners() {
-        viewModel.userNameError.observe(this) {binding.contactName.error = it}
-        viewModel.emailError.observe(this) { binding.emailEditText.error = it }
-        viewModel.passwordError.observe(this) { binding.confirmPassword.error = it }
-        viewModel.nameError.observe(this) { binding.contactName.error = it }
-        viewModel.phoneError.observe(this) { binding.emergencyContactPhone.error = it }
-
-        binding.userNameEditText.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) viewModel.validateUserName(binding.userNameEditText.text.toString())
+        viewModel.errors.observe(this) { errorMap ->
+            binding.userNameEditText.error = errorMap["userName"]
+            binding.emailEditText.error = errorMap["email"]
+            binding.newPassword.error = errorMap["password"]
+            binding.contactName.error = errorMap["contactName"] // Correct binding now
+            binding.emergencyContactPhone.error = errorMap["phone"]
         }
 
-        binding.emailEditText.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) viewModel.validateEmail(binding.emailEditText.text.toString())
+        // Using the centralized focus change logic
+        binding.userNameEditText.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) viewModel.onFieldFocusChanged("userName", binding.userNameEditText.text.toString())
         }
 
         binding.contactName.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) viewModel.validateName(binding.contactName.text.toString())
+            if (!hasFocus) viewModel.onFieldFocusChanged("contactName", binding.contactName.text.toString())
         }
 
-        binding.emergencyContactPhone.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) viewModel.validatePhone(binding.emergencyContactPhone.text.toString().trim())
-        }
+        // Similarly add for other fields...
     }
     private fun setupListeners() {
         binding.signUptButton.setOnClickListener {
@@ -122,7 +117,7 @@ class SignUpActivity : BaseActivity() {
                 password = password,
                 confirmPassword = confirmPassword,
                 emergencyPhone = emergencyPhone,
-                emergencyName = contactName
+                contactName = contactName
             )
         }
 

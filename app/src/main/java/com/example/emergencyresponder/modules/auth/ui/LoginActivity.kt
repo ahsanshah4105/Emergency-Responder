@@ -18,7 +18,6 @@ import com.example.emergencyresponder.core.utils.ValidationUtils
 import com.example.emergencyresponder.databinding.ActivityLoginBinding
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
-import com.example.emergencyresponder.modules.auth.data.model.User
 import com.example.emergencyresponder.modules.auth.data.repository.LoginRepositoryImpl
 import com.example.emergencyresponder.modules.auth.data.repository.UserPreferencesImpl
 import com.example.emergencyresponder.modules.auth.domain.usecase.LoginUseCase
@@ -34,23 +33,22 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private lateinit var viewModel: LoginViewModel
 
-    private lateinit var user: User
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Manual Injection (Consider using Hilt/Koin in the future)
         val authRemoteDataSource = AuthRemoteDataSource()
         val remoteDataSource = UserRemoteDataSource()
         val userPreferences = UserPreferencesImpl()
-        val repository = LoginRepositoryImpl(authRemoteDataSource,remoteDataSource, userPreferences)
+
+        val repository =
+            LoginRepositoryImpl(authRemoteDataSource, remoteDataSource, userPreferences)
+
         val useCase = LoginUseCase(repository)
         val factory = LoginViewModelFactory(useCase)
-        viewModel = ViewModelProvider(this, factory)[LoginViewModel::class.java]
 
+        viewModel = ViewModelProvider(this, factory)[LoginViewModel::class.java]
         setupValidationListeners()
         setupListeners()
         setupObservers()
@@ -63,20 +61,23 @@ class LoginActivity : AppCompatActivity() {
                 is AuthState.Loading -> {
                     binding.btnProgressBar.visibility = View.VISIBLE
                 }
+
                 is AuthState.Success -> {
                     binding.btnProgressBar.visibility = View.INVISIBLE
                     Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show()
                 }
+
                 is AuthState.Error -> {
                     binding.btnProgressBar.visibility = View.INVISIBLE
                     Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
                 }
+
             }
         }
 
         viewModel.route.observe(this) { event ->
-                event.getContentIfNotHandled()?.let { route ->
-                    AppNavigator.navigate(this, route, finishCurrent = true)
+            event.getContentIfNotHandled()?.let { route ->
+                AppNavigator.navigate(this, route, finishCurrent = true)
             }
         }
     }
@@ -88,11 +89,10 @@ class LoginActivity : AppCompatActivity() {
 
             if (validateInput(email, password)) {
                 viewModel.login(email, password)
-                binding.loginButton.text = ""
+
             }
         }
 
-        // Google Login Button (Make sure this ID exists in your XML)
         binding.loginWithGoogle.setOnClickListener {
             launchGoogleSignIn()
         }
@@ -109,23 +109,18 @@ class LoginActivity : AppCompatActivity() {
     private fun launchGoogleSignIn() {
         val credentialManager = CredentialManager.create(this)
 
-        // Use your Web Client ID from Firebase Console / Google Cloud Console
-        val googleIdOption = GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(false)
-            .setServerClientId(getString(R.string.default_web_client_id))
-            .build()
+        val googleIdOption = GetGoogleIdOption.Builder().setFilterByAuthorizedAccounts(false)
+            .setServerClientId(getString(R.string.default_web_client_id)).build()
 
-        val request = GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdOption)
-            .build()
+        val request = GetCredentialRequest.Builder().addCredentialOption(googleIdOption).build()
 
         lifecycleScope.launch {
             try {
                 val result = credentialManager.getCredential(this@LoginActivity, request)
                 handleSignInResult(result)
             } catch (e: Exception) {
-                Log.e("Auth", "Google Sign-In failed: ${e.message}")
-                Toast.makeText(this@LoginActivity, "Google Sign-In Cancelled", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@LoginActivity, "Google Sign-In Cancelled", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }
@@ -160,13 +155,15 @@ class LoginActivity : AppCompatActivity() {
         binding.loginEmailEditText.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 val email = binding.loginEmailEditText.text.toString()
-                binding.loginEmailEditText.error = if (!ValidationUtils.isEmailValid(email)) "Invalid email" else null
+                binding.loginEmailEditText.error =
+                    if (!ValidationUtils.isEmailValid(email)) "Invalid email" else null
             }
         }
         binding.loginPasswordEditText.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 val password = binding.loginPasswordEditText.text.toString()
-                binding.loginPasswordEditText.error = if (!ValidationUtils.isNotEmpty(password)) "Password cannot be empty" else null
+                binding.loginPasswordEditText.error =
+                    if (!ValidationUtils.isNotEmpty(password)) "Password cannot be empty" else null
             }
         }
     }

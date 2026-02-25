@@ -7,8 +7,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.emergencyresponder.core.base.BaseActivity
 import com.example.emergencyresponder.databinding.ActivityForgotPasswordBinding
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
-import com.example.emergencyresponder.modules.auth.data.repository.ResetPasswordRepositoryImpl
-import com.example.emergencyresponder.modules.auth.domain.usecase.ResetPasswordUseCase
+import com.example.emergencyresponder.modules.auth.data.repository.ForgotPasswordRepositoryImpl
+import com.example.emergencyresponder.modules.auth.domain.usecase.ForgotPasswordUseCase
 import com.example.emergencyresponder.modules.auth.ui.viewModelFactory.ForgotPasswordViewModelFactory
 import com.example.emergencyresponder.modules.auth.ui.viewmodel.AuthState
 import com.example.emergencyresponder.modules.auth.ui.viewmodel.ForgotPasswordViewModel
@@ -22,8 +22,8 @@ class ForgotPasswordActivity : BaseActivity() {
         binding = ActivityForgotPasswordBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val repository = ResetPasswordRepositoryImpl(AuthRemoteDataSource())
-        val useCase = ResetPasswordUseCase(repository)
+        val repository = ForgotPasswordRepositoryImpl(AuthRemoteDataSource())
+        val useCase = ForgotPasswordUseCase(repository)
         viewModel = ViewModelProvider(this, ForgotPasswordViewModelFactory(useCase))[ForgotPasswordViewModel::class.java]
 
         setupObservers()

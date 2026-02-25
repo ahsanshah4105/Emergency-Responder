@@ -2,7 +2,6 @@ package com.example.emergencyresponder.modules.auth.data.dataSource
 
 import com.example.emergencyresponder.modules.auth.data.model.User
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.tasks.await
 
 

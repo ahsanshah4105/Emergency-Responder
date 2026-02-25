@@ -1,5 +1,6 @@
 package com.example.emergencyresponder.modules.auth.data.repository
 
+import com.example.emergencyresponder.core.network.AuthException
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.model.User
@@ -15,7 +16,7 @@ class SignUpRepositoryImpl(
 
         val result = authDataSource.createUser(email, password)
 
-        val firebaseUser = result.user ?: throw Exception("User creation failed")
+        val firebaseUser = result.user ?: throw AuthException.UserCreationFailedException()
 
         val uid = firebaseUser.uid
 

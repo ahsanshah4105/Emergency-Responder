@@ -11,5 +11,5 @@ interface UserPreferences {
     fun setUserLoggedIn(isLoggedIn: Boolean)
 //    fun isUserLoggedIn(): Boolean
 //
-//    fun logoutUser()
+    fun logoutUser()
 }

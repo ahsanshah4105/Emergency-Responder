@@ -29,7 +29,7 @@ class UserPreferencesImpl : UserPreferences {
 //        return SPreferenceManager.isUserLoggedIn(false)
 //    }
 //
-//    override fun logoutUser() {
-//        SPreferenceManager.logoutUser()
-//    }
+    override fun logoutUser() {
+        SPreferenceManager.logoutUser()
+    }
 }
