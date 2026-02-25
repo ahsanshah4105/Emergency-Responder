@@ -4,20 +4,23 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.example.emergencyresponder.core.base.EmergencyResponderApp
 import com.example.emergencyresponder.core.constants.AppConstant
 import com.example.emergencyresponder.core.navigation.AppNavigator
 import com.example.emergencyresponder.core.navigation.AppRoute
-import com.example.emergencyresponder.core.manager.SPreferenceManager
 import com.example.emergencyresponder.core.utils.AppPermissions
 import com.example.emergencyresponder.databinding.ActivityOnboardingBinding
 import com.example.emergencyresponder.modules.onboarding.ui.adapter.OnboardingViewPagerAdapter
 import com.example.emergencyresponder.modules.onboarding.ui.viewmodel.OnboardingViewModel
+import com.example.emergencyresponder.modules.onboarding.ui.viewmodelfactory.OnboardingViewModelFactory
 
 class OnboardingActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityOnboardingBinding
-    private val viewModel: OnboardingViewModel by viewModels()
 
+    private val viewModel: OnboardingViewModel by viewModels {
+        val container = (application as EmergencyResponderApp).appContainer
+        OnboardingViewModelFactory(container.onboardingRepository)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,8 +28,8 @@ class OnboardingActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupViewPager()
+        setupObservers()
         setupListeners()
-
     }
 
     private fun setupViewPager() {
@@ -35,57 +38,56 @@ class OnboardingActivity : AppCompatActivity() {
         binding.dotsIndicator.attachTo(binding.onboardingViewPager)
     }
 
-    private fun setupListeners() {
-        val adapter = binding.onboardingViewPager.adapter!!
+    private fun setupObservers() {
+        viewModel.navigationEvent.observe(this) { event ->
+            event.getContentIfNotHandled()?.let { navigation ->
+                when (navigation) {
+                    is OnboardingViewModel.OnboardingNavigation.NavigateToLogin -> {
+                        AppNavigator.navigate(this, AppRoute.Login, finishCurrent = true)
+                    }
 
-        binding.continueBtn.setOnClickListener {
-            val currentPage = binding.onboardingViewPager.currentItem
-            val adapter = binding.onboardingViewPager.adapter!!
+                    is OnboardingViewModel.OnboardingNavigation.RequestPermission -> {
+                        AppPermissions.requestLocationPermission(
+                            this,
+                            AppConstant.LOCATION_PERMISSION_CODE
+                        )
+                    }
 
-            if (viewModel.isLastPage(currentPage, adapter.itemCount)) {
-                if (AppPermissions.hasLocationPermission(this)) {
-                    proceedAfterPermission()
-                } else {
-                    AppPermissions.requestLocationPermission(
-                        this,
-                        AppConstant.LOCATION_PERMISSION_CODE
-                    )
+                    is OnboardingViewModel.OnboardingNavigation.MoveToNextPage -> {
+                        binding.onboardingViewPager.currentItem = navigation.nextIndex
+                    }
                 }
-            } else {
-                binding.onboardingViewPager.currentItem = currentPage + 1
             }
         }
-
-
     }
 
+    private fun setupListeners() {
+        binding.continueBtn.setOnClickListener {
+            viewModel.onContinueClicked(
+                currentPage = binding.onboardingViewPager.currentItem,
+                totalItems = binding.onboardingViewPager.adapter?.itemCount ?: 0,
+                hasPermission = AppPermissions.hasLocationPermission(this)
+            )
+        }
+    }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == AppConstant.LOCATION_PERMISSION_CODE) {
             if (AppPermissions.hasLocationPermission(this)) {
-                navigateToLogin()
+                viewModel.onContinueClicked(
+                    binding.onboardingViewPager.currentItem,
+                    binding.onboardingViewPager.adapter?.itemCount ?: 0,
+                    true
+                )
             } else {
                 Toast.makeText(this, "Location permission required", Toast.LENGTH_SHORT).show()
             }
         }
-    }
-    private fun navigateToLogin() {
-        AppNavigator.navigate(
-            context = this,
-            route = AppRoute.Login,
-            finishCurrent = true
-        )
-    }
-    private fun proceedAfterPermission() {
-        SPreferenceManager.setOnboardingCompleted()
-        AppNavigator.navigate(
-            context = this,
-            route = AppRoute.Login,
-            finishCurrent = true
-        )
     }
 
 }
