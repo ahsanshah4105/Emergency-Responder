@@ -251,6 +251,9 @@ import com.example.emergencyresponder.modules.dashboard.domain.notifier.AlertNot
 import com.example.emergencyresponder.modules.dashboard.domain.notifier.AndroidAlertNotifier
 import com.example.emergencyresponder.modules.dashboard.domain.notifier.VoiceAlertManager
 import com.example.emergencyresponder.modules.dashboard.domain.usecase.CrashDetectionUseCase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 class CrashDetectionService : Service() {
 
@@ -259,11 +262,9 @@ class CrashDetectionService : Service() {
     private lateinit var sensorProvider: SensorProvider
     private lateinit var engine: CrashDetectionEngine
     private lateinit var notifier: AlertNotifier
-    lateinit var voiceManager: VoiceAlertManager
     private var wakeLock: PowerManager.WakeLock? = null
-    private val EMERGENCY_NUMBER = "+923199596412"
 
-    // --- FLAGS TO PREVENT SPAM ---
+
     private var crashAlreadyDetected = false
     private var snatchAlreadyDetected = false
 
@@ -271,7 +272,9 @@ class CrashDetectionService : Service() {
     private var powerPressCount = 0
     private var lastPressTime = 0L
     private val ACTION_CANCEL = "ACTION_CANCEL_EMERGENCY"
-    // This receiver detects Screen ON / OFF events (Power Button presses)
+
+    private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    lateinit var voiceAlertManager: VoiceAlertManager
     private val screenReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == Intent.ACTION_SCREEN_OFF || intent?.action == Intent.ACTION_SCREEN_ON) {
@@ -304,7 +307,7 @@ class CrashDetectionService : Service() {
         // 2. Initialize Components
         sensorProvider = AndroidSensorProvider(this)
         notifier = AndroidAlertNotifier(this)
-        voiceManager = VoiceAlertManager(this)
+        voiceAlertManager = VoiceAlertManager(this)
 
         // 3. Setup ML Engine
         val savedSens = SPreferenceManager.getSensitivity()
@@ -349,7 +352,7 @@ class CrashDetectionService : Service() {
             startForegroundInternal()
 
             // B. Speak Confirmation
-            voiceManager.speak("Emergency protocol initiated. Recording audio.")
+
 
             // C. Start the Sequence (SMS -> Audio -> WhatsApp)
             // Passing 'this' (Service Context) ensures recording keeps running!
@@ -380,7 +383,7 @@ class CrashDetectionService : Service() {
         CrashCountdownManager.cancel()
 
         // 2. Speak Feedback
-        voiceManager.speak("You are safe. Countdown cancelled.")
+        voiceAlertManager.speak("You are safe. Countdown cancelled.")
 
         // 3. Remove Notification from Status Bar
         notifier.cancel()
@@ -412,22 +415,12 @@ class CrashDetectionService : Service() {
     }
 
     private fun triggerManualSOS() {
-        Log.d("CrashService", "🔥 MANUAL SOS TRIGGERED VIA POWER BUTTON")
-
-        // 1. Speak Alert
-        voiceManager.speak("Emergency shortcut activated.")
-
-        // 2. Show SOS Notification (Text: "SOS Activated")
         notifier.notifyManualSOS()
-
-        // 3. Start Countdown & Send SMS/GreenAPI
-        voiceManager.startCrashCountdown {
-            Log.d("SOS", "Manual SOS Countdown finished → Sending Messages")
+        voiceAlertManager.startVoiceMonitoring(serviceScope) {
             SOSBlastManager.sendBlastToAllUsers(this@CrashDetectionService)
         }
     }
 
-    // --- AUTOMATIC SENSOR LOGIC ---
     private fun startCrashMonitoring() {
         sensorProvider.start { state ->
             val features = featureExtractor.extract(state) ?: return@start
@@ -443,7 +436,8 @@ class CrashDetectionService : Service() {
                     notifier.notifyCrash()
 
                     // 2. Start Countdown
-                    voiceManager.startCrashCountdown {
+                    voiceAlertManager.startVoiceMonitoring(serviceScope) {
+                        // This is the onSosTrigger action
                         SOSBlastManager.sendBlastToAllUsers(this@CrashDetectionService)
                     }
 
@@ -457,8 +451,7 @@ class CrashDetectionService : Service() {
                     if (snatchAlreadyDetected) return@start
                     snatchAlreadyDetected = true
 
-                    // 1. Speak & Notify
-                    voiceManager.speak("Phone snatching detected!")
+                    voiceAlertManager.speak("Phone snatching detected!")
                     notifier.notifySnatch()
 
                     // 2. Reset Lock after 5 seconds (Shorter delay for snatch)
@@ -485,7 +478,7 @@ class CrashDetectionService : Service() {
         } catch (e: Exception) { Log.e("CrashService", "CancelReceiver error: ${e.message}") }
 
         sensorProvider.stop()
-        voiceManager.shutdown()
+        voiceAlertManager.shutdown()
         if (wakeLock?.isHeld == true) wakeLock?.release()
     }
     override fun onBind(intent: Intent?) = null

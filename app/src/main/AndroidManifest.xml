@@ -79,7 +79,7 @@
         </service>
 
         <activity
-            android:name=".modules.timestamp.ui.TimeStampActivity"
+            android:name=".modules.timestamp.ui.EmergencyAlertActivity"
             android:launchMode="singleTop" /> <!-- <activity -->
         <!-- android:name=".modules.dashboard.ui.SafetyDashboardFragment" -->
         <!-- android:exported="false" /> -->

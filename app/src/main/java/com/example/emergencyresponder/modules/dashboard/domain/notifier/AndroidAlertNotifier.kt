@@ -10,7 +10,7 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.example.emergencyresponder.R
 import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
-import com.example.emergencyresponder.modules.timestamp.ui.TimeStampActivity
+import com.example.emergencyresponder.modules.timestamp.ui.EmergencyAlertActivity
 
 class AndroidAlertNotifier(
     private val context: Context
@@ -57,10 +57,10 @@ class AndroidAlertNotifier(
     private fun showEmergencyNotification(title: String, message: String) {
 
         // Prepare Intent to open the App/Timer screen
-        val intent = Intent(context, TimeStampActivity::class.java).apply {
+        val intent = Intent(context, EmergencyAlertActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             if (context is CrashDetectionService) {
-                putExtra("REMAINING_SECONDS", context.voiceManager.remainingSeconds.toInt())
+                putExtra("REMAINING_SECONDS", context.voiceAlertManager.remainingSeconds.toInt())
             }
         }
 

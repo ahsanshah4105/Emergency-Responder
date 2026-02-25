@@ -1,74 +1,51 @@
 import android.os.CountDownTimer
+import com.example.emergencyresponder.modules.timestamp.domain.repository.ICountdownManager
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-object CrashCountdownManager {
-
+object CrashCountdownManager : ICountdownManager {
+    override val totalTimeSec = 30
     private var timer: CountDownTimer? = null
 
-    // Read-only property for UI to check current state
-    var remainingSeconds: Long = 30
-        private set
+    private val _remainingSeconds = MutableStateFlow(totalTimeSec.toLong())
+    override val remainingSeconds: StateFlow<Long> = _remainingSeconds.asStateFlow()
+    private val _timerFlow = MutableSharedFlow<Long>(replay = 1)
+    val timerFlow = _timerFlow.asSharedFlow()
 
-    // Support multiple listeners (e.g., Service voice + Activity UI)
     private val tickListeners = mutableListOf<(Long) -> Unit>()
     private val finishListeners = mutableListOf<() -> Unit>()
 
     // The actual SOS action (SMS/API trigger)
     private var sosAction: (() -> Unit)? = null
-    private var finalAction: (() -> Unit)? = null
-    private const val TOTAL_TIME_MS = 30_000L
-    private const val INTERVAL_MS = 1_000L
 
-    fun startCountdown(
-        onTick: (Long) -> Unit,
-        onFinish: () -> Unit,
-        onSosAction: (() -> Unit)? = null,
-        finalAction: (() -> Unit)? = null
-    ) {
-        // 1. Stop any existing timer first
-        cancel()
-
-        // 2. Reset state
-        remainingSeconds = TOTAL_TIME_MS / 1000
-
-        // 3. Add initial listeners (from Service)
-        tickListeners.add(onTick)
-        finishListeners.add(onFinish)
-        sosAction = onSosAction
-        this.finalAction = finalAction
-        // 4. Start Timer
-        timer = object : CountDownTimer(TOTAL_TIME_MS, INTERVAL_MS) {
-            override fun onTick(millisUntilFinished: Long) {
-                remainingSeconds = millisUntilFinished / 1000
-                tickListeners.forEach { it.invoke(remainingSeconds) }
-            }
-
-            override fun onFinish() {
-                remainingSeconds = 0
-                finishListeners.forEach { it.invoke() }
-                sosAction?.invoke()
-                finalAction?.invoke()
-            }
-        }.start()
-    }
-
-    // Called by Activity to sync UI with the running timer
     fun addListener(onTick: (Long) -> Unit, onFinish: () -> Unit) {
         tickListeners.add(onTick)
         finishListeners.add(onFinish)
     }
+    override fun startCountdown(onSosAction: (() -> Unit)?) {
+        cancel()
+        sosAction = onSosAction
 
-    fun cancel() {
-        // 1. Stop the native timer
+        timer = object : CountDownTimer((totalTimeSec * 1000).toLong(), 1000L) {
+            override fun onTick(millisUntilFinished: Long) {
+                _remainingSeconds.value = millisUntilFinished / 1000
+            }
+
+            override fun onFinish() {
+                _remainingSeconds.value = 0
+                sosAction?.invoke()
+            }
+        }.start()
+    }
+
+    override fun cancel() {
         timer?.cancel()
         timer = null
-
-        // 2. Nullify the SOS action so it CANNOT fire
         sosAction = null
-
-        // 3. Clear listeners to stop UI updates
-        tickListeners.clear()
-        finishListeners.clear()
-
-        remainingSeconds = 0
+        _remainingSeconds.value = totalTimeSec.toLong()
     }
+
 }
