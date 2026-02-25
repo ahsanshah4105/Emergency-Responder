@@ -1,14 +1,15 @@
 package com.example.emergencyresponder.modules.auth.data.repository
 
-import com.example.emergencyresponder.core.manager.SPreferenceManager
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.model.User
 import com.example.emergencyresponder.modules.auth.domain.repository.LoginRepository
+import com.example.emergencyresponder.modules.auth.domain.repository.UserPreferences
 
 class LoginRepositoryImpl(
     private val authDataSource: AuthRemoteDataSource,
-    private val userRemoteDataSource: UserRemoteDataSource
+    private val userRemoteDataSource: UserRemoteDataSource,
+    private val prefs: UserPreferences
 ) : LoginRepository {
 
     override suspend fun login(email: String, password: String): User {
@@ -29,11 +30,13 @@ class LoginRepositoryImpl(
         // userRemoteDataSource.saveUserOnlyIfNew(user)
 
         // 4. Save to SharedPreferences
-        SPreferenceManager.saveUserSession(
+        prefs.saveUserSession(
             uid = user.uid,
             name = user.name,
             email = user.email,
         )
+
+        prefs.setUserLoggedIn(true)
 
         return user
     }
@@ -51,7 +54,8 @@ class LoginRepositoryImpl(
 
             emergencyContacts = emptyList()
         )
-        SPreferenceManager.saveUserSession(uid = user.uid, name = user.name, email = user.email)
+        prefs.saveUserSession(uid = user.uid, name = user.name, email = user.email)
+        prefs.setUserLoggedIn(true)
         userRemoteDataSource.saveUserOnlyIfNew(user)
 
         return user

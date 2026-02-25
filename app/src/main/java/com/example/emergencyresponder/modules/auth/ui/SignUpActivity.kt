@@ -6,7 +6,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import com.example.emergencyresponder.core.navigation.AppRoute
-import com.example.emergencyresponder.core.utils.BaseActivity
+import com.example.emergencyresponder.core.base.BaseActivity
 import com.example.emergencyresponder.databinding.ActivitySignUpBinding
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource

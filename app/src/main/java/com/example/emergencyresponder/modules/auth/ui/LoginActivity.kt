@@ -12,16 +12,15 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.example.emergencyresponder.R // Ensure this is your project's R
+import com.example.emergencyresponder.R
 import com.example.emergencyresponder.core.navigation.AppNavigator
-import com.example.emergencyresponder.core.navigation.AppRoute
-import com.example.emergencyresponder.core.manager.SPreferenceManager
 import com.example.emergencyresponder.core.utils.ValidationUtils
 import com.example.emergencyresponder.databinding.ActivityLoginBinding
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.model.User
 import com.example.emergencyresponder.modules.auth.data.repository.LoginRepositoryImpl
+import com.example.emergencyresponder.modules.auth.data.repository.UserPreferencesImpl
 import com.example.emergencyresponder.modules.auth.domain.usecase.LoginUseCase
 import com.example.emergencyresponder.modules.auth.ui.viewModelFactory.LoginViewModelFactory
 import com.example.emergencyresponder.modules.auth.ui.viewmodel.AuthState
@@ -46,7 +45,8 @@ class LoginActivity : AppCompatActivity() {
         // Manual Injection (Consider using Hilt/Koin in the future)
         val authRemoteDataSource = AuthRemoteDataSource()
         val remoteDataSource = UserRemoteDataSource()
-        val repository = LoginRepositoryImpl(authRemoteDataSource,remoteDataSource)
+        val userPreferences = UserPreferencesImpl()
+        val repository = LoginRepositoryImpl(authRemoteDataSource,remoteDataSource, userPreferences)
         val useCase = LoginUseCase(repository)
         val factory = LoginViewModelFactory(useCase)
         viewModel = ViewModelProvider(this, factory)[LoginViewModel::class.java]
@@ -74,29 +74,21 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-        // Observe Navigation/Routing
-        viewModel.route.observe(this) { route ->
-            if (route == AppRoute.Dashboard) {
-                // Ensure the flag is set (Redundant if Repo handles it, but safe to keep for logic checks)
-                SPreferenceManager.setUserLoggedIn(true)
-
-                AppNavigator.navigate(
-                    context = this,
-                    route = AppRoute.Dashboard,
-                    finishCurrent = true
-                )
+        viewModel.route.observe(this) { event ->
+                event.getContentIfNotHandled()?.let { route ->
+                    AppNavigator.navigate(this, route, finishCurrent = true)
             }
         }
     }
 
     private fun setupListeners() {
-        // Standard Login
         binding.loginButton.setOnClickListener {
             val email = binding.loginEmailEditText.text.toString()
             val password = binding.loginPasswordEditText.text.toString()
 
             if (validateInput(email, password)) {
                 viewModel.login(email, password)
+                binding.loginButton.text = ""
             }
         }
 

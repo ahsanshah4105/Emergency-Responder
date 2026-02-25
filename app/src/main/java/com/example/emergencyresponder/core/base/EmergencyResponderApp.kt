@@ -1,4 +1,4 @@
-package com.example.emergencyresponder.core.constants
+package com.example.emergencyresponder.core.base
 
 import android.app.Application
 import com.example.emergencyresponder.core.manager.SPreferenceManager

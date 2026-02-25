@@ -9,7 +9,7 @@ import com.example.emergencyresponder.core.utils.ValidationUtils
 import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
 import com.example.emergencyresponder.modules.auth.data.model.User
 import com.example.emergencyresponder.modules.auth.domain.usecase.SignUpUseCase
-import com.example.emergencyresponder.modules.auth.domain.usecase.Validator
+import com.example.emergencyresponder.core.utils.Validator
 import kotlinx.coroutines.launch
 
 class SignUpViewModel(

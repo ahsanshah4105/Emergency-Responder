@@ -11,7 +11,6 @@ class LoginUseCase(
 
     suspend fun executeGoogleLogin(idToken: String) {
         val user = repository.loginWithGoogle(idToken)
-        // Usually, Google users are pre-verified, but you can check logic here
         if (user == null) {
             throw Exception("Google authentication failed.")
         }

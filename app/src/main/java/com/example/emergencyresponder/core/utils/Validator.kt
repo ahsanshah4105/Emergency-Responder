@@ -1,6 +1,4 @@
-package com.example.emergencyresponder.modules.auth.domain.usecase
-
-import com.example.emergencyresponder.core.utils.ValidationUtils
+package com.example.emergencyresponder.core.utils
 
 
 data class ValidationResult(val isValid: Boolean, val errorMessage: String? = null)
