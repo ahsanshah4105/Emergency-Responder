@@ -6,8 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
-import com.example.emergencyresponder.core.manager.SPreferenceManager
+import com.example.emergencyresponder.core.base.EmergencyResponderApp
 import com.example.emergencyresponder.core.utils.SOSBlastManager
 import com.example.emergencyresponder.databinding.ActivityTimeStampBinding
 import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
@@ -17,8 +16,14 @@ import com.example.emergencyresponder.modules.timestamp.ui.viewmodelfactory.Time
 class EmergencyAlertActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTimeStampBinding
     private val viewModel: EmergencyAlertViewModel by viewModels {
-        TimeStampViewModelFactory(CrashCountdownManager)
+        val container = (application as EmergencyResponderApp).appContainer
+
+        TimeStampViewModelFactory(
+            countdownManager = CrashCountdownManager,
+            crashRepository = container.crashRepository
+        )
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTimeStampBinding.inflate(layoutInflater)
@@ -26,7 +31,6 @@ class EmergencyAlertActivity : AppCompatActivity() {
 
         setupObservers()
         setupClickListeners()
-
     }
 
     private fun setupObservers() {
@@ -47,7 +51,7 @@ class EmergencyAlertActivity : AppCompatActivity() {
 
     private fun setupClickListeners() {
         binding.iAmOkay.setOnClickListener {
-            SPreferenceManager.incrementCancelCount()
+            viewModel.onUserIsOkay()
 
             val intent = Intent(this, CrashDetectionService::class.java).apply {
                 action = "ACTION_CANCEL_EMERGENCY"
