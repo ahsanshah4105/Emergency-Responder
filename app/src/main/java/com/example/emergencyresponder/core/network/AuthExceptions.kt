@@ -8,14 +8,19 @@ sealed class AuthException(message: String) : Exception(message)  {
     class GoogleLoginException : AuthException("Google login failed.")
     class UserNotFoundException : AuthException("User not found.")
     class UserNotLoggedInException : AuthException("User not logged in.")
+    class UserSessionIsExpiredException : AuthException("User session is expired. Please login again. ")
+    class UserNotAuthenticatedException : AuthException("User not authenticated.")
 
     class EmailAlreadyInUseException : AuthException("Email already in use.")
     class PasswordTooShortException : AuthException("Password must be at least 6 characters long.")
     class PasswordMismatchException : AuthException("Passwords do not match.")
-    class InvalidPasswordException : AuthException("Invalid password format.")
     class InValidEmailException : AuthException("Please enter a valid email address.")
+    class NewEmailRequiredException : AuthException("New email is required.")
+    class CurrentPasswordRequiredException : AuthException("Current password is required.")
     class EmailProviderException : AuthException("Failed to send verification email.")
     class UserCreationFailedException : AuthException("User creation failed.")
+    class NameCannotBeEmpty : AuthException("Name cannot be empty")
+    class NameIsTooShort : AuthException("Name must be at least 3 characters long")
 }
 
 

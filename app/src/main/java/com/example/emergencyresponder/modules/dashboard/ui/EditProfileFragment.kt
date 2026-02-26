@@ -1,161 +1,149 @@
-package com.example.emergencyresponder.modules.dashboard.ui
+    package com.example.emergencyresponder.modules.dashboard.ui
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Toast
-import androidx.core.widget.addTextChangedListener
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
-import com.example.emergencyresponder.core.manager.SPreferenceManager
-import com.example.emergencyresponder.databinding.FragmentEditProfileBinding
-import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
-import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
-import com.example.emergencyresponder.modules.auth.data.repository.ProfileRepositoryImpl
-import com.example.emergencyresponder.modules.auth.domain.usecase.ChangeEmailUseCase
-import com.example.emergencyresponder.modules.auth.domain.usecase.UpdateProfileUseCase
-import com.example.emergencyresponder.modules.dashboard.ui.viewModelFactory.ProfileViewModelFactory
-import com.example.emergencyresponder.modules.dashboard.ui.viewmodel.ProfileState
-import com.example.emergencyresponder.modules.dashboard.ui.viewmodel.ProfileViewModel
+    import android.content.Intent
+    import android.os.Bundle
+    import android.view.LayoutInflater
+    import android.view.View
+    import android.view.ViewGroup
+    import android.widget.Toast
+    import androidx.core.view.isVisible
+    import androidx.core.widget.addTextChangedListener
+    import androidx.fragment.app.Fragment
+    import androidx.fragment.app.viewModels
+    import androidx.navigation.fragment.findNavController
+    import com.example.emergencyresponder.R
+    import com.example.emergencyresponder.core.base.EmergencyResponderApp
+    import com.example.emergencyresponder.core.base.Event
+    import com.example.emergencyresponder.core.navigation.AppRoute
+    import com.example.emergencyresponder.databinding.FragmentEditProfileBinding
+    import com.example.emergencyresponder.modules.auth.ui.LoginActivity
+    import com.example.emergencyresponder.modules.dashboard.ui.viewModelFactory.ProfileViewModelFactory
+    import com.example.emergencyresponder.modules.dashboard.ui.viewmodel.ProfileMessage
+    import com.example.emergencyresponder.modules.dashboard.ui.viewmodel.ProfileState
+    import com.example.emergencyresponder.modules.dashboard.ui.viewmodel.ProfileViewModel
 
-class EditProfileFragment : Fragment() {
+    class EditProfileFragment : Fragment() {
 
-    private var _binding: FragmentEditProfileBinding? = null
-    private val binding get() = _binding!!
-    private lateinit var viewModel: ProfileViewModel
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentEditProfileBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        setupViewModel()
-        populateCurrentData()
-        setupObservers()
-        setupListeners()
-        setupEmailWatcher()
-    }
-
-    private fun setupViewModel() {
-        val userDataSource = UserRemoteDataSource()
-        val authDataSource = AuthRemoteDataSource()
-        val repository = ProfileRepositoryImpl(userDataSource, authDataSource)
-        val updateProfileUseCase = UpdateProfileUseCase(repository)
-        val changeEmailUseCase = ChangeEmailUseCase(repository)
-        val factory = ProfileViewModelFactory(updateProfileUseCase, changeEmailUseCase)
-        viewModel = ViewModelProvider(this, factory)[ProfileViewModel::class.java]
-    }
-
-    private fun populateCurrentData() {
-        binding.userNameEditText.setText(SPreferenceManager.getUserName())
-        binding.emailEditText.setText(SPreferenceManager.getUserEmail())
-    }
-
-    private fun setupEmailWatcher() {
-        val oldEmail = SPreferenceManager.getUserEmail()
-        binding.emailEditText.addTextChangedListener {
-            // Show current password field only if email changed or password change requested
-            binding.cardView.visibility =
-                if (binding.emailEditText.text.toString().trim() != oldEmail
-                    || binding.newPasswordEditText.visibility == View.VISIBLE
-                ) View.VISIBLE else View.GONE
-        }
-    }
-
-    private fun setupListeners() {
-        // Optional: Toggle password field visibility if user wants to change password
-        binding.changePassword.setOnClickListener {
-            if (binding.cardVieww.visibility == View.VISIBLE) {
-                binding.cardVieww.visibility = View.GONE
-            } else {
-
-                binding.cardVieww.visibility = View.VISIBLE
-            }
+        private var _binding: FragmentEditProfileBinding? = null
+        private val binding get() = _binding!!
+        private val viewModel: ProfileViewModel by viewModels {
+            val container = (requireActivity().application as EmergencyResponderApp).appContainer
+            ProfileViewModelFactory(
+                updateProfileUseCase = container.updateProfileUseCase,
+                changeEmailUseCase = container.changeEmailUseCase,
+                repository = container.profileRepository,
+                prefProvider = container.prefProvider,
+            )
         }
 
-        binding.btnSave.setOnClickListener {
-            val newName = binding.userNameEditText.text.toString().trim()
-            val newEmail = binding.emailEditText.text.toString().trim()
-            val oldEmail = SPreferenceManager.getUserEmail()
-            val currentPassword = binding.currentPasswordEditText.text.toString().trim()
-            val newPassword = binding.newPasswordEditText.text.toString().trim()
+        override fun onCreateView(
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View {
+            _binding = FragmentEditProfileBinding.inflate(inflater, container, false)
+            return binding.root
+        }
 
-            var isAnyAction = false
+        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+            super.onViewCreated(view, savedInstanceState)
+            setupObservers()
+            setupListeners()
+            viewModel.loadCurrentUserData()
+        }
 
-            // --- NAME UPDATE ---
-            if (newName.isNotEmpty() && newName != SPreferenceManager.getUserName()) {
-                isAnyAction = true
-                viewModel.updateProfile(newName)
+        private fun setupObservers() {
+            // 1. Data Observer
+            viewModel.userData.observe(viewLifecycleOwner) { (name, email) ->
+                binding.userNameEditText.setText(name)
+                binding.emailEditText.setText(email)
+                setupEmailWatcher(email) // Pass old email from here
             }
-
-            // --- PASSWORD UPDATE ---
-            if (binding.newPasswordEditText.visibility == View.VISIBLE && newPassword.isNotEmpty()) {
-                if (currentPassword.isEmpty()) {
-                    binding.currentPasswordEditText.error = "Enter current password to change password"
-                    return@setOnClickListener
+            viewModel.navigationEvent.observe(viewLifecycleOwner) { event ->
+                event.getContentIfNotHandled()?.let { route ->
+                    com.example.emergencyresponder.core.navigation.AppNavigator.navigate(
+                        context = requireContext(),
+                        route = route,
+                        finishCurrent = true
+                    )
                 }
-                isAnyAction = true
-                viewModel.updatePassword(currentPassword, newPassword)
             }
-
-            if (newEmail != oldEmail) {
-                if (currentPassword.isEmpty()) {
-                    binding.currentPasswordEditText.error = "Enter current password to change email"
-                    return@setOnClickListener
+            viewModel.state.observe(viewLifecycleOwner) { event ->
+                event.getContentIfNotHandled()?.let { state ->
+                    when (state) {
+                        is ProfileState.Loading -> toggleLoading(true)
+                        is ProfileState.Success -> {
+                            toggleLoading(false)
+                            showToast(mapEnumToString(state.messageType))
+                            findNavController().navigateUp()
+                        }
+                        is ProfileState.Error -> {
+                            toggleLoading(false)
+                            showToast(state.dynamicMsg ?: mapEnumToString(state.messageType))
+                        }
+                        is ProfileState.EmailVerificationSent -> {
+                            toggleLoading(false)
+                            showToast(mapEnumToString(state.messageType))
+                            viewModel.handleVerificationSent()
+                        }
+                        else -> toggleLoading(false)
+                    }
                 }
-                isAnyAction = true
-                viewModel.changeEmail(currentPassword, newEmail, newName)
-            }
-
-            if (!isAnyAction) {
-                Toast.makeText(requireContext(), "No changes detected", Toast.LENGTH_SHORT).show()
             }
         }
-    }
 
-    private fun setupObservers() {
-        viewModel.state.observe(viewLifecycleOwner) { state ->
-            when (state) {
-                is ProfileState.Loading -> {
-                    binding.progressBar.visibility = View.VISIBLE
-                    binding.btnSave.isEnabled = false
-                    binding.btnSave.text = "Saving..."
-                }
-                is ProfileState.Success -> {
-                    binding.progressBar.visibility = View.GONE
-                    binding.btnSave.isEnabled = true
-                    binding.btnSave.text = "Update Profile"
-                    Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
-                    findNavController().navigateUp()
-                }
-                is ProfileState.EmailVerificationSent -> {
-                    binding.progressBar.visibility = View.GONE
-                    binding.btnSave.isEnabled = true
-                    binding.btnSave.text = "Save Changes"
-                    Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
-                }
-                is ProfileState.Error -> {
-                    binding.progressBar.visibility = View.GONE
-                    binding.btnSave.isEnabled = true
-                    binding.btnSave.text = "Save Changes"
-                    Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
-                }
-                else -> {}
+        private fun mapEnumToString(type: ProfileMessage): String {
+            val resId = when(type) {
+                ProfileMessage.SUCCESS -> R.string.profile_updated
+                ProfileMessage.PASSWORD_UPDATED -> R.string.password_updated
+                ProfileMessage.VERIFY_EMAIL -> R.string.verify_your_email
+                ProfileMessage.GENERIC_ERROR -> R.string.err_generic
+            }
+            return getString(resId)
+        }
+
+        private fun setupEmailWatcher(oldEmail: String) {
+            binding.emailEditText.addTextChangedListener {
+                val hasEmailChanged = binding.emailEditText.text.toString().trim() != oldEmail
+                binding.cardView.isVisible = hasEmailChanged || binding.cardVieww.isVisible
             }
         }
-    }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        viewModel.resetState()
-        _binding = null
+        private fun toggleLoading(isLoading: Boolean) {
+            binding.progressBar.isVisible = isLoading
+            binding.btnSave.isEnabled = !isLoading
+        }
+
+        private fun showToast(msg: String) = Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+        private fun setupListeners() {
+            binding.changePassword.setOnClickListener {
+                if (binding.cardVieww.isVisible) {
+                    binding.cardVieww.visibility = View.GONE
+                } else {
+
+                    binding.cardVieww.visibility = View.VISIBLE
+                }
+            }
+
+            binding.btnSave.setOnClickListener {
+                viewModel.onSaveClicked(
+                    newName = binding.userNameEditText.text.toString(),
+                    newEmail = binding.emailEditText.text.toString(),
+                    currentPass = binding.currentPasswordEditText.text.toString(),
+                    newPass = binding.newPasswordEditText.text.toString()
+                )
+            }
+
+        }
+        private fun navigateToLogin() {
+            val intent = Intent(requireActivity(), LoginActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            startActivity(intent)
+            requireActivity().finish()
+        }
+        override fun onDestroyView() {
+            super.onDestroyView()
+            viewModel.resetState()
+            _binding = null
+        }
     }
-}

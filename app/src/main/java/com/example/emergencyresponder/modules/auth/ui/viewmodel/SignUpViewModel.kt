@@ -24,14 +24,6 @@ class SignUpViewModel(
 
     private val _route = MutableLiveData<Event<AppRoute>>()
     val route: LiveData<Event<AppRoute>> = _route
-    val userNameError = MutableLiveData<String?>()
-
-    val emailError = MutableLiveData<String?>()
-    val passwordError = MutableLiveData<String?>()
-    val nameError = MutableLiveData<String?>()
-
-    private  val _phoneError = MutableLiveData<String?>()
-    val phoneError: LiveData<String?> = _phoneError
     val errors = MutableLiveData<Map<String, String?>>()
     private fun updateError(field: String, error: String?) {
         val currentMap = errors.value ?: emptyMap()
@@ -47,29 +39,6 @@ class SignUpViewModel(
         }
         updateError(field, if (result.isValid) null else result.errorMessage)
     }
-    fun validateUserName(name: String) {
-        emailError.value = if (ValidationUtils.isNotEmpty(name)) null else "Name cannot be empty"
-    }
-    fun validateEmail(email: String) {
-        emailError.value = if (ValidationUtils.isEmailValid(email)) null else "Invalid email"
-    }
-
-    fun validateName(name: String) {
-        nameError.value = if (ValidationUtils.isNotEmpty(name)) null else "Name cannot be empty"
-    }
-
-    fun validatePhone(phone: String) {
-        val isValid = ValidationUtils.isPhoneValid(phone, "PK") // Default to Pakistan or US
-
-        if (phone.isEmpty()) {
-            _phoneError.value = "Phone number is required"
-        } else if (!isValid) {
-            _phoneError.value = "Invalid phone format"
-        } else {
-            _phoneError.value = null // No error
-        }
-    }
-
     fun validateInput(
         userName: String,
         email: String,
@@ -102,7 +71,6 @@ class SignUpViewModel(
     }
 
     fun signUp(userName: String, email: String, password: String, confirmPassword: String, emergencyPhone: String, contactName: String) {
-        // Full validation check before proceeding
         val isEmailValid = validator.validateEmail(email)
         val isNameValid = validator.validateName(userName)
         val isContactValid = validator.validateName(contactName)
@@ -120,7 +88,6 @@ class SignUpViewModel(
                 val user = User(name = userName, email = email, emergencyContacts = listOf(EmergencyContact(contactName, emergencyPhone)))
                 signUpUseCase(email, password, user)
 
-                // Fixed Error #5: Better success message
                 _state.value = AuthState.Success("Account created! Please verify your email.")
                 _route.value = Event(AppRoute.Login)
             } catch (e: Exception) {

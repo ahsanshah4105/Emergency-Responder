@@ -71,4 +71,13 @@
     <string name="change_password">Change Password</string>
     <string name="update">UPDATE</string>
 
+    <string name="success">Success</string>
+    <string name="profile_updated">Profile Updated</string>
+    <string name="password_updated">Password Updated"</string>
+    <string name="verify_your_email">Verify your new email</string>
+    <string name="email_or_password_incorrect">Email or password is incorrect.</string>
+    <string name="err_name_short">Name must be at least 3 characters long</string>
+    <string name="err_generic">Something went wrong. Please try again.</string>
+
+
 </resources>
