@@ -1,8 +1,7 @@
 package com.example.emergencyresponder.modules.dashboard.domain.notifier
 
-
+import CrashCountdownManager
 import android.content.Context
-import android.os.CountDownTimer
 import android.speech.tts.TextToSpeech
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -11,8 +10,7 @@ import java.util.Locale
 
 class VoiceAlertManager(context: Context) : TextToSpeech.OnInitListener {
 
-    var remainingSeconds: Long = 30 // default countdown
-    private var timer: CountDownTimer? = null
+    var remainingSeconds: Long = 30
     private var voiceJob: Job? = null
     private var tts: TextToSpeech? = null
     private var isReady = false
@@ -49,11 +47,9 @@ class VoiceAlertManager(context: Context) : TextToSpeech.OnInitListener {
                     "Otherwise, an emergency message will be sent."
         )
 
-        // Start the actual timer in the Manager
         CrashCountdownManager.startCountdown(onSosAction = onSosTrigger)
 
-        // Observe the flow for voice intervals
-        voiceJob?.cancel() // Clear any old monitoring
+        voiceJob?.cancel()
         voiceJob = scope.launch {
             CrashCountdownManager.remainingSeconds.collect { sec ->
                 handleVoiceIntervals(sec)
@@ -63,7 +59,7 @@ class VoiceAlertManager(context: Context) : TextToSpeech.OnInitListener {
     private fun handleVoiceIntervals(sec: Long) {
         when (sec) {
             20L, 10L -> speak("$sec seconds remaining")
-            in 1L..5L -> speak(sec.toString()) // 5, 4, 3, 2, 1
+            in 1L..5L -> speak(sec.toString()) 
         }
     }
     fun shutdown() {

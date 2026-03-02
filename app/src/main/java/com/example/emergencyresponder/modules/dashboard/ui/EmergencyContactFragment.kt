@@ -1,7 +1,5 @@
 package com.example.emergencyresponder.modules.dashboard.ui
 
-import AddEmergencyContactUseCase
-import ObserveEmergencyContactsUseCase
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,16 +12,16 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.emergencyresponder.R
+import com.example.emergencyresponder.core.base.EmergencyResponderApp
 import com.example.emergencyresponder.core.utils.SOSUtils
+import com.example.emergencyresponder.core.utils.ValidationUtils
 import com.example.emergencyresponder.databinding.FragmentEmergencyContactBinding
 import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
-import com.example.emergencyresponder.modules.dashboard.data.datasource.EmergencyContactRemoteDataSource
-import com.example.emergencyresponder.modules.dashboard.data.repositoryImpl.EmergencyContactRepositoryImpl
 import com.example.emergencyresponder.modules.dashboard.ui.adapters.EmergencyContactsAdapter
 import com.example.emergencyresponder.modules.dashboard.ui.viewModelFactory.EmergencyContactViewModelFactory
 import com.example.emergencyresponder.modules.dashboard.ui.viewmodel.EmergencyContactViewModel
+import com.example.emergencyresponder.modules.dashboard.ui.viewmodel.EmergencyError
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 
 class EmergencyContactFragment : Fragment() {
 
@@ -31,10 +29,8 @@ class EmergencyContactFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var adapter: EmergencyContactsAdapter
-    private val contactsList = mutableListOf<EmergencyContact>()
 
     private lateinit var viewModel: EmergencyContactViewModel
-    private val auth by lazy { FirebaseAuth.getInstance() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,119 +43,123 @@ class EmergencyContactFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val appContainer = (requireActivity().application as EmergencyResponderApp).appContainer
+
+        val factory = EmergencyContactViewModelFactory(
+            uid = uid,
+            observeUseCase = appContainer.observeContactsUseCase,
+            addUseCase = appContainer.addContactUseCase,
+            deleteUseCase = appContainer.deleteContactUseCase
+        )
+        viewModel = ViewModelProvider(this, factory)[EmergencyContactViewModel::class.java]
 
         setupRecycler()
+        setupObservers()
 
-        val firestore = FirebaseFirestore.getInstance()
-        val remoteDataSource = EmergencyContactRemoteDataSource(firestore)
-        val repository = EmergencyContactRepositoryImpl(remoteDataSource)
-        val observeUseCase = ObserveEmergencyContactsUseCase(repository)
-        val addUseCase = AddEmergencyContactUseCase(repository)
+        binding.addMoreContacts.setOnClickListener { showAddDialog() }
 
-        val factory = EmergencyContactViewModelFactory(observeUseCase, addUseCase,repository)
-        viewModel = ViewModelProvider(this, factory).get(EmergencyContactViewModel::class.java)
+    }
 
-        val uid = auth.currentUser?.uid ?: return
-
-        viewModel.observeContacts(uid)
+    private fun setupObservers() {
         viewModel.contacts.observe(viewLifecycleOwner) { list ->
-            contactsList.clear()
-            contactsList.addAll(list)
-            adapter.notifyDataSetChanged()
+            adapter.updateData(list)
         }
 
-        binding.addMoreContacts.setOnClickListener {
-            showAddDialog(uid)
+        viewModel.error.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { errorType ->
+                val messageRes = when (errorType) {
+                    EmergencyError.FAILED_TO_ADD -> R.string.err_failed_add
+                    EmergencyError.FAILED_TO_DELETE -> R.string.err_failed_delete
+                    EmergencyError.NETWORK_ERROR -> R.string.err_network
+                    else -> R.string.err_generic
+                }
+                Toast.makeText(context, getString(messageRes), Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
-    private fun showAddDialog(uid: String) {
+    private fun showAddDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_add_contact, null)
         val nameEt = dialogView.findViewById<EditText>(R.id.contactName)
         val phoneEt = dialogView.findViewById<EditText>(R.id.emergency_Contact_Phone)
 
         val dialog = AlertDialog.Builder(requireContext())
-            .setTitle("Add Emergency Contact")
+            .setTitle(R.string.add_more_contacts)
             .setView(dialogView)
-            .setPositiveButton("Add", null)
-            .setNegativeButton("Cancel", null)
+            .setPositiveButton(R.string.btn_add, null)
+            .setNegativeButton(R.string.btn_cancel, null)
             .create()
 
         dialog.show()
 
         val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
         val negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
-        positiveButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.primaryColor))
-        negativeButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_grey))
-
         positiveButton.setOnClickListener {
             val nameText = nameEt.text.toString().trim()
             val phoneText = phoneEt.text.toString().trim()
-            var isValid = true
 
             if (nameText.isEmpty()) {
-                nameEt.error = "Name is required"
-                isValid = false
+                nameEt.error = getString(R.string.err_name_required)
+                return@setOnClickListener
             }
 
             if (phoneText.isEmpty()) {
-                phoneEt.error = "Phone is required"
-                isValid = false
-            } else if (!com.example.emergencyresponder.core.utils.ValidationUtils.isPhoneValid(phoneText, "PK")) {
-                phoneEt.error = "Invalid phone format"
-                isValid = false
+                phoneEt.error = getString(R.string.err_phone_required)
+                return@setOnClickListener
             }
 
-            if (isValid) {
-                val contact = EmergencyContact(
-                    name = nameText,
-                    phone = phoneText
-                )
-                viewModel.addContact(uid, contact)
-
-                dialog.dismiss()
+            if (!ValidationUtils.isPhoneValid(phoneText, "PK")) {
+                phoneEt.error = getString(R.string.err_invalid_phone)
+                return@setOnClickListener
             }
+
+            viewModel.addContact(EmergencyContact(nameText, phoneText))
+            dialog.dismiss()
         }
+        negativeButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_grey))
+
     }
-  private fun setupRecycler() {
-      adapter = EmergencyContactsAdapter(
-          items = contactsList,
-          onSosClick = { contact ->
-              SOSUtils.sendSOSToSpecificPerson(requireContext(), contact.phone)
-          },
-          onItemLongClick = { contact, position ->
-              showDeleteDialog(contact)
-          }
-      )
+
+    private fun setupRecycler() {
+        adapter = EmergencyContactsAdapter(
+            onSosClick = { contact ->
+                SOSUtils.sendSOSToSpecificPerson(requireContext(), contact.phone)
+            },
+            onItemLongClick = { contact, position ->
+                showDeleteDialog(contact)
+            }
+        )
 
 
-      binding.emergencyContactsList.layoutManager = LinearLayoutManager(requireContext())
+        binding.emergencyContactsList.layoutManager = LinearLayoutManager(requireContext())
         binding.emergencyContactsList.adapter = adapter
     }
 
     private fun showDeleteDialog(contact: EmergencyContact) {
-        val dialog = AlertDialog.Builder(requireContext())
-            .setTitle("Delete Contact")
-            .setMessage("Are you sure you want to delete ${contact.name}?")
-            .setPositiveButton("Delete") { _, _ ->
-                val uid = auth.currentUser?.uid ?: return@setPositiveButton
-                viewModel.deleteContact(uid, contact)
-                Toast.makeText(requireContext(), "Contact deleted", Toast.LENGTH_SHORT).show()
-            }
-            .setNegativeButton("Cancel", null)
-            .create() // Create the dialog first so we can modify buttons
+        val message = getString(R.string.dialog_delete_msg, contact.name)
 
-        // 1. Show the dialog
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle(R.string.dialog_delete_title)
+            .setMessage(message)
+            .setPositiveButton(R.string.btn_delete) { _, _ ->
+                viewModel.deleteContact(contact)
+
+                Toast.makeText(requireContext(), R.string.msg_contact_deleted, Toast.LENGTH_SHORT)
+                    .show()
+            }
+            .setNegativeButton(R.string.btn_cancel, null)
+            .create()
+
         dialog.show()
 
-        // 2. Access buttons and apply colors from colors.xml
         val deleteButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
         val cancelButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
 
-        // Replace 'red' and 'text_grey' with the exact names in your colors.xml
         deleteButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.primaryColor))
         cancelButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_grey))
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

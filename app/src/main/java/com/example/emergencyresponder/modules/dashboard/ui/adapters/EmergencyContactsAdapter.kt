@@ -9,8 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.emergencyresponder.R
 import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
 import com.example.emergencyresponder.modules.dashboard.data.model.EmergencyContacts
+
 class EmergencyContactsAdapter(
-    private val items: List<EmergencyContact>,
+    private var items: MutableList<EmergencyContact> = mutableListOf(),
     private val onSosClick: (EmergencyContact) -> Unit,
     private val onItemLongClick: (EmergencyContact, Int) -> Unit
 ) : RecyclerView.Adapter<EmergencyContactsAdapter.ServiceViewHolder>() {
@@ -44,4 +45,10 @@ class EmergencyContactsAdapter(
     }
 
     override fun getItemCount(): Int = items.size
+
+    fun updateData(newItems: List<EmergencyContact>) {
+        items.clear()
+        items.addAll(newItems)
+        notifyDataSetChanged()
+    }
 }

@@ -63,8 +63,6 @@ object SOSUtils {
         }
     }
 
-
-
     private fun startAudioRecording(context: Context, onRecordingFinished: (File?) -> Unit) {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(context, "Microphone permission missing!", Toast.LENGTH_SHORT).show()

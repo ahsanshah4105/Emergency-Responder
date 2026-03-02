@@ -8,3 +8,4 @@ interface AlertNotifier {
     fun notifyManualSOS()
     fun cancel()
 }
+enum class AlertType { CRASH, SNATCH, MANUAL_SOS }

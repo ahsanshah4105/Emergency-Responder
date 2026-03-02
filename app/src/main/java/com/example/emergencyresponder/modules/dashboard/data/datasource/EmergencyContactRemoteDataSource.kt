@@ -4,66 +4,41 @@ import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
 import com.example.emergencyresponder.modules.auth.data.model.User
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 
 class EmergencyContactRemoteDataSource(
     private val firestore: FirebaseFirestore
 ) {
-
-    fun observeContacts(
-        uid: String,
-        onUpdate: (List<EmergencyContact>) -> Unit,
-        onError: (String) -> Unit
-    ) {
-        firestore.collection("users")
-            .document(uid)
+    fun observeContacts(uid: String): Flow<List<EmergencyContact>> = callbackFlow {
+        val subscription = firestore.collection("users").document(uid)
             .addSnapshotListener { snapshot, error ->
-
                 if (error != null) {
-                    onError(error.message ?: "Unknown Error")
+                    close(error)
                     return@addSnapshotListener
                 }
-
                 val user = snapshot?.toObject(User::class.java)
-                onUpdate(user?.emergencyContacts ?: emptyList())
+                val contacts = user?.emergencyContacts ?: emptyList()
+                trySend(contacts)
             }
+        awaitClose { subscription.remove() }
     }
 
-    fun addContact(
-        uid: String,
-        contact: EmergencyContact,
-        onResult: (Boolean) -> Unit
-    ) {
-        firestore.collection("users")
-            .document(uid)
+    suspend fun addContact(uid: String, contact: EmergencyContact) {
+        firestore.collection("users").document(uid)
             .update("emergencyContacts", FieldValue.arrayUnion(contact))
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { onResult(false) }
+            .await()
     }
 
-    fun deleteContact(
-        uid: String,
-        contact: EmergencyContact,
-        onResult: (Boolean) -> Unit
-    ) {
-        // arrayRemove requires the exact object to find and remove it
-        firestore.collection("users")
-            .document(uid)
+    suspend fun deleteContact(uid: String, contact: EmergencyContact) {
+        firestore.collection("users").document(uid)
             .update("emergencyContacts", FieldValue.arrayRemove(contact))
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener {
-                // If the document doesn't exist or network fails
-                onResult(false)
-            }
+            .await()
     }
 
-    // NEW: Logic to send an SOS alert to the backend
-    fun sendSOSNotification(
-        uid: String,
-        contact: EmergencyContact,
-        location: String,
-        onResult: (Boolean) -> Unit
-    ) {
-        // Create an alert object to store in Firestore
+    suspend fun sendSOSNotification(uid: String, contact: EmergencyContact, location: String) {
         val sosAlert = hashMapOf(
             "senderUid" to uid,
             "targetContactName" to contact.name,
@@ -72,10 +47,6 @@ class EmergencyContactRemoteDataSource(
             "status" to "SENT",
             "timestamp" to FieldValue.serverTimestamp()
         )
-
-        firestore.collection("sos_alerts")
-            .add(sosAlert)
-            .addOnSuccessListener { onResult(true) }
-            .addOnFailureListener { onResult(false) }
+        firestore.collection("sos_alerts").add(sosAlert).await()
     }
 }

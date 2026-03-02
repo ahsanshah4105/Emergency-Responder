@@ -21,6 +21,14 @@ sealed class AuthException(message: String) : Exception(message)  {
     class UserCreationFailedException : AuthException("User creation failed.")
     class NameCannotBeEmpty : AuthException("Name cannot be empty")
     class NameIsTooShort : AuthException("Name must be at least 3 characters long")
+    class InvalidPhoneFormat : AuthException("Invalid phone format")
+    class InvalidPhoneNumber : AuthException("Invalid phone number")
+    class DatabaseException(override val message: String) : AuthException("Database error")
+    class UnknownException(override val message: String) : AuthException("Unknown error")
+    class FailedToDeleteEmergencyContact : AuthException("Failed to delete emergency contact")
+
+
+
 }
 
 

@@ -79,5 +79,21 @@
     <string name="err_name_short">Name must be at least 3 characters long</string>
     <string name="err_generic">Something went wrong. Please try again.</string>
 
+    <string name="err_name_required">Name is required</string>
+    <string name="err_phone_required">Phone is required</string>
+    <string name="err_invalid_phone">Invalid phone format</string>
+    <string name="err_failed_add">Could not add contact</string>
+    <string name="err_failed_delete">Could not delete contact</string>
+    <string name="err_network">Network issues, please try again</string>
+    <string name="msg_contact_deleted">Contact deleted</string>
+
+    <string name="dialog_delete_title">Delete Contact</string>
+    <string name="dialog_delete_msg">Are you sure you want to delete %1$s?</string>
+    <string name="btn_delete">Delete</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_add">Add</string>
+
+
+
 
 </resources>

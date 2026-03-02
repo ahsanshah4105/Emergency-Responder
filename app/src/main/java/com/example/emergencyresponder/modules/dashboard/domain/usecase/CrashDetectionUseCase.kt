@@ -19,7 +19,7 @@ class CrashDetectionUseCase(
         val now = System.currentTimeMillis()
 
         val threshold = when (sensitivity) {
-            Sensitivity.LOW -> 0.90f
+            Sensitivity.LOW -> 0.92f
             Sensitivity.MEDIUM -> 0.75f
             Sensitivity.HIGH -> 0.60f
         }
@@ -27,7 +27,12 @@ class CrashDetectionUseCase(
         val modelDecision = state.mlConfidence >= threshold
         val ruleDecision = isCrash(state)
 
-        if (modelDecision && ruleDecision && now - lastCrashTime > cooldownMs) {
+        val finalDecision = when(sensitivity) {
+            Sensitivity.HIGH -> modelDecision || (ruleDecision && state.accel > 15)
+            else -> modelDecision && ruleDecision
+        }
+
+        if (finalDecision && now - lastCrashTime > cooldownMs) {
             lastCrashTime = now
             return DetectionResult.Crash
         }

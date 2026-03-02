@@ -14,6 +14,23 @@ import com.example.emergencyresponder.modules.splash.domain.repository.ISplashRe
 import com.example.emergencyresponder.modules.dashboard.domain.usecase.ChangeEmailUseCase
 import com.example.emergencyresponder.modules.dashboard.domain.usecase.UpdateProfileUseCase
 import com.example.emergencyresponder.modules.dashboard.domain.repository.IProfileRepository
+import com.google.firebase.firestore.FirebaseFirestore
+import com.example.emergencyresponder.modules.dashboard.data.datasource.EmergencyContactRemoteDataSource
+import com.example.emergencyresponder.modules.dashboard.data.repositoryImpl.EmergencyContactRepositoryImpl
+import com.example.emergencyresponder.modules.dashboard.domain.repository.IEmergencyContactRepository
+import com.example.emergencyresponder.modules.dashboard.domain.usecase.DeleteEmergencyContactUseCase
+import ObserveEmergencyContactsUseCase
+import AddEmergencyContactUseCase
+import com.example.emergencyresponder.core.manager.SPreferenceManager
+import com.example.emergencyresponder.modules.dashboard.data.ml.CrashMlAnalyzer
+import com.example.emergencyresponder.modules.dashboard.data.ml.TFLiteCrashMlAnalyzer
+import com.example.emergencyresponder.modules.dashboard.data.provider.AndroidSensorProvider
+import com.example.emergencyresponder.modules.dashboard.domain.engine.CrashDetectionEngine
+import com.example.emergencyresponder.modules.dashboard.domain.notifier.AlertNotifier
+import com.example.emergencyresponder.modules.dashboard.domain.notifier.AndroidAlertNotifier
+import com.example.emergencyresponder.modules.dashboard.domain.notifier.VoiceAlertManager
+import com.example.emergencyresponder.modules.dashboard.domain.repository.SensorProvider
+import com.example.emergencyresponder.modules.dashboard.domain.usecase.CrashDetectionUseCase
 
 class AppContainer(private val context: Context) {
 
@@ -40,5 +57,49 @@ class AppContainer(private val context: Context) {
     val updateProfileUseCase by lazy { UpdateProfileUseCase(profileRepository) }
     val changeEmailUseCase by lazy { ChangeEmailUseCase(profileRepository) }
 
+    private val firestore by lazy { FirebaseFirestore.getInstance() }
+    private val emergencyDataSource by lazy { EmergencyContactRemoteDataSource(firestore) }
+    val emergencyRepository: IEmergencyContactRepository by lazy {
+        EmergencyContactRepositoryImpl(emergencyDataSource)
+    }
+
+    val observeContactsUseCase by lazy { ObserveEmergencyContactsUseCase(emergencyRepository) }
+    val addContactUseCase by lazy { AddEmergencyContactUseCase(emergencyRepository) }
+    val deleteContactUseCase by lazy { DeleteEmergencyContactUseCase(emergencyRepository) }
+
+    val mlAnalyzer: CrashMlAnalyzer by lazy {
+        TFLiteCrashMlAnalyzer(context)
+    }
+
+    val sensorProvider: SensorProvider by lazy {
+        AndroidSensorProvider(context)
+    }
+
+    val notifier: AlertNotifier by lazy {
+        AndroidAlertNotifier(context)
+    }
+
+    val voiceAlertManager: VoiceAlertManager by lazy {
+        VoiceAlertManager(context)
+    }
+
+    private val _crashEngine: CrashDetectionEngine by lazy {
+        val savedSens = SPreferenceManager.getSensitivity()
+        val sensitivityEnum = when(savedSens) {
+            "HIGH" -> Sensitivity.HIGH
+            "MEDIUM" -> Sensitivity.MEDIUM
+            else -> Sensitivity.LOW
+        }
+
+        // Yahan CrashDetectionUseCase ko sensitivity pass ho rahi hai
+        CrashDetectionEngine(
+            mlAnalyzer = mlAnalyzer,
+            useCase = CrashDetectionUseCase(sensitivityEnum)
+        )
+    }
+
+    fun getCrashEngine(): CrashDetectionEngine {
+        return _crashEngine
+    }
 
 }

@@ -1,14 +1,18 @@
+import com.example.emergencyresponder.core.network.AuthException
+import com.example.emergencyresponder.core.utils.ValidationUtils
 import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
-import com.example.emergencyresponder.modules.dashboard.domain.repository.EmergencyContactRepository
+import com.example.emergencyresponder.modules.dashboard.domain.repository.IEmergencyContactRepository
 
 class AddEmergencyContactUseCase(
-    private val repository: EmergencyContactRepository
+    private val repository: IEmergencyContactRepository
 ) {
-    operator fun invoke(
-        uid: String,
-        contact: EmergencyContact,
-        onResult: (Boolean) -> Unit
+    suspend operator fun invoke(
+        uid: String, contact: EmergencyContact
     ) {
-        repository.addContact(uid, contact, onResult)
+        if (contact.name.isBlank()) throw AuthException.NameCannotBeEmpty()
+        if (!ValidationUtils.isPhoneValid(contact.phone)) {
+            throw AuthException.InvalidPhoneFormat()
+        }
+        repository.addContact(uid, contact)
     }
 }
