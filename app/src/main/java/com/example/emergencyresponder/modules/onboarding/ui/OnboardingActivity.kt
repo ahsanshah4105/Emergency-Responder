@@ -5,7 +5,7 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.example.emergencyresponder.core.base.EmergencyResponderApp
-import com.example.emergencyresponder.core.constants.AppConstant
+import com.example.emergencyresponder.core.common.AppConstant
 import com.example.emergencyresponder.core.navigation.AppNavigator
 import com.example.emergencyresponder.core.navigation.AppRoute
 import com.example.emergencyresponder.core.utils.AppPermissions

@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.emergencyresponder.core.base.Event
-import com.example.emergencyresponder.core.constants.PrefKeys
+import com.example.emergencyresponder.core.common.PrefKeys
 import com.example.emergencyresponder.core.domain.repository.IBasePreference
 import com.example.emergencyresponder.core.navigation.AppRoute
 import com.example.emergencyresponder.modules.dashboard.domain.repository.IProfileRepository

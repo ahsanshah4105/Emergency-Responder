@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.emergencyresponder.core.base.EmergencyResponderApp
 import com.example.emergencyresponder.core.utils.SOSBlastManager
 import com.example.emergencyresponder.databinding.ActivityTimeStampBinding
-import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
+import com.example.emergencyresponder.modules.dashboard.data.service.CrashDetectionService
 import com.example.emergencyresponder.modules.timestamp.ui.viewmodel.EmergencyAlertViewModel
 import com.example.emergencyresponder.modules.timestamp.ui.viewmodelfactory.TimeStampViewModelFactory
 

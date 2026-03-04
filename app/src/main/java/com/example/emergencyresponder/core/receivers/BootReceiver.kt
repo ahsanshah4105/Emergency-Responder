@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
-import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
+import com.example.emergencyresponder.modules.dashboard.data.service.CrashDetectionService
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {

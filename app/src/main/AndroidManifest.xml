@@ -51,7 +51,7 @@
         </receiver>
 
         <service
-            android:name=".modules.dashboard.ui.service.CrashDetectionService"
+            android:name=".modules.dashboard.data.service.CrashDetectionService"
             android:exported="false"
             android:foregroundServiceType="specialUse"
             tools:ignore="MissingClass">
@@ -60,12 +60,12 @@
                 android:value="Detects car accidents using motion sensors." />
         </service>
         <service
-            android:name=".modules.dashboard.ui.service.MicListenService"
+            android:name=".modules.dashboard.data.service.MicListenService"
             android:exported="false"
             android:foregroundServiceType="microphone" />
 
         <service
-            android:name=".modules.dashboard.ui.service.PowerPressAccessibilityService"
+            android:name=".modules.dashboard.data.service.PowerPressAccessibilityService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
             android:exported="false">
 

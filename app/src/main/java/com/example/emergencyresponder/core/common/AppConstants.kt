@@ -1,4 +1,4 @@
-package com.example.emergencyresponder.core.constants
+package com.example.emergencyresponder.core.common
 
 class AppConstant {
     companion object{

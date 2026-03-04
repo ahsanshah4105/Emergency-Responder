@@ -1,7 +1,7 @@
 package com.example.emergencyresponder.core.di
 
 import android.content.Context
-import com.example.emergencyresponder.core.data.repository.PreferenceProviderImpl
+import com.example.emergencyresponder.core.data.local.PreferenceProviderImpl
 import com.example.emergencyresponder.core.domain.repository.IBasePreference
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
 import com.example.emergencyresponder.modules.dashboard.data.repositoryImpl.ProfileRepositoryImpl
@@ -21,6 +21,7 @@ import com.example.emergencyresponder.modules.dashboard.domain.repository.IEmerg
 import com.example.emergencyresponder.modules.dashboard.domain.usecase.DeleteEmergencyContactUseCase
 import ObserveEmergencyContactsUseCase
 import AddEmergencyContactUseCase
+import com.example.emergencyresponder.core.common.PrefKeys
 import com.example.emergencyresponder.core.manager.SPreferenceManager
 import com.example.emergencyresponder.modules.dashboard.data.ml.CrashMlAnalyzer
 import com.example.emergencyresponder.modules.dashboard.data.ml.TFLiteCrashMlAnalyzer
@@ -31,13 +32,18 @@ import com.example.emergencyresponder.modules.dashboard.domain.notifier.AndroidA
 import com.example.emergencyresponder.modules.dashboard.domain.notifier.VoiceAlertManager
 import com.example.emergencyresponder.modules.dashboard.domain.repository.SensorProvider
 import com.example.emergencyresponder.modules.dashboard.domain.usecase.CrashDetectionUseCase
-
+import com.example.emergencyresponder.modules.dashboard.data.provider.YAMNetClassifier
+import com.example.emergencyresponder.core.data.local.UserPreferencesManager
+import com.example.emergencyresponder.modules.dashboard.domain.usecase.AudioAnalysisUseCase
 class AppContainer(private val context: Context) {
 
     val prefProvider: IBasePreference by lazy {
         PreferenceProviderImpl(context.applicationContext)
     }
 
+    val userPrefs: UserPreferencesManager by lazy {
+        UserPreferencesManager(prefProvider)
+    }
     val crashRepository: ICrashRepository by lazy {
         ICrashRepositoryImpl(prefProvider)
     }
@@ -84,14 +90,13 @@ class AppContainer(private val context: Context) {
     }
 
     private val _crashEngine: CrashDetectionEngine by lazy {
-        val savedSens = SPreferenceManager.getSensitivity()
+        val savedSens = prefProvider.getString(PrefKeys.SENSITIVITY, "MEDIUM")
         val sensitivityEnum = when(savedSens) {
             "HIGH" -> Sensitivity.HIGH
             "MEDIUM" -> Sensitivity.MEDIUM
             else -> Sensitivity.LOW
         }
 
-        // Yahan CrashDetectionUseCase ko sensitivity pass ho rahi hai
         CrashDetectionEngine(
             mlAnalyzer = mlAnalyzer,
             useCase = CrashDetectionUseCase(sensitivityEnum)
@@ -100,6 +105,14 @@ class AppContainer(private val context: Context) {
 
     fun getCrashEngine(): CrashDetectionEngine {
         return _crashEngine
+    }
+
+    val audioClassifier: YAMNetClassifier by lazy {
+        YAMNetClassifier(context)
+    }
+
+    val audioAnalysisUseCase: AudioAnalysisUseCase by lazy {
+        AudioAnalysisUseCase(audioClassifier)
     }
 
 }

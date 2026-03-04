@@ -1,6 +1,8 @@
 package com.example.emergencyresponder.core.domain.repository
 
 
+
+
 interface IBasePreference {
     fun saveString(key: String, value: String?)
     fun getString(key: String, default: String = ""): String
@@ -12,5 +14,5 @@ interface IBasePreference {
     fun getInt(key: String, default: Int = 0): Int
 
     fun remove(key: String)
-    fun clearUserSession() // Specially for Logout
+    fun clearUserSession()
 }

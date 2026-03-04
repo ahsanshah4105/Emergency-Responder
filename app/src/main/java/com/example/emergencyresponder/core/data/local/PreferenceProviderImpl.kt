@@ -1,5 +1,4 @@
-package com.example.emergencyresponder.core.data.repository
-
+package com.example.emergencyresponder.core.data.local
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -29,4 +28,6 @@ class PreferenceProviderImpl(context: Context) : IBasePreference {
             remove("user_phone")
         }.apply()
     }
+
+
 }

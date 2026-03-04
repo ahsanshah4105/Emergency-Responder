@@ -17,7 +17,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.emergencyresponder.R
 import com.example.emergencyresponder.databinding.ActivityDashboardBinding
-import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
+import com.example.emergencyresponder.modules.dashboard.data.service.CrashDetectionService
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class DashboardActivity : AppCompatActivity() {

@@ -1,6 +1,6 @@
 package com.example.emergencyresponder.modules.splash.data.repository
 
-import com.example.emergencyresponder.core.constants.PrefKeys
+import com.example.emergencyresponder.core.common.PrefKeys
 import com.example.emergencyresponder.core.domain.repository.IBasePreference
 import com.example.emergencyresponder.modules.splash.domain.repository.ISplashRepository
 

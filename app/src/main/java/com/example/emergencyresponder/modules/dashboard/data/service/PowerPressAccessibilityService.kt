@@ -1,4 +1,4 @@
-package com.example.emergencyresponder.modules.dashboard.ui.service
+package com.example.emergencyresponder.modules.dashboard.data.service
 
 
 import android.accessibilityservice.AccessibilityService

@@ -1,14 +1,19 @@
-package com.example.emergencyresponder.modules.dashboard.ui.service
+package com.example.emergencyresponder.modules.dashboard.data.service
 
 import CrashCountdownManager
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.PowerManager
 import android.util.Log
+import androidx.core.app.NotificationCompat
+import com.example.emergencyresponder.R
 import com.example.emergencyresponder.core.base.EmergencyResponderApp
 import com.example.emergencyresponder.core.utils.SOSBlastManager
 import com.example.emergencyresponder.modules.dashboard.data.model.DetectionResult
@@ -59,7 +64,7 @@ class CrashDetectionService : Service() {
 
         super.onCreate()
 
-        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+        val powerManager = getSystemService(POWER_SERVICE) as PowerManager
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SafetyApp:Monitor")
         wakeLock?.acquire(10 * 60 * 1000L)
 
@@ -87,8 +92,8 @@ class CrashDetectionService : Service() {
     }
     private fun registerSystemReceivers() {
         val cancelFilter = IntentFilter(ACTION_CANCEL)
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(cancelReceiver, cancelFilter, Context.RECEIVER_NOT_EXPORTED)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(cancelReceiver, cancelFilter, RECEIVER_NOT_EXPORTED)
         } else {
             registerReceiver(cancelReceiver, cancelFilter)
         }
@@ -183,18 +188,18 @@ class CrashDetectionService : Service() {
 
     private fun startForegroundInternal() {
         val channelId = "safety_foreground"
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            val channel = android.app.NotificationChannel(
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
                 channelId,
                 "Emergency Monitoring",
-                android.app.NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_HIGH
             )
-            val manager = getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+            val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)
         }
 
-        val notification = androidx.core.app.NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(com.example.emergencyresponder.R.drawable.app_logo)
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.app_logo)
             .setContentTitle("Emergency Monitor Active")
             .setContentText("Monitoring Sensors & Power Button")
             .setOngoing(true)

@@ -28,9 +28,9 @@ import com.example.emergencyresponder.core.utils.SOSUtils
 import com.example.emergencyresponder.databinding.FragmentSafetyDashboardBinding
 import com.example.emergencyresponder.modules.dashboard.data.model.DashboardStatus
 import com.example.emergencyresponder.modules.dashboard.ui.viewmodel.SafetyDashboardViewModel
-import com.example.emergencyresponder.modules.dashboard.ui.service.CrashDetectionService
-import com.example.emergencyresponder.modules.dashboard.ui.service.MicListenService
-import com.example.emergencyresponder.modules.dashboard.ui.service.PowerPressAccessibilityService
+import com.example.emergencyresponder.modules.dashboard.data.service.CrashDetectionService
+import com.example.emergencyresponder.modules.dashboard.data.service.MicListenService
+import com.example.emergencyresponder.modules.dashboard.data.service.PowerPressAccessibilityService
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.collectLatest

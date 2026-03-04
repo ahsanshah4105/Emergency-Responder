@@ -1,6 +1,6 @@
 package com.example.emergencyresponder.modules.timestamp.data.repository
 
-import com.example.emergencyresponder.core.constants.PrefKeys
+import com.example.emergencyresponder.core.common.PrefKeys
 import com.example.emergencyresponder.core.domain.repository.IBasePreference
 import com.example.emergencyresponder.modules.timestamp.domain.repository.ICrashRepository
 
