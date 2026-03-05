@@ -4,14 +4,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.emergencyresponder.R
 import com.example.emergencyresponder.core.base.Event
 import com.example.emergencyresponder.core.navigation.AppRoute
 import com.example.emergencyresponder.core.utils.ValidationResult
-import com.example.emergencyresponder.core.utils.ValidationUtils
+import com.example.emergencyresponder.core.utils.Validator
 import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
 import com.example.emergencyresponder.modules.auth.data.model.User
 import com.example.emergencyresponder.modules.auth.domain.usecase.SignUpUseCase
-import com.example.emergencyresponder.core.utils.Validator
 import kotlinx.coroutines.launch
 
 class SignUpViewModel(
@@ -19,8 +19,8 @@ class SignUpViewModel(
 ): ViewModel() {
     private val validator: Validator = Validator()
 
-    private val _state = MutableLiveData<AuthState>()
-    val state: LiveData<AuthState> = _state
+    private val _state = MutableLiveData<AuthUiState>()
+    val state: LiveData<AuthUiState> = _state
 
     private val _route = MutableLiveData<Event<AppRoute>>()
     val route: LiveData<Event<AppRoute>> = _route
@@ -48,23 +48,23 @@ class SignUpViewModel(
         phone: String
     ): Boolean {
         validator.validateName(userName).takeIf { !it.isValid }?.let {
-            _state.value = AuthState.Error(it.errorMessage ?: "")
+            _state.value = AuthUiState.Error(it.errorMessage ?: "")
             return false
         }
         validator.validateEmail(email).takeIf { !it.isValid }?.let {
-            _state.value = AuthState.Error(it.errorMessage ?: "")
+            _state.value = AuthUiState.Error(it.errorMessage ?: "")
             return false
         }
         validator.validatePassword(password, confirmPassword).takeIf { !it.isValid }?.let {
-            _state.value = AuthState.Error(it.errorMessage ?: "")
+            _state.value = AuthUiState.Error(it.errorMessage ?: "")
             return false
         }
         validator.validateName(name).takeIf { !it.isValid }?.let {
-            _state.value = AuthState.Error(it.errorMessage ?: "")
+            _state.value = AuthUiState.Error(it.errorMessage ?: "")
             return false
         }
         validator.validatePhone(phone).takeIf { !it.isValid }?.let {
-            _state.value = AuthState.Error(it.errorMessage ?: "")
+            _state.value = AuthUiState.Error(it.errorMessage ?: "")
             return false
         }
         return true
@@ -78,20 +78,20 @@ class SignUpViewModel(
         val isPasswordValid = validator.validatePassword(password, confirmPassword)
 
         if (!isEmailValid.isValid || !isNameValid.isValid || !isContactValid.isValid || !isPhoneValid.isValid || !isPasswordValid.isValid) {
-            _state.value = AuthState.Error("Please fix the errors above")
+            _state.value = AuthUiState.Error("Please fix the errors above")
             return
         }
 
         viewModelScope.launch {
-            _state.value = AuthState.Loading
+            _state.value = AuthUiState.Loading
             try {
                 val user = User(name = userName, email = email, emergencyContacts = listOf(EmergencyContact(contactName, emergencyPhone)))
                 signUpUseCase(email, password, user)
 
-                _state.value = AuthState.Success("Account created! Please verify your email.")
+                _state.value = AuthUiState.Success(R.string.account_created_verify_email)
                 _route.value = Event(AppRoute.Login)
             } catch (e: Exception) {
-                _state.value = AuthState.Error(e.message ?: "Signup failed")
+                _state.value = AuthUiState.Error(e.message ?: "Signup failed")
             }
         }
     }

@@ -1,8 +1,7 @@
-package com.example.emergencyresponder.modules.auth.data.repository
-
 import com.example.emergencyresponder.core.network.AuthException
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
+import com.example.emergencyresponder.modules.auth.data.model.AuthenticatedUser
 import com.example.emergencyresponder.modules.auth.data.model.User
 import com.example.emergencyresponder.modules.auth.domain.repository.LoginRepository
 import com.example.emergencyresponder.modules.auth.domain.repository.UserPreferences
@@ -14,59 +13,62 @@ class LoginRepositoryImpl(
     private val prefs: UserPreferences
 ) : LoginRepository {
 
-    override suspend fun login(email: String, password: String): User {
+    override suspend fun login(email: String, password: String): AuthenticatedUser {
         try {
-
             val result = authDataSource.loginUser(email, password)
-            val firebaseUser =
-                result.user ?: throw AuthException.UserNotFoundException() as Throwable
+            val firebaseUser = result.user ?: throw AuthException.UserNotFoundException()
 
             if (!firebaseUser.isEmailVerified) {
                 authDataSource.logout()
                 throw AuthException.EmailNotVerifiedException()
             }
 
-            val user = userRemoteDataSource.getUser(firebaseUser.uid)
-            prefs.saveUserSession(
-                uid = user.uid,
-                name = user.name,
-                email = user.email,
-            )
+            val userData = userRemoteDataSource.getUser(firebaseUser.uid)
 
+            prefs.saveUserSession(userData.uid, userData.name, userData.email)
             prefs.setUserLoggedIn(true)
 
-            return user
+            return AuthenticatedUser(
+                uid = userData.uid,
+                name = userData.name,
+                email = userData.email
+            )
 
         } catch (e: FirebaseAuthInvalidCredentialsException) {
             throw AuthException.InvalidCredentialsException()
         } catch (e: Exception) {
-            throw AuthException.NetworkException()
+            throw e as? AuthException ?: AuthException.NetworkException()
         }
-
     }
 
-    override suspend fun loginWithGoogle(idToken: String): User {
+    override suspend fun loginWithGoogle(idToken: String): AuthenticatedUser {
         try {
-
             val result = authDataSource.loginWithGoogle(idToken)
-
             val firebaseUser = result.user ?: throw AuthException.GoogleLoginException()
 
-            val user = User(
+            val authUser = AuthenticatedUser(
                 uid = firebaseUser.uid,
                 name = firebaseUser.displayName ?: "",
-                email = firebaseUser.email ?: "",
-
-                emergencyContacts = emptyList()
+                email = firebaseUser.email ?: ""
             )
-            prefs.saveUserSession(uid = user.uid, name = user.name, email = user.email)
-            prefs.setUserLoggedIn(true)
-            userRemoteDataSource.saveUserOnlyIfNew(user)
 
-            return user
+            val dataUser = User(
+                uid = authUser.uid,
+                name = authUser.name,
+                email = authUser.email
+            )
+
+            prefs.saveUserSession(authUser.uid, authUser.name, authUser.email)
+            prefs.setUserLoggedIn(true)
+
+            userRemoteDataSource.saveUserOnlyIfNew(dataUser)
+
+            return authUser
         } catch (e: Exception) {
-            throw AuthException.NetworkException()
+            throw when(e) {
+                is AuthException -> e
+                else -> AuthException.NetworkException()
+            }
         }
     }
-
 }

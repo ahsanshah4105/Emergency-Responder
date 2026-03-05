@@ -92,6 +92,11 @@
     <string name="btn_delete">Delete</string>
     <string name="btn_cancel">Cancel</string>
     <string name="btn_add">Add</string>
+    <string name="login_successful">Login Successful</string>
+    <string name="invalid_email">Invalid Email</string>
+    <string name="login_failed">Login Failed</string>
+    <string name="failed_to_sent_reset_email">Failed to send reset email</string>
+    <string name="account_created_verify_email">Account created! Please verify your email.</string>
 
 
 

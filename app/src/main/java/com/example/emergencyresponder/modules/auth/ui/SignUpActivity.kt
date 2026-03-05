@@ -13,7 +13,7 @@ import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDat
 import com.example.emergencyresponder.modules.auth.data.repository.SignUpRepositoryImpl
 import com.example.emergencyresponder.modules.auth.domain.usecase.SignUpUseCase
 import com.example.emergencyresponder.modules.auth.ui.viewModelFactory.SignUpViewModelFactory
-import com.example.emergencyresponder.modules.auth.ui.viewmodel.AuthState
+import com.example.emergencyresponder.modules.auth.ui.viewmodel.AuthUiState
 import com.example.emergencyresponder.modules.auth.ui.viewmodel.SignUpViewModel
 
 class SignUpActivity : BaseActivity() {
@@ -59,19 +59,22 @@ class SignUpActivity : BaseActivity() {
     private fun stateObserver() {
         viewModel.state.observe(this) { state ->
             when (state) {
-                is AuthState.Loading -> {
+                is AuthUiState.Loading -> {
                     binding.btnProgressBar.visibility = View.VISIBLE
                     binding.signUptButton.isEnabled = false
                 }
-                is AuthState.Success -> {
+                is AuthUiState.Success -> {
                     binding.btnProgressBar.visibility = View.GONE
-                    Toast.makeText(this, state.message, Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, state.resId, Toast.LENGTH_LONG).show()
                 }
-                is AuthState.Error -> {
+                is AuthUiState.Error -> {
                     binding.btnProgressBar.visibility = View.GONE
                     binding.signUptButton.isEnabled = true
-                    Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, state.resId.toString(), Toast.LENGTH_SHORT).show()
                 }
+
+                AuthUiState.Idle -> binding.btnProgressBar.visibility = View.GONE
+
             }
         }
     }

@@ -10,7 +10,7 @@ import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDat
 import com.example.emergencyresponder.modules.auth.data.repository.ForgotPasswordRepositoryImpl
 import com.example.emergencyresponder.modules.auth.domain.usecase.ForgotPasswordUseCase
 import com.example.emergencyresponder.modules.auth.ui.viewModelFactory.ForgotPasswordViewModelFactory
-import com.example.emergencyresponder.modules.auth.ui.viewmodel.AuthState
+import com.example.emergencyresponder.modules.auth.ui.viewmodel.AuthUiState
 import com.example.emergencyresponder.modules.auth.ui.viewmodel.ForgotPasswordViewModel
 
 class ForgotPasswordActivity : BaseActivity() {
@@ -37,16 +37,18 @@ class ForgotPasswordActivity : BaseActivity() {
     private fun setupObservers() {
         viewModel.state.observe(this) { state ->
             when (state) {
-                is AuthState.Loading -> binding.btnProgressBar.visibility = View.VISIBLE
-                is AuthState.Success -> {
+                is AuthUiState.Loading -> binding.btnProgressBar.visibility = View.VISIBLE
+                is AuthUiState.Success -> {
                     binding.btnProgressBar.visibility = View.GONE
                     Toast.makeText(this, "Reset link sent to your email!", Toast.LENGTH_LONG).show()
                     finish()
                 }
-                is AuthState.Error -> {
+                is AuthUiState.Error -> {
                     binding.btnProgressBar.visibility = View.GONE
-                    Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, state.resId.toString(), Toast.LENGTH_SHORT).show()
                 }
+
+                AuthUiState.Idle -> binding.btnProgressBar.visibility = View.GONE
             }
         }
     }

@@ -13,16 +13,12 @@ import androidx.credentials.GetCredentialResponse
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.emergencyresponder.R
+import com.example.emergencyresponder.core.base.EmergencyResponderApp
 import com.example.emergencyresponder.core.navigation.AppNavigator
 import com.example.emergencyresponder.core.utils.ValidationUtils
 import com.example.emergencyresponder.databinding.ActivityLoginBinding
-import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
-import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
-import com.example.emergencyresponder.modules.auth.data.repository.LoginRepositoryImpl
-import com.example.emergencyresponder.modules.auth.data.repository.UserPreferencesImpl
-import com.example.emergencyresponder.modules.auth.domain.usecase.LoginUseCase
 import com.example.emergencyresponder.modules.auth.ui.viewModelFactory.LoginViewModelFactory
-import com.example.emergencyresponder.modules.auth.ui.viewmodel.AuthState
+import com.example.emergencyresponder.modules.auth.ui.viewmodel.AuthUiState
 import com.example.emergencyresponder.modules.auth.ui.viewmodel.LoginViewModel
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -32,23 +28,15 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private lateinit var viewModel: LoginViewModel
-
+    private val appContainer by lazy { (application as EmergencyResponderApp).appContainer }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val authRemoteDataSource = AuthRemoteDataSource()
-        val remoteDataSource = UserRemoteDataSource()
-        val userPreferences = UserPreferencesImpl()
-
-        val repository =
-            LoginRepositoryImpl(authRemoteDataSource, remoteDataSource, userPreferences)
-
-        val useCase = LoginUseCase(repository)
-        val factory = LoginViewModelFactory(useCase)
-
+        val factory = LoginViewModelFactory(appContainer.loginUseCase)
         viewModel = ViewModelProvider(this, factory)[LoginViewModel::class.java]
+
         setupValidationListeners()
         setupListeners()
         setupObservers()
@@ -58,23 +46,23 @@ class LoginActivity : AppCompatActivity() {
 
         viewModel.state.observe(this) { state ->
             when (state) {
-                is AuthState.Loading -> {
+                is AuthUiState.Loading -> {
                     binding.btnProgressBar.visibility = View.VISIBLE
                 }
-
-                is AuthState.Success -> {
-                    binding.btnProgressBar.visibility = View.INVISIBLE
-                    Toast.makeText(this, "Login Successful", Toast.LENGTH_SHORT).show()
+                is AuthUiState.Success -> {
+                    binding.btnProgressBar.visibility = View.GONE
+                    Toast.makeText(this, state.resId, Toast.LENGTH_SHORT).show()
                 }
-
-                is AuthState.Error -> {
-                    binding.btnProgressBar.visibility = View.INVISIBLE
-                    Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
+                is AuthUiState.Error -> {
+                    binding.btnProgressBar.visibility = View.GONE
+                    Toast.makeText(this, state.resId.toString(), Toast.LENGTH_SHORT).show()
+                    binding.loginEmailEditText.error = state.resId.toString()
                 }
-
+                is AuthUiState.Idle -> {
+                    binding.btnProgressBar.visibility = View.GONE
+                }
             }
         }
-
         viewModel.route.observe(this) { event ->
             event.getContentIfNotHandled()?.let { route ->
                 AppNavigator.navigate(this, route, finishCurrent = true)
@@ -87,10 +75,7 @@ class LoginActivity : AppCompatActivity() {
             val email = binding.loginEmailEditText.text.toString()
             val password = binding.loginPasswordEditText.text.toString()
 
-            if (validateInput(email, password)) {
-                viewModel.login(email, password)
-
-            }
+            viewModel.login(email, password)
         }
 
         binding.loginWithGoogle.setOnClickListener {

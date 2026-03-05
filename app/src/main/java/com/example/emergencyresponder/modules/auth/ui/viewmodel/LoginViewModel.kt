@@ -4,51 +4,50 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.emergencyresponder.R
 import com.example.emergencyresponder.core.base.Event
 import com.example.emergencyresponder.core.navigation.AppRoute
+import com.example.emergencyresponder.core.utils.ValidationUtils
 import com.example.emergencyresponder.modules.auth.domain.usecase.LoginUseCase
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
     private val loginUseCase: LoginUseCase
 ) : ViewModel() {
-
-    private val _state = MutableLiveData<AuthState>()
-    val state: LiveData<AuthState> = _state
+    private val _state = MutableLiveData<AuthUiState>(AuthUiState.Idle)
+    val state: LiveData<AuthUiState> = _state
 
     private val _route = MutableLiveData<Event<AppRoute>>()
     val route: LiveData<Event<AppRoute>> = _route
+
     fun login(email: String, password: String) {
+        if (!ValidationUtils.isEmailValid(email)) {
+            _state.value = AuthUiState.Error(R.string.invalid_email)
+            return
+        }
+
         viewModelScope.launch {
-            _state.value = AuthState.Loading
+            _state.value = AuthUiState.Loading
             try {
                 loginUseCase(email, password)
-                _state.value = AuthState.Success()
+                _state.value = AuthUiState.Success(R.string.login_successful)
                 _route.value = Event(AppRoute.Dashboard)
             } catch (e: Exception) {
-                _state.value = AuthState.Error(e.message ?: "Login failed")
+                _state.value = AuthUiState.Error( e.message ?: R.string.login_failed)
             }
         }
     }
 
     fun loginWithGoogle(idToken: String) {
         viewModelScope.launch {
-            _state.value = AuthState.Loading
+            _state.value = AuthUiState.Loading
             try {
                 loginUseCase.executeGoogleLogin(idToken)
-                _state.value = AuthState.Success()
+                _state.value = AuthUiState.Success(R.string.login_successful)
                 _route.value = Event(AppRoute.Dashboard)
             } catch (e: Exception) {
-                _state.value = AuthState.Error(e.message ?: "Google Login failed")
+                _state.value = AuthUiState.Error(e.message ?: R.string.login_failed)
             }
         }
     }
-
-}
-
-sealed class AuthState {
-    object Loading : AuthState()
-    class Success(var message: String? = null) : AuthState()
-    data class Error(val message: String) : AuthState()
-
 }

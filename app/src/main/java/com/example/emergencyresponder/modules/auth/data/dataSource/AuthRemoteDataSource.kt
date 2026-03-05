@@ -1,7 +1,6 @@
 package com.example.emergencyresponder.modules.auth.data.dataSource
 
 import com.example.emergencyresponder.core.network.AuthException
-import com.example.emergencyresponder.modules.auth.ui.viewmodel.AuthUiEvent
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.EmailAuthProvider

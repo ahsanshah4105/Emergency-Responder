@@ -21,8 +21,9 @@ import com.example.emergencyresponder.modules.dashboard.domain.repository.IEmerg
 import com.example.emergencyresponder.modules.dashboard.domain.usecase.DeleteEmergencyContactUseCase
 import ObserveEmergencyContactsUseCase
 import AddEmergencyContactUseCase
+import LoginRepositoryImpl
 import com.example.emergencyresponder.core.common.PrefKeys
-import com.example.emergencyresponder.core.manager.SPreferenceManager
+import com.example.emergencyresponder.modules.auth.domain.repository.LoginRepository
 import com.example.emergencyresponder.modules.dashboard.data.ml.CrashMlAnalyzer
 import com.example.emergencyresponder.modules.dashboard.data.ml.TFLiteCrashMlAnalyzer
 import com.example.emergencyresponder.modules.dashboard.data.provider.AndroidSensorProvider
@@ -34,16 +35,25 @@ import com.example.emergencyresponder.modules.dashboard.domain.repository.Sensor
 import com.example.emergencyresponder.modules.dashboard.domain.usecase.CrashDetectionUseCase
 import com.example.emergencyresponder.modules.dashboard.data.provider.YAMNetClassifier
 import com.example.emergencyresponder.core.data.local.UserPreferencesManager
+import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
+import com.example.emergencyresponder.modules.auth.data.repository.UserPreferencesImpl
 import com.example.emergencyresponder.modules.dashboard.domain.usecase.AudioAnalysisUseCase
+import com.example.emergencyresponder.modules.auth.domain.repository.UserPreferences
+import com.example.emergencyresponder.modules.auth.domain.usecase.LoginUseCase
+
 class AppContainer(private val context: Context) {
 
     val prefProvider: IBasePreference by lazy {
         PreferenceProviderImpl(context.applicationContext)
     }
+    private val userRemoteDataSource by lazy { UserRemoteDataSource() }
+    private val authDataSource by lazy { AuthRemoteDataSource() }
 
     val userPrefs: UserPreferencesManager by lazy {
         UserPreferencesManager(prefProvider)
     }
+
+
     val crashRepository: ICrashRepository by lazy {
         ICrashRepositoryImpl(prefProvider)
     }
@@ -51,11 +61,18 @@ class AppContainer(private val context: Context) {
     val splashRepository: ISplashRepository by lazy {
         ISplashRepositoryImpl(prefProvider)
     }
+    val userPreferences: UserPreferences by lazy {
+        UserPreferencesImpl()
+    }
+
+    val loginRepository: LoginRepository by lazy {
+        LoginRepositoryImpl(authDataSource, userRemoteDataSource, userPreferences)
+    }
+    val loginUseCase: LoginUseCase by lazy { LoginUseCase(loginRepository) }
 
     val onboardingRepository: IOnboardingRepository by lazy {
         IOnboardingRepositoryImpl(prefProvider)
     }
-    private val userRemoteDataSource by lazy { UserRemoteDataSource() }
 
     val profileRepository: IProfileRepository by lazy {
         ProfileRepositoryImpl(userRemoteDataSource)
