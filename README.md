@@ -1,36 +1,214 @@
-# Emergency Responder
+# 🚨 Emergency Responder
 
-Android app for emergency detection (crash, snatch) and SOS alerts with Clean Architecture, SOLID, MVVM, and Hilt.
+> An intelligent Android safety app that detects emergencies in real-time — crashes, snatching, and distress signals — and instantly alerts your emergency contacts.
 
-## Tech stack
+[![Android](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
+[![Kotlin](https://img.shields.io/badge/Language-Kotlin-blue.svg)](https://kotlinlang.org)
+[![Architecture](https://img.shields.io/badge/Architecture-Clean%20MVVM-orange.svg)](#architecture)
+[![ML](https://img.shields.io/badge/ML-TensorFlow%20Lite-yellow.svg)](https://www.tensorflow.org/lite)
+[![Firebase](https://img.shields.io/badge/Backend-Firebase-red.svg)](https://firebase.google.com)
 
-- **Kotlin**, **Coroutines**, **Flow**
-- **Architecture:** Clean Architecture + MVVM
-- **DI:** Hilt
-- **UI:** ViewBinding, Navigation
-- **Backend:** Firebase Auth, Firestore
-- **ML:** TensorFlow Lite (crash detection, audio classification)
+---
+
+# 📱 What It Does
+
+Emergency Responder runs silently in the background, monitoring for life-threatening situations.
+
+| Detection Mode | Description |
+| :--- | :--- |
+| 💥 **Crash Detection** | Accelerometer + gyroscope data are processed using a TensorFlow Lite model to detect vehicle crashes |
+| 🏃 **Snatch Guard** | Accessibility Service monitors sudden device displacement or forced phone removal |
+| 🎵 **Audio Triggers** | Clap or whistle patterns trigger SOS alerts hands-free |
+| 📞 **SOS Blast** | Sends live location instantly to emergency contacts via SMS or call |
+
+---
+
+# ✨ Features
+
+- 🔐 Authentication  
+  - Email & Password Login  
+  - Google Sign-In  
+  - Forgot Password Flow  
+
+- 📊 Real-Time Dashboard  
+  - Live monitoring status  
+  - Detection toggles  
+
+- 👥 Emergency Contacts  
+  - Add / Remove trusted contacts  
+
+- 👤 Profile Management  
+  - Update user information inside app  
+
+- ⚙️ Background Monitoring  
+  - Foreground service keeps app active even when closed  
+
+- 📡 Offline Safety  
+  - Detection works without internet  
+  - Alerts queued until connectivity returns  
+
+---
+
+# 🏗️ Architecture
+
+This project follows:
+
+- **Clean Architecture**
+- **MVVM Pattern**
+- **SOLID Principles**
+
+```text
+┌─────────────────────────────────────┐
+│         UI Layer (MVVM)             │
+│ Activities · Fragments · ViewModels │
+└──────────────┬──────────────────────┘
+               │ depends on
+┌──────────────▼──────────────────────┐
+│         Domain Layer                │
+│  Use Cases · Entities · Interfaces  │
+│      (No Android dependencies)      │
+└──────────────┬──────────────────────┘
+               │ implemented by
+┌──────────────▼──────────────────────┐
+│          Data Layer                 │
+│ Repositories · Firebase · Mappers   │
+└─────────────────────────────────────┘
+```
+
+### Dependency Rule
+
+- Dependencies always point inward
+- Domain layer never depends on Android or Firebase
+- UI communicates only with ViewModels
+- Data layer implements domain interfaces
+
+---
+
+# 🛠️ Tech Stack
+
+| Category | Technology |
+| :--- | :--- |
+| Language | Kotlin |
+| Architecture | Clean Architecture + MVVM |
+| Async | Coroutines + Flow |
+| Dependency Injection | Hilt |
+| UI | ViewBinding + Navigation Component |
+| Backend | Firebase Auth + Firestore |
+| Machine Learning | TensorFlow Lite |
+| Testing | JUnit + Mockk + Coroutines Test |
+
+---
+
+# 🚀 Getting Started
+
+## Prerequisites
+
+- Android Studio Hedgehog or newer
+- JDK 17+
+- Firebase project with:
+  - Firebase Authentication
+  - Cloud Firestore
+
+---
 
 ## Setup
 
-1. Clone and open in Android Studio.
-2. Add `google-services.json` for Firebase (Auth + Firestore).
-3. Set `JAVA_HOME` and run:
-   ```bash
-   ./gradlew assembleDebug
-   ```
-4. Run unit tests:
-   ```bash
-   ./gradlew test
-   ```
+### 1️⃣ Clone Repository
 
-## Features
+```bash
+git clone https://github.com/ahsanshah4105/Emergency-Responder.git
+cd Emergency-Responder
+```
 
-- Auth: email/password and Google sign-in, sign-up, forgot password
-- Dashboard: crash detection (sensors + TFLite), snatch guard (accessibility), audio (clap/whistle)
-- Emergency contacts: add/remove, SOS blast
-- Profile: update name/email
+### 2️⃣ Add Firebase Configuration
 
-## Architecture
+Download `google-services.json` from Firebase Console and place it inside:
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for layer boundaries, dependency rule, and testing approach.
+```text
+/app
+```
+
+### 3️⃣ Set JAVA_HOME
+
+```bash
+export JAVA_HOME=/path/to/jdk17
+```
+
+### 4️⃣ Build Project
+
+```bash
+./gradlew assembleDebug
+```
+
+### 5️⃣ Run Tests
+
+```bash
+./gradlew test
+```
+
+---
+
+# 🧪 Testing
+
+The project contains unit tests across all layers.
+
+### Included Tests
+
+- ✅ `LoginUseCaseTest`
+- ✅ `SignUpUseCaseTest`
+- ✅ `CrashDetectionUseCaseTest`
+- ✅ `LoginViewModelTest`
+
+### Testing Tools
+
+- `JUnit`
+- `Mockk`
+- `kotlinx-coroutines-test`
+- `runTest`
+- `StandardTestDispatcher`
+
+---
+
+# 📂 Project Structure
+
+```text
+app/
+│
+├── data/
+│   ├── mapper/          # Data ↔ Domain converters
+│   ├── model/           # DTOs / Firebase models
+│   └── repository/      # Repository implementations
+│
+├── domain/
+│   ├── model/           # Core entities
+│   ├── repository/      # Repository interfaces
+│   └── usecase/         # Business logic
+│
+└── ui/
+    ├── auth/            # Login, Signup, Forgot Password
+    ├── dashboard/       # Main dashboard
+    ├── contacts/        # Emergency contacts
+    └── profile/         # User profile
+```
+
+---
+
+# 🤝 Contributing
+
+Pull requests are welcome.
+
+For major changes, please open an issue first to discuss what you would like to change.
+
+---
+
+# 📄 License
+
+This project is open source.
+
+See the `LICENSE` file for more information.
+
+---
+
+# ❤️ Final Note
+
+> Built with care to help people stay safer in emergencies — because every second matters.
