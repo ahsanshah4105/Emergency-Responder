@@ -9,14 +9,17 @@ import com.example.emergencyresponder.core.base.Event
 import com.example.emergencyresponder.core.navigation.AppRoute
 import com.example.emergencyresponder.core.utils.ValidationResult
 import com.example.emergencyresponder.core.utils.Validator
-import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
-import com.example.emergencyresponder.modules.auth.data.model.User
+import com.example.emergencyresponder.core.domain.model.EmergencyContact
+import com.example.emergencyresponder.modules.auth.domain.model.User
 import com.example.emergencyresponder.modules.auth.domain.usecase.SignUpUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SignUpViewModel(
+@HiltViewModel
+class SignUpViewModel @Inject constructor(
     private val signUpUseCase: SignUpUseCase
-): ViewModel() {
+) : ViewModel() {
     private val validator: Validator = Validator()
 
     private val _state = MutableLiveData<AuthUiState>()

@@ -13,29 +13,32 @@ import android.media.MediaRecorder
 import android.util.Log
 import androidx.annotation.RequiresPermission
 import com.example.emergencyresponder.core.base.BaseForegroundService
-import com.example.emergencyresponder.core.base.EmergencyResponderApp
 import com.example.emergencyresponder.core.data.local.UserPreferencesManager
+import com.example.emergencyresponder.core.domain.coroutines.DispatcherProvider
 import com.example.emergencyresponder.core.utils.NotificationHelper
 import com.example.emergencyresponder.modules.dashboard.domain.notifier.VoiceAlertManager
 import com.example.emergencyresponder.modules.dashboard.domain.usecase.AudioAnalysisUseCase
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MicListenService : BaseForegroundService() {
 
     override val notificationId = NOTIFICATION_ID
     override val notificationTitle = "Safety Monitor Active"
     override val notificationContent = "Listening for emergency signals..."
 
-    private lateinit var audioUseCase: AudioAnalysisUseCase
-    private lateinit var prefProvider: UserPreferencesManager
-    private lateinit var voiceManager: VoiceAlertManager
+    @Inject lateinit var audioUseCase: AudioAnalysisUseCase
+    @Inject lateinit var prefProvider: UserPreferencesManager
+    @Inject lateinit var voiceManager: VoiceAlertManager
+    @Inject lateinit var dispatchers: DispatcherProvider
 
     private val serviceJob = SupervisorJob()
-    private val scope = CoroutineScope(Dispatchers.Default + serviceJob)
+    private val scope by lazy { CoroutineScope(dispatchers.default + serviceJob) }
 
     private var audioRecord: AudioRecord? = null
     private var isRunning = false
@@ -50,10 +53,6 @@ class MicListenService : BaseForegroundService() {
 
     override fun onCreate() {
         super.onCreate()
-        val container = (application as EmergencyResponderApp).appContainer
-        audioUseCase = container.audioAnalysisUseCase
-        voiceManager = container.voiceAlertManager
-        prefProvider = container.userPrefs
         startListening()
     }
 
@@ -63,7 +62,7 @@ class MicListenService : BaseForegroundService() {
 
         scope.launch {
             try {
-                audioRecord = withContext(Dispatchers.IO) {
+                audioRecord = withContext(dispatchers.io) {
                     createAudioRecord(FRAME_SIZE)
                 }
 
@@ -122,7 +121,7 @@ class MicListenService : BaseForegroundService() {
                     if (now - lastTriggerTime > 5000) {
                         Log.i("MicDetection", "✅ TRIGGER: Sound matched threshold! Starting Alarm.")
                         lastTriggerTime = now
-                        withContext(Dispatchers.Main) { triggerAlarm() }
+                        withContext(dispatchers.main) { triggerAlarm() }
                     } else {
                         Log.w(
                             "MicDetection",
@@ -143,9 +142,9 @@ class MicListenService : BaseForegroundService() {
         if (!detecting) return
         detecting = false
 
-        scope.launch(Dispatchers.Main) {
+        scope.launch(dispatchers.main) {
             try {
-                val name = prefProvider.getUserName() ?: "User"
+                val name = prefProvider.getUserName() ?: getString(com.example.emergencyresponder.R.string.default_user_name)
                 voiceManager.speak("Hi $name, I am here.")
                 kotlinx.coroutines.delay(2500)
                 voiceManager.speak("Hi $name, I am here.")
@@ -154,8 +153,8 @@ class MicListenService : BaseForegroundService() {
                 manager.notify(
                     ALARM_ID, NotificationHelper.getBaseNotification(
                         this@MicListenService,
-                        "🚨 Clap/Whistle Detected",
-                        "Emergency response triggered for $name."
+                        getString(com.example.emergencyresponder.R.string.audio_emergency_detected_title),
+                        getString(com.example.emergencyresponder.R.string.audio_emergency_detected_body, name)
                     )
                 )
 

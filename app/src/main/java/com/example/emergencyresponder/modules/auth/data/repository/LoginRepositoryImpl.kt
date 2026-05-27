@@ -1,8 +1,8 @@
 import com.example.emergencyresponder.core.network.AuthException
 import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
 import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
-import com.example.emergencyresponder.modules.auth.data.model.AuthenticatedUser
-import com.example.emergencyresponder.modules.auth.data.model.User
+import com.example.emergencyresponder.modules.auth.data.model.User as DataUser
+import com.example.emergencyresponder.modules.auth.domain.model.AuthenticatedUser
 import com.example.emergencyresponder.modules.auth.domain.repository.LoginRepository
 import com.example.emergencyresponder.modules.auth.domain.repository.UserPreferences
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
@@ -33,7 +33,6 @@ class LoginRepositoryImpl(
                 name = userData.name,
                 email = userData.email
             )
-
         } catch (e: FirebaseAuthInvalidCredentialsException) {
             throw AuthException.InvalidCredentialsException()
         } catch (e: Exception) {
@@ -52,7 +51,7 @@ class LoginRepositoryImpl(
                 email = firebaseUser.email ?: ""
             )
 
-            val dataUser = User(
+            val dataUser = DataUser(
                 uid = authUser.uid,
                 name = authUser.name,
                 email = authUser.email
@@ -65,7 +64,7 @@ class LoginRepositoryImpl(
 
             return authUser
         } catch (e: Exception) {
-            throw when(e) {
+            throw when (e) {
                 is AuthException -> e
                 else -> AuthException.NetworkException()
             }

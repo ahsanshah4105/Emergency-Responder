@@ -1,12 +1,10 @@
 package com.example.emergencyresponder.modules.dashboard.domain.usecase
 
-
 import Sensitivity
-import com.example.emergencyresponder.modules.dashboard.data.model.DetectionResult
-import com.example.emergencyresponder.modules.dashboard.data.model.SensorState
+import com.example.emergencyresponder.modules.dashboard.domain.model.DetectionResult
+import com.example.emergencyresponder.modules.dashboard.domain.model.SensorState
 import kotlin.math.acos
 import kotlin.math.sqrt
-
 
 class CrashDetectionUseCase(
     private val sensitivity: Sensitivity

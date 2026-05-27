@@ -8,8 +8,11 @@ import androidx.lifecycle.map
 import com.example.emergencyresponder.core.base.Event
 import com.example.emergencyresponder.modules.timestamp.domain.repository.ICountdownManager
 import com.example.emergencyresponder.modules.timestamp.domain.repository.ICrashRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class EmergencyAlertViewModel(
+@HiltViewModel
+class EmergencyAlertViewModel @Inject constructor(
     private val countdownManager: ICountdownManager,
     private val crashRepository: ICrashRepository,
 ) : ViewModel() {

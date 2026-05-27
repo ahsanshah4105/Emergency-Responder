@@ -7,7 +7,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.emergencyresponder.R
-import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
+import com.example.emergencyresponder.core.domain.model.EmergencyContact
 import com.example.emergencyresponder.modules.dashboard.data.model.EmergencyContacts
 
 class EmergencyContactsAdapter(

@@ -5,37 +5,33 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.emergencyresponder.R
-import com.example.emergencyresponder.core.base.EmergencyResponderApp
 import com.example.emergencyresponder.core.navigation.AppNavigator
 import com.example.emergencyresponder.core.utils.ValidationUtils
 import com.example.emergencyresponder.databinding.ActivityLoginBinding
-import com.example.emergencyresponder.modules.auth.ui.viewModelFactory.LoginViewModelFactory
 import com.example.emergencyresponder.modules.auth.ui.viewmodel.AuthUiState
 import com.example.emergencyresponder.modules.auth.ui.viewmodel.LoginViewModel
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
-    private lateinit var viewModel: LoginViewModel
-    private val appContainer by lazy { (application as EmergencyResponderApp).appContainer }
+    private val viewModel: LoginViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        val factory = LoginViewModelFactory(appContainer.loginUseCase)
-        viewModel = ViewModelProvider(this, factory)[LoginViewModel::class.java]
 
         setupValidationListeners()
         setupListeners()
@@ -104,7 +100,7 @@ class LoginActivity : AppCompatActivity() {
                 val result = credentialManager.getCredential(this@LoginActivity, request)
                 handleSignInResult(result)
             } catch (e: Exception) {
-                Toast.makeText(this@LoginActivity, "Google Sign-In Cancelled", Toast.LENGTH_SHORT)
+                Toast.makeText(this@LoginActivity, R.string.google_sign_in_cancelled, Toast.LENGTH_SHORT)
                     .show()
             }
         }
@@ -121,19 +117,6 @@ class LoginActivity : AppCompatActivity() {
                 Log.e("Auth", "Error parsing Google Credential", e)
             }
         }
-    }
-
-    private fun validateInput(email: String, password: String): Boolean {
-        var isValid = true
-        if (!ValidationUtils.isEmailValid(email)) {
-            binding.loginEmailEditText.error = "Invalid email"
-            isValid = false
-        }
-        if (!ValidationUtils.isNotEmpty(password)) {
-            binding.loginPasswordEditText.error = "Password cannot be empty"
-            isValid = false
-        }
-        return isValid
     }
 
     private fun setupValidationListeners() {

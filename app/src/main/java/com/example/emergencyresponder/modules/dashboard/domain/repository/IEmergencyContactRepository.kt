@@ -1,6 +1,6 @@
 package com.example.emergencyresponder.modules.dashboard.domain.repository
 
-import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
+import com.example.emergencyresponder.core.domain.model.EmergencyContact
 import kotlinx.coroutines.flow.Flow
 
 interface IEmergencyContactRepository {

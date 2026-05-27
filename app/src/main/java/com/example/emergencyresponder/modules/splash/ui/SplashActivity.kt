@@ -3,24 +3,21 @@ package com.example.emergencyresponder.modules.splash.ui
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.animation.AnimationUtils
+import android.widget.ImageView
+import android.widget.LinearLayout
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.example.emergencyresponder.R
 import com.example.emergencyresponder.core.navigation.AppNavigator
 import com.example.emergencyresponder.core.navigation.AppRoute
 import com.example.emergencyresponder.modules.splash.ui.viewmodel.SplashViewModel
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.view.animation.AnimationUtils
-import androidx.activity.viewModels
-import com.example.emergencyresponder.R
-import com.example.emergencyresponder.core.base.EmergencyResponderApp
-import com.example.emergencyresponder.modules.splash.ui.viewmodelfactory.SplashViewModelFactory
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SplashActivity : AppCompatActivity() {
 
-    private val viewModel: SplashViewModel by viewModels {
-        val container = (application as EmergencyResponderApp).appContainer
-        SplashViewModelFactory(container.splashRepository) // Pure Interface Injection
-    }
+    private val viewModel: SplashViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +25,6 @@ class SplashActivity : AppCompatActivity() {
 
         startAnimations()
 
-        // 3 seconds delay for branding, but logic is handled by VM
         Handler(Looper.getMainLooper()).postDelayed({
             viewModel.checkDestination()
         }, 3000)

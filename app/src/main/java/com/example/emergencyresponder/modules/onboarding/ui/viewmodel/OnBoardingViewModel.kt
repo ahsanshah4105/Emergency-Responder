@@ -5,9 +5,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.emergencyresponder.core.base.Event
 import com.example.emergencyresponder.modules.onboarding.domain.repository.IOnboardingRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-
-class OnboardingViewModel(
+@HiltViewModel
+class OnboardingViewModel @Inject constructor(
     private val repository: IOnboardingRepository
 ) : ViewModel() {
 

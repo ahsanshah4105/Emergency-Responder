@@ -1,6 +1,6 @@
 package com.example.emergencyresponder.modules.dashboard.domain.engine
 
-import com.example.emergencyresponder.modules.dashboard.data.model.SensorState
+import com.example.emergencyresponder.modules.dashboard.domain.model.SensorState
 import kotlin.math.pow
 import kotlin.math.sqrt
 

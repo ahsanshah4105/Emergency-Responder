@@ -19,7 +19,10 @@ import com.example.emergencyresponder.R
 import com.example.emergencyresponder.databinding.ActivityDashboardBinding
 import com.example.emergencyresponder.modules.dashboard.data.service.CrashDetectionService
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import dagger.hilt.android.AndroidEntryPoint
 
+
+@AndroidEntryPoint
 class DashboardActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDashboardBinding
@@ -68,7 +71,6 @@ class DashboardActivity : AppCompatActivity() {
         if (destination == "SAFETY_FRAGMENT") {
             EmergencyContactFragment()
         } else {
-            // Load default fragment (e.g., Home)
             SafetyDashboardFragment()
         }
 
@@ -102,7 +104,7 @@ class DashboardActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == SMS_PERMISSION_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "SMS permission granted", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.sms_permission_granted, Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(
                     this,

@@ -5,7 +5,9 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import com.example.emergencyresponder.modules.dashboard.data.model.SensorState
+import com.example.emergencyresponder.modules.dashboard.data.mapper.DashboardMapper.toDomain
+import com.example.emergencyresponder.modules.dashboard.data.model.SensorState as DataSensorState
+import com.example.emergencyresponder.modules.dashboard.domain.model.SensorState
 import com.example.emergencyresponder.modules.dashboard.domain.repository.SensorProvider
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -31,14 +33,14 @@ class AndroidSensorProvider(private val context: Context) : SensorProvider {
                 }
 
                 if (lastAccel != null && lastGyro != null && lastGravity != null) {
-                    val state = SensorState(
+                    val dataState = DataSensorState(
                         accel = magnitude(lastAccel!!),
                         gyro = magnitude(lastGyro!!),
                         gravityAngle = calculateGravityAngle(lastGravity!!, lastAccel!!),
                         proximityNear = proximityNear,
                         mlConfidence = 0f
                     )
-                    trySend(state) // Flow mein data bhej raha hai
+                    trySend(dataState.toDomain())
                 }
             }
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}

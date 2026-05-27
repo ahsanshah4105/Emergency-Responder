@@ -1,3 +1,5 @@
+package com.example.emergencyresponder.core.manager
+
 import android.os.CountDownTimer
 import com.example.emergencyresponder.modules.timestamp.domain.repository.ICountdownManager
 import kotlinx.coroutines.flow.MutableSharedFlow

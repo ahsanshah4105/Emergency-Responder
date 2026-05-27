@@ -12,7 +12,18 @@ interface IBasePreference {
 
     fun saveInt(key: String, value: Int)
     fun getInt(key: String, default: Int = 0): Int
+    fun getSensitivity(): String
+    fun setSensitivity(level: String)
+    fun incrementCancelCount()
+    fun getCancelCount(): Int
+    fun resetCancelCount()
+    fun isOnboardingCompleted(): Boolean
+    fun setOnboardingCompleted()
+    fun isUserLoggedIn(): Boolean
+    fun setUserLoggedIn(isLoggedIn: Boolean)
+    fun hasAskedBattery(): Boolean
+    fun setBatteryAsked(asked: Boolean)
 
-    fun remove(key: String)
+    fun saveUserSession(uid: String, name: String, email: String)
     fun clearUserSession()
 }

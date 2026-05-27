@@ -5,8 +5,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.emergencyresponder.core.base.Event
 import com.example.emergencyresponder.modules.splash.domain.repository.ISplashRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class SplashViewModel(private val repository: ISplashRepository) : ViewModel() {
+@HiltViewModel
+class SplashViewModel @Inject constructor(private val repository: ISplashRepository) : ViewModel() {
 
     sealed class SplashNavigation {
         object Dashboard : SplashNavigation()

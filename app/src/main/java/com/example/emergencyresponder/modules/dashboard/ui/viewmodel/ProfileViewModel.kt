@@ -6,18 +6,26 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.emergencyresponder.core.base.Event
 import com.example.emergencyresponder.core.common.PrefKeys
+import com.example.emergencyresponder.core.domain.coroutines.DispatcherProvider
 import com.example.emergencyresponder.core.domain.repository.IBasePreference
+import com.example.emergencyresponder.core.domain.session.AuthSession
 import com.example.emergencyresponder.core.navigation.AppRoute
 import com.example.emergencyresponder.modules.dashboard.domain.repository.IProfileRepository
 import com.example.emergencyresponder.modules.dashboard.domain.usecase.ChangeEmailUseCase
 import com.example.emergencyresponder.modules.dashboard.domain.usecase.UpdateProfileUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class ProfileViewModel(
+@HiltViewModel
+class ProfileViewModel @Inject constructor(
     private val updateProfileUseCase: UpdateProfileUseCase,
     private val changeEmailUseCase: ChangeEmailUseCase,
     private val repository: IProfileRepository,
-    private val prefProvider: IBasePreference
+    private val prefProvider: IBasePreference,
+    private val authSession: AuthSession,
+    private val dispatchers: DispatcherProvider
 ) : ViewModel() {
     private val _navigationEvent = MutableLiveData<Event<AppRoute>>()
     val navigationEvent: LiveData<Event<AppRoute>> = _navigationEvent
@@ -69,7 +77,7 @@ class ProfileViewModel(
         viewModelScope.launch {
             _state.value = Event(ProfileState.Loading)
             try {
-                _state.value = Event(action())
+                _state.value = Event(withContext(dispatchers.io) { action() })
             } catch (e: Exception) {
                 _state.value = Event(ProfileState.Error(ProfileMessage.GENERIC_ERROR, e.message))
             }

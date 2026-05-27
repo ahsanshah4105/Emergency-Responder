@@ -1,10 +1,9 @@
 package com.example.emergencyresponder.modules.onboarding.ui
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.example.emergencyresponder.core.base.EmergencyResponderApp
+import com.example.emergencyresponder.R
 import com.example.emergencyresponder.core.common.AppConstant
 import com.example.emergencyresponder.core.navigation.AppNavigator
 import com.example.emergencyresponder.core.navigation.AppRoute
@@ -12,15 +11,13 @@ import com.example.emergencyresponder.core.utils.AppPermissions
 import com.example.emergencyresponder.databinding.ActivityOnboardingBinding
 import com.example.emergencyresponder.modules.onboarding.ui.adapter.OnboardingViewPagerAdapter
 import com.example.emergencyresponder.modules.onboarding.ui.viewmodel.OnboardingViewModel
-import com.example.emergencyresponder.modules.onboarding.ui.viewmodelfactory.OnboardingViewModelFactory
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class OnboardingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOnboardingBinding
 
-    private val viewModel: OnboardingViewModel by viewModels {
-        val container = (application as EmergencyResponderApp).appContainer
-        OnboardingViewModelFactory(container.onboardingRepository)
-    }
+    private val viewModel: OnboardingViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,7 +82,8 @@ class OnboardingActivity : AppCompatActivity() {
                     true
                 )
             } else {
-                Toast.makeText(this, "Location permission required", Toast.LENGTH_SHORT).show()
+                // Show a simple feedback; actual localized message is in strings.xml
+                android.widget.Toast.makeText(this, R.string.location_permission_required, android.widget.Toast.LENGTH_SHORT).show()
             }
         }
     }

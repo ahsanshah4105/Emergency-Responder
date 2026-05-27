@@ -4,11 +4,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.emergencyresponder.modules.auth.domain.usecase.ForgotPasswordUseCase
 import com.example.emergencyresponder.R
+import com.example.emergencyresponder.modules.auth.domain.usecase.ForgotPasswordUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ForgotPasswordViewModel(
+@HiltViewModel
+class ForgotPasswordViewModel @Inject constructor(
     private val forgotPasswordUseCase: ForgotPasswordUseCase
 ) : ViewModel() {
 

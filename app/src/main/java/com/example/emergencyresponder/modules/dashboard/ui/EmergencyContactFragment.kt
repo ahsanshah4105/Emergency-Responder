@@ -9,20 +9,19 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.emergencyresponder.R
-import com.example.emergencyresponder.core.base.EmergencyResponderApp
 import com.example.emergencyresponder.core.utils.SOSUtils
 import com.example.emergencyresponder.core.utils.ValidationUtils
 import com.example.emergencyresponder.databinding.FragmentEmergencyContactBinding
-import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
+import com.example.emergencyresponder.core.domain.model.EmergencyContact
 import com.example.emergencyresponder.modules.dashboard.ui.adapters.EmergencyContactsAdapter
-import com.example.emergencyresponder.modules.dashboard.ui.viewModelFactory.EmergencyContactViewModelFactory
 import com.example.emergencyresponder.modules.dashboard.ui.viewmodel.EmergencyContactViewModel
 import com.example.emergencyresponder.modules.dashboard.ui.viewmodel.EmergencyError
-import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class EmergencyContactFragment : Fragment() {
 
     private var _binding: FragmentEmergencyContactBinding? = null
@@ -30,7 +29,7 @@ class EmergencyContactFragment : Fragment() {
 
     private lateinit var adapter: EmergencyContactsAdapter
 
-    private lateinit var viewModel: EmergencyContactViewModel
+    private val viewModel: EmergencyContactViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,17 +42,6 @@ class EmergencyContactFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        val appContainer = (requireActivity().application as EmergencyResponderApp).appContainer
-
-        val factory = EmergencyContactViewModelFactory(
-            uid = uid,
-            observeUseCase = appContainer.observeContactsUseCase,
-            addUseCase = appContainer.addContactUseCase,
-            deleteUseCase = appContainer.deleteContactUseCase
-        )
-        viewModel = ViewModelProvider(this, factory)[EmergencyContactViewModel::class.java]
-
         setupRecycler()
         setupObservers()
 

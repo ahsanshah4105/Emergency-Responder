@@ -13,11 +13,12 @@ import android.telephony.SmsManager
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import com.example.emergencyresponder.core.manager.SPreferenceManager
+import com.example.emergencyresponder.core.common.PrefKeys
+import com.example.emergencyresponder.core.domain.coroutines.DispatcherProvider
+import com.example.emergencyresponder.core.domain.repository.IBasePreference
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -36,7 +37,8 @@ object SOSUtils {
     // --- Configuration ---
     private const val INSTANCE_ID = "7103514169"
     private const val API_TOKEN = "73f2ce51c6184439be5e9e7a413400709128d9f2e0b94f7b93"
-
+    lateinit var prefProvider: IBasePreference
+    lateinit var dispatchers: DispatcherProvider
     private var mediaRecorder: MediaRecorder? = null
     private var audioFile: File? = null
     private val client = OkHttpClient.Builder()
@@ -65,7 +67,7 @@ object SOSUtils {
 
     private fun startAudioRecording(context: Context, onRecordingFinished: (File?) -> Unit) {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(context, "Microphone permission missing!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, com.example.emergencyresponder.R.string.mic_permission_required, Toast.LENGTH_SHORT).show()
             onRecordingFinished(null)
             return
         }
@@ -97,7 +99,7 @@ object SOSUtils {
 
             }
 
-            Toast.makeText(context, "🎙️ Recording 15s Audio...", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, com.example.emergencyresponder.R.string.sos_recording_in_progress, Toast.LENGTH_LONG).show()
 
             // Stop recording after 15 seconds
             Handler(Looper.getMainLooper()).postDelayed({
@@ -132,9 +134,8 @@ object SOSUtils {
         getCurrentLocation(context) { lat, lng ->
             val messageText = getMessage(lat, lng)
 
-            // ✅ Use GlobalScope or a dedicated Service Scope to ensure it survives
-            // the calling function's lifecycle
-            CoroutineScope(Dispatchers.IO).launch {
+            // Use IO dispatcher for network work
+            CoroutineScope(dispatchers.io).launch {
                 var successCount = 0
 
                 for (rawNumber in targetPhoneNumbers) {
@@ -181,9 +182,13 @@ object SOSUtils {
                     }
                 }
 
-                withContext(Dispatchers.Main) {
+                withContext(dispatchers.main) {
                     if (successCount > 0) {
-                        Toast.makeText(context, "✅ WhatsApp SOS Sent ($successCount)", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            context.getString(com.example.emergencyresponder.R.string.whatsapp_sos_sent, successCount),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
@@ -218,7 +223,7 @@ object SOSUtils {
                 }
                 context.startActivity(intent)
             } catch (e: Exception) {
-                Toast.makeText(context, "WhatsApp not installed", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, com.example.emergencyresponder.R.string.whatsapp_not_installed, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -247,7 +252,7 @@ object SOSUtils {
 
 
     private fun getMessage(lat: Double, lng: Double): String {
-        var name = SPreferenceManager.getUserName()
+        val name = prefProvider.getString(PrefKeys.USER_NAME)
         return "🚨 Hi I am $name.* \nPlease contact me immediately\n\n📍 My Location:\nhttps://www.google.com/maps/search/?api=1&query=$lat,$lng"
     }
 

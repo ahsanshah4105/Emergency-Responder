@@ -12,29 +12,19 @@
     import androidx.fragment.app.viewModels
     import androidx.navigation.fragment.findNavController
     import com.example.emergencyresponder.R
-    import com.example.emergencyresponder.core.base.EmergencyResponderApp
-    import com.example.emergencyresponder.core.base.Event
-    import com.example.emergencyresponder.core.navigation.AppRoute
     import com.example.emergencyresponder.databinding.FragmentEditProfileBinding
     import com.example.emergencyresponder.modules.auth.ui.LoginActivity
-    import com.example.emergencyresponder.modules.dashboard.ui.viewModelFactory.ProfileViewModelFactory
     import com.example.emergencyresponder.modules.dashboard.ui.viewmodel.ProfileMessage
     import com.example.emergencyresponder.modules.dashboard.ui.viewmodel.ProfileState
     import com.example.emergencyresponder.modules.dashboard.ui.viewmodel.ProfileViewModel
+    import dagger.hilt.android.AndroidEntryPoint
 
+    @AndroidEntryPoint
     class EditProfileFragment : Fragment() {
 
         private var _binding: FragmentEditProfileBinding? = null
         private val binding get() = _binding!!
-        private val viewModel: ProfileViewModel by viewModels {
-            val container = (requireActivity().application as EmergencyResponderApp).appContainer
-            ProfileViewModelFactory(
-                updateProfileUseCase = container.updateProfileUseCase,
-                changeEmailUseCase = container.changeEmailUseCase,
-                repository = container.profileRepository,
-                prefProvider = container.prefProvider,
-            )
-        }
+        private val viewModel: ProfileViewModel by viewModels()
 
         override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,

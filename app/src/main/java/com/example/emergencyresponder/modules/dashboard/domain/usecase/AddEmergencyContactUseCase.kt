@@ -1,6 +1,8 @@
+package com.example.emergencyresponder.modules.dashboard.domain.usecase
+
 import com.example.emergencyresponder.core.network.AuthException
 import com.example.emergencyresponder.core.utils.ValidationUtils
-import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
+import com.example.emergencyresponder.core.domain.model.EmergencyContact
 import com.example.emergencyresponder.modules.dashboard.domain.repository.IEmergencyContactRepository
 
 class AddEmergencyContactUseCase(

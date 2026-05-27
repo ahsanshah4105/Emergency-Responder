@@ -7,7 +7,6 @@
     <string name="welocome_to_co_pilot">Welcome to your new co-pilot for peace of mind in the road. Let’s get you set up for a safer journey</string>
     <string name="automatic_crash">Automatic Crash Detection</string>
     <string name="using_sensor_automatic_crash_detection">Using your phone’s sensors, we can detect a potential crash and automatically send for help when you need it most.</string>
-    "
     <string name="notify_your_loved_ones">Notify Your Loved Ones</string>
     <string name="incase_of_accident">In case of an incident, your pre-selected emergency contacts will be automatically notified with your location.</string>
     <string name="enable_location">Enable Location to Detect Accidents</string>
@@ -73,7 +72,7 @@
 
     <string name="success">Success</string>
     <string name="profile_updated">Profile Updated</string>
-    <string name="password_updated">Password Updated"</string>
+    <string name="password_updated">Password Updated</string>
     <string name="verify_your_email">Verify your new email</string>
     <string name="email_or_password_incorrect">Email or password is incorrect.</string>
     <string name="err_name_short">Name must be at least 3 characters long</string>
@@ -98,7 +97,30 @@
     <string name="failed_to_sent_reset_email">Failed to send reset email</string>
     <string name="account_created_verify_email">Account created! Please verify your email.</string>
 
+    <string name="mic_permission_granted">Mic permission granted</string>
+    <string name="mic_permission_required">Mic permission required</string>
+    <string name="location_permission_required">Location permission required</string>
 
+    <string name="default_user_name">User</string>
+    <string name="welcome_user">Welcome, %1$s</string>
 
+    <string name="audio_emergency_detected_title">Emergency sound detected</string>
+    <string name="audio_emergency_detected_body">Emergency response triggered for %1$s.</string>
+
+    <string name="sos_recording_in_progress">Recording emergency audio…</string>
+    <string name="whatsapp_sos_sent">WhatsApp SOS sent (%1$d)</string>
+    <string name="whatsapp_not_installed">WhatsApp not installed</string>
+
+    <string name="opening_whatsapp">Opening WhatsApp…</string>
+    <string name="snatch_guard_active">Snatch Guard is Active</string>
+    <string name="system_active">SYSTEM ACTIVE</string>
+    <string name="not_active">NOT ACTIVE</string>
+    <string name="enable_notifications_full_protection">Please enable notifications for full protection</string>
+    <string name="sensitivity_updated">Sensitivity updated to %1$s</string>
+
+    <string name="google_sign_in_cancelled">Google Sign-In cancelled</string>
+    <string name="sms_permission_granted">SMS permission granted</string>
+    <string name="reset_link_sent">Reset link sent to your email!</string>
+    <string name="seconds_remaining">%1$ds</string>
 
 </resources>

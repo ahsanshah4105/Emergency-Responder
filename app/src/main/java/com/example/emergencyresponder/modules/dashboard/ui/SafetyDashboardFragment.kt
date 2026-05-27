@@ -2,6 +2,7 @@ package com.example.emergencyresponder.modules.dashboard.ui
 
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -23,25 +24,30 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.emergencyresponder.R
-import com.example.emergencyresponder.core.manager.SPreferenceManager
+import com.example.emergencyresponder.core.domain.repository.IBasePreference
 import com.example.emergencyresponder.core.utils.SOSUtils
 import com.example.emergencyresponder.databinding.FragmentSafetyDashboardBinding
-import com.example.emergencyresponder.modules.dashboard.data.model.DashboardStatus
+import com.example.emergencyresponder.modules.dashboard.domain.model.DashboardStatus
 import com.example.emergencyresponder.modules.dashboard.ui.viewmodel.SafetyDashboardViewModel
 import com.example.emergencyresponder.modules.dashboard.data.service.CrashDetectionService
 import com.example.emergencyresponder.modules.dashboard.data.service.MicListenService
 import com.example.emergencyresponder.modules.dashboard.data.service.PowerPressAccessibilityService
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
+@AndroidEntryPoint
 class SafetyDashboardFragment : Fragment() {
 
     private var _binding: FragmentSafetyDashboardBinding? = null
     private val binding get() = _binding!!
     private var sosRunnable: Runnable? = null
+    @Inject
+    lateinit var prefs: IBasePreference
     private val viewModel: SafetyDashboardViewModel by viewModels()
     private val REQUEST_NOTIFICATION_PERMISSION = 100
     private val micPermissionRequest =
@@ -54,14 +60,15 @@ class SafetyDashboardFragment : Fragment() {
             if (granted) {
                 val intent = Intent(requireContext(), MicListenService::class.java)
                 ContextCompat.startForegroundService(requireContext(), intent)
-                Toast.makeText(requireContext(), "Mic permission granted", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.mic_permission_granted, Toast.LENGTH_SHORT).show()
                 viewModel.updateAudioStatus(true)
             } else {
-                Toast.makeText(requireContext(), "Mic permission required", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), R.string.mic_permission_granted, Toast.LENGTH_SHORT).show()
                 viewModel.updateAudioStatus(false)
             }
         }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -70,8 +77,8 @@ class SafetyDashboardFragment : Fragment() {
         _binding = FragmentSafetyDashboardBinding.inflate(inflater, container, false)
 
         binding.itemAudio.setOnClickListener { requestMicPermission() }
-        val userName = SPreferenceManager.getUserName()
-        binding.txtWelcome.text = "Welcome, ${userName ?: "User"}"
+        val userName = prefs.getString("user_name", getString(R.string.default_user_name))
+        binding.txtWelcome.text = getString(R.string.welcome_user, userName)
 
         binding.itemSnatch.setOnClickListener {
             enableSnatchGuard()
@@ -108,7 +115,7 @@ class SafetyDashboardFragment : Fragment() {
                 sosRunnable = Runnable {
 
                     // Provide immediate feedback
-                    Toast.makeText(requireContext(), "Opening WhatsApp...", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), R.string.opening_whatsapp, Toast.LENGTH_SHORT).show()
 
                     // ✅ CALL THE NEW FUNCTION
                     SOSUtils.sendSOSOnWhatsApp(requireContext())
@@ -159,7 +166,7 @@ class SafetyDashboardFragment : Fragment() {
             )
 
         } else {
-            Toast.makeText(requireContext(), "Snatch Guard is Active ✅", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), R.string.snatch_guard_active, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -177,7 +184,6 @@ class SafetyDashboardFragment : Fragment() {
         try {
             findNavController().navigate(R.id.action_safetyDashboardFragment_to_emergencyContactFragment2)
         } catch (e: Exception) {
-            // Fallback if action ID is different, try global ID
             try {
                 findNavController().navigate(R.id.emergencyContactFragment)
             } catch (e2: Exception) {
@@ -233,14 +239,14 @@ class SafetyDashboardFragment : Fragment() {
             binding.capsuleSystem.setBackgroundResource(R.drawable.bg_capsule_green)
             binding.capsuleSystem.findViewById<View>(R.id.indicatorDot).setBackgroundResource(R.drawable.circle_indicator_green)
             binding.capsuleSystem.findViewById<android.widget.TextView>(R.id.tvSystemStatus).apply {
-                text = "SYSTEM ACTIVE"
+                text = getString(R.string.system_active)
                 setTextColor(ContextCompat.getColor(requireContext(), R.color.accent_green_text))
             }
         } else {
             binding.capsuleSystem.setBackgroundResource(R.drawable.bg_capsule_red)
             binding.capsuleSystem.findViewById<View>(R.id.indicatorDot).setBackgroundResource(R.drawable.circle_indicator_red)
             binding.capsuleSystem.findViewById<android.widget.TextView>(R.id.tvSystemStatus).apply {
-                text = "NOT ACTIVE"
+                text = getString(R.string.not_active)
                 setTextColor(ContextCompat.getColor(requireContext(), R.color.primaryColor))
             }
         }
@@ -268,7 +274,7 @@ class SafetyDashboardFragment : Fragment() {
                         action = android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS
                         putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, requireContext().packageName)
                     }
-                    Toast.makeText(requireContext(), "Please enable notifications for full protection", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), R.string.enable_notifications_full_protection, Toast.LENGTH_LONG).show()
                     startActivity(intent)
                 }
             }
@@ -285,7 +291,7 @@ class SafetyDashboardFragment : Fragment() {
 
     private fun checkSensitivityTrigger() {
         // If user cancelled 3 or more times, ask them to adjust
-        if (SPreferenceManager.getCancelCount() >= 3) {
+        if (prefs.getCancelCount() >= 3) {
             showSensitivityDialog()
         }
     }
@@ -309,7 +315,7 @@ class SafetyDashboardFragment : Fragment() {
         val btnCancel = dialogView.findViewById<View>(R.id.btnCancel)
 
         // Initial Selection State (Get current)
-        var selectedLevel = SPreferenceManager.getSensitivity()
+        var selectedLevel = prefs.getSensitivity()
 
         // Helper to update UI
         fun updateSelectionUI(level: String) {
@@ -338,23 +344,23 @@ class SafetyDashboardFragment : Fragment() {
 
         btnSave.setOnClickListener {
             // 1. Save new sensitivity
-            SPreferenceManager.setSensitivity(selectedLevel)
+            prefs.setSensitivity(selectedLevel)
 
             // 2. Reset the counter to 0 so it doesn't show again immediately
-            SPreferenceManager.resetCancelCount()
+            prefs.resetCancelCount()
 
             // 3. Restart Service to apply changes
             val intent = Intent(requireContext(), CrashDetectionService::class.java)
             requireContext().stopService(intent)
             ContextCompat.startForegroundService(requireContext(), intent)
 
-            Toast.makeText(requireContext(), "Sensitivity updated to $selectedLevel", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.sensitivity_updated, selectedLevel), Toast.LENGTH_SHORT).show()
             dialog.dismiss()
         }
 
         btnCancel.setOnClickListener {
             // Just reset counter so it doesn't bug them immediately again
-            SPreferenceManager.resetCancelCount()
+            prefs.resetCancelCount()
             dialog.dismiss()
         }
 
@@ -416,7 +422,7 @@ class SafetyDashboardFragment : Fragment() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // Only show if not already unrestricted and we haven't asked yet
             if (!pm.isIgnoringBatteryOptimizations(requireContext().packageName) &&
-                !SPreferenceManager.hasAskedBattery()) {
+                prefs.hasAskedBattery()) {
                 showBatteryGuideDialog()
             }
         }
@@ -428,11 +434,11 @@ class SafetyDashboardFragment : Fragment() {
             .setMessage("To ensure SOS messages send immediately when the app is closed, please set battery usage to 'Unrestricted'.")
             .setCancelable(false)
             .setPositiveButton("Go to Settings") { _, _ ->
-                SPreferenceManager.setBatteryAsked(true)
+                prefs.setBatteryAsked(true)
                 openBatterySettings()
             }
             .setNegativeButton("Later") { _, _ ->
-                SPreferenceManager.setBatteryAsked(true)
+                prefs.setBatteryAsked(true)
             }
             .show()
 

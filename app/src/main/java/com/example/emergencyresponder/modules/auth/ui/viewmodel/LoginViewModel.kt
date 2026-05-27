@@ -9,9 +9,12 @@ import com.example.emergencyresponder.core.base.Event
 import com.example.emergencyresponder.core.navigation.AppRoute
 import com.example.emergencyresponder.core.utils.ValidationUtils
 import com.example.emergencyresponder.modules.auth.domain.usecase.LoginUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class LoginViewModel(
+@HiltViewModel
+class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase
 ) : ViewModel() {
     private val _state = MutableLiveData<AuthUiState>(AuthUiState.Idle)

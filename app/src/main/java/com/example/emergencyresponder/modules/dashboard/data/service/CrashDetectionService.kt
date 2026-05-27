@@ -1,6 +1,5 @@
 package com.example.emergencyresponder.modules.dashboard.data.service
 
-import CrashCountdownManager
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -14,34 +13,38 @@ import android.os.PowerManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.emergencyresponder.R
-import com.example.emergencyresponder.core.base.EmergencyResponderApp
+import com.example.emergencyresponder.core.domain.coroutines.DispatcherProvider
+import com.example.emergencyresponder.core.manager.CrashCountdownManager
 import com.example.emergencyresponder.core.utils.SOSBlastManager
-import com.example.emergencyresponder.modules.dashboard.data.model.DetectionResult
+import com.example.emergencyresponder.modules.dashboard.domain.model.DetectionResult
 import com.example.emergencyresponder.modules.dashboard.domain.engine.CrashDetectionEngine
 import com.example.emergencyresponder.modules.dashboard.domain.engine.FeatureExtractor
 import com.example.emergencyresponder.modules.dashboard.domain.engine.PowerButtonMonitor
 import com.example.emergencyresponder.modules.dashboard.domain.notifier.AlertNotifier
 import com.example.emergencyresponder.modules.dashboard.domain.notifier.VoiceAlertManager
 import com.example.emergencyresponder.modules.dashboard.domain.repository.SensorProvider
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import throttleFirst
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class CrashDetectionService : Service() {
+    @Inject lateinit var engine: CrashDetectionEngine
+    @Inject lateinit var notifier: AlertNotifier
+    @Inject lateinit var sensorProvider: SensorProvider
+    @Inject lateinit var voiceAlertManager: VoiceAlertManager
+    @Inject lateinit var dispatchers: DispatcherProvider
 
-    private lateinit var sensorProvider: SensorProvider
-    private lateinit var engine: CrashDetectionEngine
-    private lateinit var notifier: AlertNotifier
     private lateinit var powerMonitor: PowerButtonMonitor
-    lateinit var voiceAlertManager: VoiceAlertManager
     private val featureExtractor = FeatureExtractor()
     private var wakeLock: PowerManager.WakeLock? = null
-    private val serviceScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val serviceScope by lazy { CoroutineScope(dispatchers.default + SupervisorJob()) }
     private val ACTION_CANCEL = "ACTION_CANCEL_EMERGENCY"
 
 
@@ -68,11 +71,11 @@ class CrashDetectionService : Service() {
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SafetyApp:Monitor")
         wakeLock?.acquire(10 * 60 * 1000L)
 
-        val appContainer = (application as EmergencyResponderApp).appContainer
-        sensorProvider = appContainer.sensorProvider
-        engine = appContainer.getCrashEngine()
-        notifier = appContainer.notifier
-        voiceAlertManager = appContainer.voiceAlertManager
+        //val appContainer = (application as EmergencyResponderApp).appContainer
+//        sensorProvider = appContainer.sensorProvider
+//        engine = appContainer.getCrashEngine()
+//        notifier = appContainer.notifier
+//        voiceAlertManager = appContainer.voiceAlertManager
         powerMonitor = PowerButtonMonitor(this)
 
         registerSystemReceivers()
@@ -86,7 +89,7 @@ class CrashDetectionService : Service() {
         serviceScope.launch {
             powerMonitor.observeTriplePress()
                 .collect {
-                    withContext(Dispatchers.Main) { triggerManualSOS() }
+                    withContext(dispatchers.main) { triggerManualSOS() }
                 }
         }
     }
@@ -101,7 +104,7 @@ class CrashDetectionService : Service() {
 
 
     private fun startMonitoringPipeline() {
-        serviceScope.launch(Dispatchers.Default) {
+        serviceScope.launch(dispatchers.default) {
             sensorProvider.getSensorUpdates()
                 .mapNotNull { state ->
                     val features = featureExtractor.extract(state)
@@ -118,7 +121,7 @@ class CrashDetectionService : Service() {
                 }
                 .throttleFirst(3000L)
                 .collect { result ->
-                    withContext(Dispatchers.Main) {
+                    withContext(dispatchers.main) {
                         Log.d("CrashService", "✅ Collecting Final Result for UI: $result")
                         handleDetectionResult(result)
                     }
@@ -179,7 +182,9 @@ class CrashDetectionService : Service() {
         super.onDestroy()
         try { unregisterReceiver(cancelReceiver) } catch (e: Exception) { /* ... */ }
 
-        voiceAlertManager.shutdown()
+        if (::voiceAlertManager.isInitialized) {
+            voiceAlertManager.shutdown()
+        }
         serviceScope.cancel()
 
         if (wakeLock?.isHeld == true) wakeLock?.release()

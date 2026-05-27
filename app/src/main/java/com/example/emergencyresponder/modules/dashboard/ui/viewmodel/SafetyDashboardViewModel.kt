@@ -5,20 +5,28 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
-import com.example.emergencyresponder.modules.auth.data.model.EmergencyContact
-import com.example.emergencyresponder.modules.dashboard.data.model.DashboardStatus
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.example.emergencyresponder.core.domain.model.EmergencyContact
+import com.example.emergencyresponder.core.domain.coroutines.DispatcherProvider
+import com.example.emergencyresponder.core.domain.session.AuthSession
+import com.example.emergencyresponder.modules.dashboard.domain.model.DashboardStatus
+import com.example.emergencyresponder.modules.dashboard.domain.usecase.ObserveEmergencyContactsUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class SafetyDashboardViewModel : ViewModel() {
+@HiltViewModel
+class SafetyDashboardViewModel @Inject constructor(
+    private val authSession: AuthSession,
+    private val dispatchers: DispatcherProvider,
+    private val observeEmergencyContactsUseCase: ObserveEmergencyContactsUseCase
+) : ViewModel() {
 
     private val _dashboardStatus = MutableStateFlow(DashboardStatus())
     val dashboardStatus = _dashboardStatus.asStateFlow()
-    val uid = FirebaseAuth.getInstance().currentUser?.uid
 
 
     private val _navigateToEmergencyContacts = MutableLiveData<Boolean>()
@@ -46,44 +54,30 @@ class SafetyDashboardViewModel : ViewModel() {
         onResult: (List<EmergencyContact>) -> Unit,
         onError: () -> Unit
     ) {
-        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
-
-        FirebaseFirestore.getInstance()
-            .collection("users")
-            .document(uid)
-            .get()
-            .addOnSuccessListener { document ->
-
-                if (document.exists()) {
-
-                    val contacts = document.get("emergencyContacts") as? List<Map<String, Any>>
-
-                    val contactList = contacts?.map {
-                        EmergencyContact(
-                            name = it["name"].toString(),
-                            phone = it["phone"].toString()
-                        )
-                    } ?: emptyList()
-
-                    onResult(contactList)
+        viewModelScope.launch {
+            try {
+                val uid = authSession.currentUid() ?: run {
+                    onError()
+                    return@launch
                 }
-            }
-            .addOnFailureListener {
+                val contacts = withContext(dispatchers.io) {
+                    observeEmergencyContactsUseCase(uid).first()
+                }
+                onResult(contacts)
+            } catch (e: Exception) {
                 onError()
             }
+        }
     }
 
     fun checkEmergencyContactsExist() {
         viewModelScope.launch {
             try {
-
-                if (uid.isNullOrEmpty()) {
-                    return@launch
+                val uid = authSession.currentUid() ?: return@launch
+                val contacts = withContext(dispatchers.io) {
+                    observeEmergencyContactsUseCase(uid).first()
                 }
-                val userRemoteDataSource = UserRemoteDataSource()
-                val user = userRemoteDataSource.getUser(uid)
-
-                val hasValidContact = user.emergencyContacts.any { it.phone.isNotBlank() }
+                val hasValidContact = contacts.any { it.phone.isNotBlank() }
                 if (!hasValidContact) {
                     _navigateToEmergencyContacts.value = true
                 } else {

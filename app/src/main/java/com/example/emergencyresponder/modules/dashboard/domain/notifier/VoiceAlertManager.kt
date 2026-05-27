@@ -1,8 +1,8 @@
 package com.example.emergencyresponder.modules.dashboard.domain.notifier
 
-import CrashCountdownManager
 import android.content.Context
 import android.speech.tts.TextToSpeech
+import com.example.emergencyresponder.core.manager.CrashCountdownManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch

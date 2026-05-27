@@ -4,37 +4,24 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.lifecycle.ViewModelProvider
-import com.example.emergencyresponder.core.navigation.AppRoute
+import androidx.activity.viewModels
 import com.example.emergencyresponder.core.base.BaseActivity
+import com.example.emergencyresponder.core.navigation.AppRoute
 import com.example.emergencyresponder.databinding.ActivitySignUpBinding
-import com.example.emergencyresponder.modules.auth.data.dataSource.AuthRemoteDataSource
-import com.example.emergencyresponder.modules.auth.data.dataSource.UserRemoteDataSource
-import com.example.emergencyresponder.modules.auth.data.repository.SignUpRepositoryImpl
-import com.example.emergencyresponder.modules.auth.domain.usecase.SignUpUseCase
-import com.example.emergencyresponder.modules.auth.ui.viewModelFactory.SignUpViewModelFactory
 import com.example.emergencyresponder.modules.auth.ui.viewmodel.AuthUiState
 import com.example.emergencyresponder.modules.auth.ui.viewmodel.SignUpViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SignUpActivity : BaseActivity() {
 
     private lateinit var binding: ActivitySignUpBinding
-    private lateinit var viewModel: SignUpViewModel
-
+    private val viewModel: SignUpViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySignUpBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val authRemoteDataSource = AuthRemoteDataSource()
-        val userRemoteDataSource = UserRemoteDataSource()
-        val repository = SignUpRepositoryImpl(
-            authRemoteDataSource,
-            userRemoteDataSource
-        )
-        val useCase = SignUpUseCase(repository)
-        val factory = SignUpViewModelFactory(useCase)
-        viewModel = ViewModelProvider(this, factory).get(SignUpViewModel::class.java)
         binding.loginButton.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
