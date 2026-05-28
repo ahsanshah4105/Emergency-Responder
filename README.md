@@ -10,6 +10,12 @@
 
 ---
 
+## 🔗 Connect with Me
+
+[LinkedIn](https://www.linkedin.com/in/ahsan-ali-shah-895aa4283/)
+
+---
+
 # 📱 What It Does
 
 Emergency Responder runs silently in the background, monitoring for life-threatening situations.
