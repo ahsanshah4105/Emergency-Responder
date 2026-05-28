@@ -28,7 +28,7 @@ Emergency Responder runs silently in the background, monitoring for life-threate
 <p align="center">AC
   <img src="docs/screenshots/dashboard.png" width="220" alt="Safety Dashboard"/>
   &nbsp;&nbsp;
-  <img src="docs/screenshots/areyouok(1).png" width="220" alt="Are You OK Alert"/>
+  <img src="docs/screenshots/areyouok (1).png" width="220" alt="Are You OK Alert"/>
   &nbsp;&nbsp;
   <img src="docs/screenshots/contacts.png" width="220" alt="Emergency Contacts"/>
   &nbsp;&nbsp;
