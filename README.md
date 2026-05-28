@@ -13,7 +13,7 @@
 
 ## 🔗 Connect with Me
 
-[LinkedIn](https://www.linkedin.com/in/ahsan-ali-shah-895aa4283/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?logo=linkedin)](https://www.linkedin.com/in/ahsan-ali-shah-895aa4283/)
 
 ---
 
