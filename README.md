@@ -2,10 +2,11 @@
 
 > An intelligent Android safety app that detects emergencies in real-time — crashes, snatching, and distress signals — and instantly alerts your emergency contacts.
 
-[![Android](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
+![Android](https://img.shields.io/badge/Platform-Android-green?logo=android)
 [![Kotlin](https://img.shields.io/badge/Language-Kotlin-blue.svg)](https://kotlinlang.org)
-[![Architecture](https://img.shields.io/badge/Architecture-Clean%20MVVM-orange.svg)](#architecture)
-[![ML](https://img.shields.io/badge/ML-TensorFlow%20Lite-yellow.svg)](https://www.tensorflow.org/lite)
+![Architecture](https://img.shields.io/badge/Architecture-MVVM%20%2B%20Clean%20Architecture-ff6f00)
+![TFLite](https://img.shields.io/badge/ML-TensorFlow%20Lite-orange?logo=tensorflow)
+![License](https://img.shields.io/badge/License-MIT-blue)
 [![Firebase](https://img.shields.io/badge/Backend-Firebase-red.svg)](https://firebase.google.com)
 
 ---
