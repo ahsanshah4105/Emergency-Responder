@@ -23,6 +23,20 @@ Emergency Responder runs silently in the background, monitoring for life-threate
 
 ---
 
+## 📱 Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" width="220" alt="Safety Dashboard"/>
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/areyouok(1).png" width="220" alt="Are You OK Alert"/>
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/contacts.png" width="220" alt="Emergency Contacts"/>
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/profile.png" width="220" alt="Profile Settings"/>
+</p>
+
+---
+
 # ✨ Features
 
 - 🔐 Authentication  
