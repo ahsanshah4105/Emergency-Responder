@@ -33,13 +33,13 @@ Emergency Responder runs silently in the background, monitoring for life-threate
 ## 📱 Screenshots
 
 <p align="center">AC
-  <img src="docs/screenshots/dashboard.png" width="220" alt="Safety Dashboard"/>
+  <img src="app/docs/dashboard.png" width="220" alt="Safety Dashboard"/>
   &nbsp;&nbsp;
-  <img src="docs/screenshots/areyouok (1).png" width="220" alt="Are You OK Alert"/>
+  <img src="app/docs/areyouok (1).png" width="220" alt="Are You OK Alert"/>
   &nbsp;&nbsp;
-  <img src="docs/screenshots/contacts.png" width="220" alt="Emergency Contacts"/>
+  <img src="app/docs/contacts.png" width="220" alt="Emergency Contacts"/>
   &nbsp;&nbsp;
-  <img src="docs/screenshots/profile.png" width="220" alt="Profile Settings"/>
+  <img src="app/docs/profile.png" width="220" alt="Profile Settings"/>
 </p>
 
 ---
